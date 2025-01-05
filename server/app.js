@@ -7,15 +7,10 @@ import hpp from "hpp";
 import dotenv from "dotenv";
 import compression from "compression";
 import mongodbSanitize from "mongodb-sanitize";
-import path from "path";
 
 import DATABASE from "./config/DATABASE.js";
 import UserAgentMiddleware from "./middleware/userAgent.js";
 import userRouter from "./router/userRouter.js";
-import packageRouter from "./router/packageRouter.js";
-import cronSchedule from "./utils/cron.js";
-import Transfer from "./router/sendMoneyRouter.js";
-import transaction from "./router/transactionRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
@@ -54,11 +49,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 app.use(UserAgentMiddleware);
 
-app.use("/api/v1", userRouter, packageRouter, Transfer,transaction);
+app.use("/api/v1", userRouter);
 
-app.use("/images", express.static(path.join("./images")));
-
-cronSchedule();
 
 app.listen(PORT, () => {
   DATABASE();
