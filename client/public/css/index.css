@@ -4,10 +4,32 @@
 
 @layer components {
     .menu{
-        @apply flex flex-wrap gap-3 items-center px-4 py-2 text-neutral-700 hover:bg-sky-100 hover:text-neutral-900 rounded-full cursor-pointer;
+        @apply w-fit flex flex-wrap gap-3 items-center px-4 py-2 text-neutral-700 hover:bg-sky-100 hover:text-neutral-900 rounded-full cursor-pointer;
     }
     .menu-active{
         @apply flex flex-wrap gap-3 items-center px-4 py-2 text-neutral-900  rounded-full cursor-pointer;
     }
 }
 
+body{
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    line-height: 125%!important;
+}
+
+.bg-blur{
+    backdrop-filter: blur(10px);
+}
+
+.scroll-bar-hidden {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+input, select, textarea {
+    outline: none !important;
+}
