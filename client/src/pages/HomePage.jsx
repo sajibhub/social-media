@@ -1,4 +1,4 @@
-import Layout from "../Layout/Layout.jsx";
+import Layout from "../layout/Layout.jsx";
 import HomeStoryComponent from "../Component/home/HomeStoryComponent.jsx";
 import AddPost from "../Component/home/AddPost.jsx";
 import PostCard from "../Component/home/PostCard.jsx";

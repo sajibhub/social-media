@@ -1,5 +1,6 @@
 import {BrowserRouter, Route, Routes} from "react-router-dom";
-import HomePage from "./Pages/HomePage.jsx";
+import HomePage from "./pages/HomePage.jsx";
+import AuthorPage from "./pages/authorPage.jsx";
 
 
 const App = () => {
@@ -7,6 +8,7 @@ const App = () => {
         <BrowserRouter>
             <Routes>
                 <Route path="/"  element={<HomePage />} />
+                <Route path="/login"  element={<AuthorPage />} />
             </Routes>
         </BrowserRouter>
     );
