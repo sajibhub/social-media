@@ -16,15 +16,15 @@ const phoneRegex = /^(?:\+88|0088)?(01[3-9]\d{8})$/;
 
 export const SignUp = async (req, res) => {
   try {
-    const { fullName, email, phone, password } = req.body;
+    const { username, fullName, email, phone, password } = req.body;
 
-    if (!fullName || !password || !email) {
+    if (!fullName || !password || !email || !username) {
       return res.status(400).json({
         message: "All fields must be provided",
       });
     }
 
-    if (fullName === "" || password === "" || email === "") {
+    if (fullName === "" || password === "" || email === "" || username === "") {
       return res.status(400).json({
         message: "Fields cannot be empty",
       });
@@ -42,6 +42,14 @@ export const SignUp = async (req, res) => {
           message: "Invalid phone number. Use a valid Bangladeshi number.",
         });
       }
+    }
+
+    const userNameExists = await User.findOne({ username });
+
+    if (userNameExists) {
+      return res.status(400).json({
+        message: "Username already exists. Please choose a different one.",
+      });
     }
 
     const userExists = await User.findOne({
@@ -69,11 +77,13 @@ export const SignUp = async (req, res) => {
     }
 
     const userCreate = await User.create({
+      username,
       fullName,
       email,
       phone,
       password: await bcrypt.hash(password, 10),
       profile: `https://avatar.iran.liara.run/userfullName?userfullName=${fullName}`,
+      cover: `https://avatar.iran.liara.run/userfullName?userfullName=${fullName}`,
       provider: "email",
       visitorId: "",
     });
@@ -97,7 +107,7 @@ export const SignUp = async (req, res) => {
       .format(new Date(userCreate.createdAt))
       .replace(",", "")
       .replaceAll("/", "-");
-    Mail(email, "New Account Create", NewAccount(fullName, email, phone, date));
+    // Mail(email, "New Account Create", NewAccount(fullName, email, phone, date));
     return res.status(201).json({
       message: "Congratulations! Your account has been successfully created!",
     });
@@ -111,30 +121,30 @@ export const SignUp = async (req, res) => {
 
 export const Login = async (req, res) => {
   try {
-    const { userfullName, password } = req.body;
+    const { username, password } = req.body;
 
-    const alreadyLoginCheck = req.cookies.token;
-    if (alreadyLoginCheck) {
+    const { token } = req.cookies;
+    if (token) {
       return res.status(400).json({
         status: "login",
         message: "Already logged in",
       });
     }
 
-    if (!userfullName || !password) {
+    if (!username || !password) {
       return res.status(403).json({
         message: "All fields are required",
       });
     }
 
-    if (userfullName == "" || password == "") {
+    if (username == "" || password == "") {
       return res.status(400).json({
         message: "Fields cannot be empty",
       });
     }
 
     const findUser = await User.findOne({
-      $or: [{ email: userfullName }, { phone: userfullName }],
+      $or: [{ username }, { email: username }, { phone: username }],
     });
 
     if (!findUser) {
@@ -189,7 +199,7 @@ export const Profile = async (req, res) => {
       { $match: { _id: id } },
       {
         $addFields: {
-          follower: {
+          followers: {
             $size: "$followers",
           },
         },
@@ -199,6 +209,31 @@ export const Profile = async (req, res) => {
           following: {
             $size: "$following",
           },
+        },
+      },
+      {
+        $addFields: {
+          postLike: {
+            $size: "$likePosts",
+          },
+        },
+      },
+      {
+        $project: {
+          username: 1,
+          fullName: 1,
+          email: 1,
+          phone: 1,
+          profile: 1,
+          cover: 1,
+          provider: 1,
+          facebookId: 1,
+          googleId: 1,
+          bio: 1,
+          mediaLink: 1,
+          followers: 1,
+          following: 1,
+          postLike: 1,
         },
       },
     ]);

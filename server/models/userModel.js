@@ -18,7 +18,6 @@ const UserSchema = mongoose.Schema(
     },
     phone: {
       type: String,
-      required: true,
       unique: true,
       trim: true,
     },
@@ -26,16 +25,13 @@ const UserSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    google: {
-      id: { type: String },
-      name: { type: String },
-      email: { type: String },
-      profile: { type: String },
+    googleId: {
+      type: String,
+      default: null,
     },
-    facebook: {
-      name: { type: String },
-      email: { type: String },
-      profile: { type: String },
+    facebookId: {
+      type: String,
+      default: null,
     },
     provider: { type: String },
     otp: {
