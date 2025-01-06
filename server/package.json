@@ -1,7 +1,15 @@
 {
   "name": "social-media",
   "version": "1.0.0",
-  "description": "social media application backend",
+  "description": "social media backend",
+  "homepage": "https://github.com/sajib-bd/social-media#readme",
+  "bugs": {
+    "url": "https://github.com/sajib-bd/social-media/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sajib-bd/social-media.git"
+  },
   "license": "ISC",
   "author": "SAJIB",
   "type": "module",
@@ -11,21 +19,22 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "compression": "^1.7.5",
+    "compression": "^1.7.4",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "express-rate-limit": "^7.5.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "express-rate-limit": "^7.4.1",
     "helmet": "^8.0.0",
     "hpp": "^0.2.3",
     "jsonwebtoken": "^9.0.2",
     "mongodb-sanitize": "^2.2.0",
-    "mongoose": "^8.9.3",
+    "mongoose": "^8.7.2",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.16",
-    "nodemon": "^3.1.9",
+    "nodemailer": "^6.9.15",
+    "nodemon": "^3.1.7",
+    "r-password": "^1.0.2",
     "validator": "^13.12.0"
-  },
+  }
 }

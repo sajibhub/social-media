@@ -1,9 +1,10 @@
 import jwt from "jsonwebtoken";
-import User from "../model/userModel.js";
+import User from "../models/userModel.js";
 
 const Authorized = async (req, res, next) => {
   try {
     const { token } = req.cookies;
+
     if (!token) {
       return res.status(401).json({
         message: "Unauthorized",
