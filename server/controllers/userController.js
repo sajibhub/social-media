@@ -107,7 +107,7 @@ export const SignUp = async (req, res) => {
       .format(new Date(userCreate.createdAt))
       .replace(",", "")
       .replaceAll("/", "-");
-    // Mail(email, "New Account Create", NewAccount(fullName, email, phone, date));
+    Mail(email, "New Account Create", NewAccount(fullName, email, phone, date));
     return res.status(201).json({
       message: "Congratulations! Your account has been successfully created!",
     });
@@ -259,7 +259,7 @@ export const ForgetOTP = async (req, res) => {
 
     const find = await User.findOne({ email: email });
     if (!find) {
-      return res.status(204).json({
+      return res.status(404).json({
         message:
           "We couldn't find an account associated with this email address. Please check and try again!",
       });
@@ -269,7 +269,7 @@ export const ForgetOTP = async (req, res) => {
       const minuteCat = find.otp.expired - 180000;
       const time = minuteCat - new Date().getTime();
       const showTime = time / 1000;
-      return res.status(404).json({
+      return res.status(400).json({
         message: `OTP  has already send to you email. please try again ${showTime.toFixed(
           0
         )} seconds later`,
