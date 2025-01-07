@@ -14,9 +14,9 @@ import userRouter from "./router/userRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
-
 const app = express();
 
+app.set('trust proxy', true);
 const limit = rateLimit({
   windowMs: process.env.REQ_MS,
   max: process.env.REQ_LIMIT,
