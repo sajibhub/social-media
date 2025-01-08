@@ -8,7 +8,7 @@ import{motion} from "framer-motion";
 const Menu = () => {
     return (
         <>
-            <div className=" px-3 ">
+            <div className=" px-3 scroll-bar-hidden ">
                 <img src="/image/I.png" alt="logo" className="h-[50px] block mx-auto mt-10" />
 
                 <div className="py-3 w-fit mx-auto  mt-10">

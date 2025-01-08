@@ -3,10 +3,11 @@ import { AiFillLike } from "react-icons/ai";
 import { FaCommentDots, FaShare } from "react-icons/fa";
 import { IoBookmark } from "react-icons/io5";
 import { useState } from "react";
+import uiManage from "@/store/uiManage.js";
 
 const PostCard = () => {
   let [like, addLike] = useState(null);
-
+  const {setComment} = uiManage()
   return (
     <>
       {Array.from(Array(28).keys()).map((add, i) => {
@@ -36,7 +37,7 @@ const PostCard = () => {
                     2day ago
                   </span>
                 </h2>
-                <p className="text-sm text-neutral-600 ">
+                <p className="text-base text-neutral-600 ">
                   UI/UX Designer | Front-end Developer | Mobile Apps Design{" "}
                 </p>
               </div>
@@ -45,12 +46,12 @@ const PostCard = () => {
                 Follow
               </button>
             </div>
-            <h4 className=" px-3 mb-2  text-sm font-medium text-neutral-800">
+            <h4 className=" px-3 mb-2  text-base font-medium text-neutral-600">
               Kenan Foundation Asia believes in a world where everyone has the
               right to build a better life for themselves
             </h4>
 
-            <div className="px-3  overflow-hidden w-full h-[250px] flex flex-row justify-center items-center">
+            <div className="px-3  overflow-hidden w-full h-[320px] flex flex-row justify-center items-center">
               <img
                 src="/image/profile.jpg"
                 alt="post photo"
@@ -75,7 +76,7 @@ const PostCard = () => {
                   } text-lg`}
                 />
                 <h1
-                  className={`text-base font-medium ${
+                  className={`text-base font-medium hidden md:block ${
                     like === i ? "text-neutral-800" : "text-neutral-600"
                   } `}
                 >
@@ -83,16 +84,19 @@ const PostCard = () => {
                   Like
                 </h1>
               </div>
-              <div className="flex flex-row gap-2 justify-start items-center">
+              <div
+                  onClick={() => setComment(true)}
+                  className="flex flex-row gap-2 justify-start items-center
+                  ">
                 <FaCommentDots className="text-neutral-700 text-lg" />
-                <h1 className="text-base font-medium text-neutral-700">
+                <h1 className="text-base font-medium text-neutral-700 hidden md:block">
                   1 Comment
                 </h1>
               </div>
 
               <div className="flex flex-row gap-2 justify-start items-center">
                 <FaShare className="text-neutral-700 text-lg" />
-                <h1 className="text-base font-medium text-neutral-700">
+                <h1 className="text-base font-medium text-neutral-700 hidden md:block">
                   1 Share
                 </h1>
               </div>

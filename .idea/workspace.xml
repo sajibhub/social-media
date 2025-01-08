@@ -4,7 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="" />
+    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/client/src/Component/utility/try.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/layout/BottomMenu.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/public/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/client/public/css/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/home/AddPost.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/home/AddPost.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/home/PostCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/home/PostCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/layout/Layout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Layout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/layout/Menu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Menu.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/store/uiManage.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/store/uiManage.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -33,21 +47,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Merging main",
-    "ignore.virus.scanning.warn.message": "true",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2024.2.4\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Program Files\\JetBrains\\WebStorm 2024.2.4\\plugins\\javascript-plugin\\jsLanguageServicesImpl\\external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Development\runing-React\social-media\client\public\image" />
@@ -79,6 +93,12 @@
       <workItem from="1736182348536" duration="55000" />
       <workItem from="1736182441061" duration="8000" />
       <workItem from="1736182666749" duration="158000" />
+      <workItem from="1736182834535" duration="89000" />
+      <workItem from="1736219176352" duration="3920000" />
+      <workItem from="1736228023140" duration="5427000" />
+      <workItem from="1736234478649" duration="2138000" />
+      <workItem from="1736254166324" duration="2600000" />
+      <workItem from="1736331296771" duration="11980000" />
     </task>
     <servers />
   </component>

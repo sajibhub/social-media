@@ -13,10 +13,10 @@
     }
 
     .author-tab{
-        @apply lg:block my-1 w-full px-3 py-2 rounded lg:rounded-s  text-white font-semibold text-lg hover:bg-white hover:text-sky-500 ;
+        @apply lg:block my-1 w-full px-3 py-2 lg:rounded-s  text-white font-semibold text-lg hover:bg-white hover:text-sky-500 ;
     }
     .author-tab-active{
-        @apply lg:block my-1 w-full px-4 py-2 rounded-s font-semibold bg-white text-lg text-sky-500 ;
+        @apply lg:block my-1 w-full px-4 py-2 lg:rounded-s font-semibold bg-white text-lg text-sky-500 ;
     }
 }
 
