@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/client/src/Component/utility/try.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/layout/BottomMenu.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/public/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/client/public/css/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/Component/home/AddPost.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/home/AddPost.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/Component/home/PostCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/home/PostCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/layout/Layout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Layout.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/layout/Menu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Menu.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/store/uiManage.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/store/uiManage.js" afterDir="false" />
-    </list>
+    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -98,7 +84,7 @@
       <workItem from="1736228023140" duration="5427000" />
       <workItem from="1736234478649" duration="2138000" />
       <workItem from="1736254166324" duration="2600000" />
-      <workItem from="1736331296771" duration="11980000" />
+      <workItem from="1736331296771" duration="12390000" />
     </task>
     <servers />
   </component>
