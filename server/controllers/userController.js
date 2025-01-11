@@ -5,7 +5,6 @@ import random from "r-password";
 import User from "../models/userModel.js";
 import { Mail } from "../utils/mail.js";
 import TokenAndCookie from "../utils/TokenAndCookie.js";
-import multer from "../utils/multer.js";
 import {
   NewAccount,
   OtpMail,
