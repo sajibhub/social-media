@@ -4,7 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="" />
+    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/client/public/image/logo.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/public/image/storyImg.jpg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/Component/story/ActiveComponent.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/popup/StoryPopup.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/client/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/public/image/I.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/home/AddPost.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/home/AddPost.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/utility/try.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/utility/try.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/layout/Layout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Layout.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/layout/Menu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Menu.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/HomePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,7 +40,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/sajib-bd/social-media.git&quot;,
-    &quot;accountId&quot;: &quot;41c48dcb-2436-45ab-b2c4-f02661e52ac4&quot;
+    &quot;accountId&quot;: &quot;37ff572a-0149-49ee-a69b-5b0dd5e5f3bb&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -50,13 +68,14 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Project\Development\social-media\client\public\image" />
       <recent name="E:\Development\runing-React\social-media\client\public\image" />
     </key>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-WS-243.21565.180" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
       </set>
     </attachedChunks>
   </component>
@@ -86,6 +105,16 @@
       <workItem from="1736254166324" duration="2600000" />
       <workItem from="1736331296771" duration="12390000" />
       <workItem from="1736346428687" duration="318000" />
+      <workItem from="1736398472631" duration="1940000" />
+      <workItem from="1736406763523" duration="759000" />
+      <workItem from="1736408984230" duration="457000" />
+      <workItem from="1736415993621" duration="1685000" />
+      <workItem from="1736424172575" duration="4798000" />
+      <workItem from="1736429833702" duration="42000" />
+      <workItem from="1736431746033" duration="6000" />
+      <workItem from="1736566752106" duration="4371000" />
+      <workItem from="1736572957538" duration="305000" />
+      <workItem from="1736599796383" duration="6998000" />
     </task>
     <servers />
   </component>
@@ -99,6 +128,18 @@
           <url>file://$PROJECT_DIR$/client/src/Component/author/SignIn.jsx</url>
           <line>13</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/client/src/Component/story/ActiveComponent.jsx</url>
+          <line>7</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/client/src/Component/story/ActiveComponent.jsx</url>
+          <line>51</line>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

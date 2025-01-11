@@ -4,6 +4,7 @@ import {MdEmojiEmotions,} from "react-icons/md";
 import {useState} from "react";
 import EmojiPicker from "emoji-picker-react";
 import uiManage from "../store/uiManage.js";
+import toast from "react-hot-toast";
 
 const CommentPopup = () => {
     const [image, setImage] = useState(null);
@@ -33,6 +34,7 @@ const CommentPopup = () => {
 
     const submitComment = () => {
         setComment(false)
+        toast.success('Comment Create Successfully')
     }
     return (
         <div

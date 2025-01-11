@@ -2,6 +2,7 @@ import Layout from "../layout/Layout.jsx";
 import HomeStoryComponent from "../Component/home/HomeStoryComponent.jsx";
 import AddPost from "../Component/home/AddPost.jsx";
 import PostCard from "../Component/home/PostCard.jsx";
+import ActiveComponent from "@/Component/story/ActiveComponent.jsx";
 
 
 const HomePage = () => {
@@ -20,6 +21,8 @@ const HomePage = () => {
             <HomeStoryComponent />
             <AddPost />
             <PostCard />
+
+            <ActiveComponent />
         </Layout>
     );
 };

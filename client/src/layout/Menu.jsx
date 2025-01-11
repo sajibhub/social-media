@@ -1,7 +1,7 @@
 import {TiHome} from "react-icons/ti";
 import {IoMdNotifications} from "react-icons/io";
 import {FaBookmark, FaSearch, FaSignOutAlt, FaUser, FaUsers} from "react-icons/fa";
-import {RiMessage3Fill} from "react-icons/ri";
+import {RiMessage3Fill, RiStickyNoteAddFill} from "react-icons/ri";
 import {IoSettingsSharp} from "react-icons/io5";
 import{motion} from "framer-motion";
 
@@ -9,16 +9,16 @@ const Menu = () => {
     return (
         <>
             <div className=" px-3 scroll-bar-hidden ">
-                <img src="/image/I.png" alt="logo" className="h-[50px] block mx-auto mt-10" />
+                <img src="/image/logo.png" alt="logo" className="h-[160px] block mx-auto mt-10" />
 
-                <div className="py-3 w-fit mx-auto  mt-10">
+                <div className="py-3 w-fit mx-auto  ">
                     <motion.div
                         whileHover={{opacity: 1, scale: 1.1}}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
                         transition={{
                             duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
 
                         className="menu-active mb-3
@@ -30,12 +30,12 @@ const Menu = () => {
 
                     <motion.div
                         whileHover={{opacity: 1, scale: 1.1}}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
                         transition={{
 
                             duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className="menu mb-3"
                     >
@@ -45,12 +45,12 @@ const Menu = () => {
 
                     <motion.div
                         whileHover={{opacity: 1, scale: 1.1}}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
                         transition={{
 
                             duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className="menu mb-3"
                     >
@@ -60,12 +60,12 @@ const Menu = () => {
 
                     <motion.div
                         whileHover={{opacity: 1, scale: 1.1}}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
                         transition={{
 
                             duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className="menu mb-3"
                     >
@@ -75,12 +75,12 @@ const Menu = () => {
 
                     <motion.div
                         whileHover={{opacity: 1, scale: 1.1}}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
                         transition={{
 
                             duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className="menu mb-3"
                     >
@@ -90,12 +90,12 @@ const Menu = () => {
 
                     <motion.div
                         whileHover={{opacity: 1, scale: 1.1}}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
                         transition={{
 
                             duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className="menu mb-3"
                     >
@@ -105,12 +105,27 @@ const Menu = () => {
 
                     <motion.div
                         whileHover={{opacity: 1, scale: 1.1}}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
                         transition={{
 
                             duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
+                        }}
+                        className="menu mb-3"
+                    >
+                        <RiStickyNoteAddFill className="text-xl font-medium "/>
+                        <h3 className="text-lg font-bold  ">Add Post</h3>
+                    </motion.div>
+
+                    <motion.div
+                        whileHover={{opacity: 1, scale: 1.1}}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
+                        transition={{
+
+                            duration: 0.3,
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className="menu mb-3"
                     >
@@ -122,12 +137,12 @@ const Menu = () => {
 
                     <motion.div
                         whileHover={{opacity: 1, scale: 1.1}}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
                         transition={{
 
                             duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className="menu mb-2"
                     >
@@ -137,12 +152,12 @@ const Menu = () => {
 
                     <motion.div
                         whileHover={{opacity: 1, scale: 1.1}}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
+                        initial={{opacity: 0, scale: 0}}
+                        animate={{opacity: 1, scale: 1}}
                         transition={{
 
                             duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className="menu mb-3"
                     >

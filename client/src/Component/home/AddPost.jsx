@@ -5,6 +5,7 @@ import {MdEmojiEmotions} from "react-icons/md";
 import {useState} from "react";
 import {IoClose} from "react-icons/io5";
 import EmojiPicker from "emoji-picker-react";
+import toast from "react-hot-toast";
 const AddPost = () => {
     const [image, setImage] = useState(null);
     const [text, setText] = useState("");
@@ -26,6 +27,13 @@ const AddPost = () => {
         setText(newText);
         setShowPicker(false);
     };
+
+    const createPost = () => {
+        setText("");
+        setImage(null);
+        toast.success('Post Create Successfully !')
+
+    }
 
     return (
         <>
@@ -103,6 +111,7 @@ const AddPost = () => {
                         />
                     </div>
                     <button
+                        onClick={createPost}
 
                         className="
                         text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
