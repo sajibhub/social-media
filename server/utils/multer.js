@@ -13,7 +13,7 @@ const imageUpload = (id) => {
     filename: (req, file, cb) => {
       cb(
         null,
-        `${id}${
+        `${id} - ${
           new Date().getTime() +
           file.originalname.slice(
             file.originalname.lastIndexOf("."),

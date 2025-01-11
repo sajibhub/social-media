@@ -49,10 +49,13 @@ const PostSchema = mongoose.Schema(
         },
       },
     ],
-    view: {
-      type: Number,
-      default: 0,
-    },
+    view: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+    ],
   },
   {
     timestamps: true,
