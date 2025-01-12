@@ -7,6 +7,7 @@ import {
   Profile,
   ForgetOTP,
   PasswordReset,
+  Follow,
 } from "../controllers/userController.js";
 import Authorized from "../middleware/authorized.js";
 
@@ -18,5 +19,6 @@ userRouter.post("/user/auth/logout", Authorized, Logout);
 userRouter.get("/user/profile", Authorized, Profile);
 userRouter.post("/user/auth/forger/password/:email", ForgetOTP);
 userRouter.put("/user/auth/forger/password", PasswordReset);
+userRouter.put("/user/profile/follow/:userId", Authorized, Follow);
 
 export default userRouter;

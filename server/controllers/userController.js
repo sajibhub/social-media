@@ -1,6 +1,7 @@
 import validator from "validator";
 import bcrypt from "bcrypt";
 import random from "r-password";
+import mongoose from "mongoose";
 
 import User from "../models/userModel.js";
 import { Mail } from "../utils/mail.js";
@@ -197,23 +198,23 @@ export const Profile = async (req, res) => {
     const profile = await User.aggregate([
       { $match: { _id: id } },
       {
+        $lookup: {
+          from: "posts",
+          localField: "_id",
+          foreignField: "likes", // Field in the posts collection that holds the array of user IDs
+          as: "likedPosts", // Alias for the resulting array of posts liked by the user
+        },
+      },
+      {
         $addFields: {
           followers: {
-            $size: "$followers",
+            $size: "$followers", // Count the number of followers
           },
-        },
-      },
-      {
-        $addFields: {
           following: {
-            $size: "$following",
+            $size: "$following", // Count the number of following
           },
-        },
-      },
-      {
-        $addFields: {
           postLike: {
-            $size: "$likePosts",
+            $size: "$likedPosts", // Count the total number of posts liked by this user
           },
         },
       },
@@ -232,7 +233,7 @@ export const Profile = async (req, res) => {
           mediaLink: 1,
           followers: 1,
           following: 1,
-          postLike: 1,
+          postLike: 1, // Include the total liked posts in the output
         },
       },
     ]);
@@ -383,6 +384,45 @@ export const PasswordReset = async (req, res) => {
     );
     return res.status(200).json({
       message: "Password Reset successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred while processing your request.",
+    });
+  }
+};
+
+export const Follow = async (req, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.params.userId);
+    const { id } = req.headers;
+    if (id.toString() == userId.toString()) {
+      return res.status(400).json({
+        message: "You can't follow yourself",
+      });
+    }
+    const findUser = await User.findById(userId).select({ followers: 1 });
+    if (findUser.followers.toString().includes(userId)) {
+      const updateFollowers = await User.findByIdAndUpdate(
+        id,
+        {
+          $pull: { followers: id },
+        },
+        { new: true }
+      );
+      return res.status(200).json({
+        message: "Unfollowed Successfully",
+      });
+    }
+    const updateFollowing = await User.findByIdAndUpdate(
+      id,
+      {
+        $push: { followers: id },
+      },
+      { new: true }
+    );
+    return res.status(200).json({
+      message: "Followed Successfully",
     });
   } catch (error) {
     res.status(500).json({

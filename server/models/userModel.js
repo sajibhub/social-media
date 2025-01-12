@@ -86,13 +86,6 @@ const UserSchema = mongoose.Schema(
         default: "",
       },
     },
-    likePosts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Post",
-        default: [],
-      },
-    ],
     status: {
       type: Boolean,
       default: false,
