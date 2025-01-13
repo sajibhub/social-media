@@ -162,6 +162,11 @@ export const Login = async (req, res) => {
 
     await TokenAndCookie(findUser._id, res);
 
+    await User.findByIdAndUpdate(
+      findUser._id,
+      { lastLogin: new Date() },
+      { new: true }
+    );
     return res.status(200).json({
       message: "Login successful",
     });
@@ -195,26 +200,34 @@ export const Logout = async (req, res) => {
 export const Profile = async (req, res) => {
   try {
     const { id } = req.headers;
+    const { username } = req.params;
     const profile = await User.aggregate([
-      { $match: { _id: id } },
+      { $match: { username } },
       {
         $lookup: {
           from: "posts",
           localField: "_id",
-          foreignField: "likes", // Field in the posts collection that holds the array of user IDs
-          as: "likedPosts", // Alias for the resulting array of posts liked by the user
+          foreignField: "likes",
+          as: "likedPosts",
         },
       },
       {
         $addFields: {
           followers: {
-            $size: "$followers", // Count the number of followers
+            $size: "$followers",
           },
           following: {
-            $size: "$following", // Count the number of following
+            $size: "$following",
           },
           postLike: {
-            $size: "$likedPosts", // Count the total number of posts liked by this user
+            $size: "$likedPosts",
+          },
+          myProfile: {
+            $cond: {
+              if: { $eq: [id, "$_id"] },
+              then: true,
+              else: false,
+            },
           },
         },
       },
@@ -222,18 +235,49 @@ export const Profile = async (req, res) => {
         $project: {
           username: 1,
           fullName: 1,
-          email: 1,
-          phone: 1,
+          email: {
+            $cond: {
+              if: { $eq: [id, "$_id"] },
+              then: "$email",
+              else: "$$REMOVE",
+            },
+          },
+          phone: {
+            $cond: {
+              if: { $eq: [id, "$_id"] },
+              then: "$phone",
+              else: "$$REMOVE",
+            },
+          },
           profile: 1,
           cover: 1,
-          provider: 1,
-          facebookId: 1,
-          googleId: 1,
+          provider: {
+            $cond: {
+              if: { $eq: [id, "$_id"] },
+              then: "$provider",
+              else: "$$REMOVE",
+            },
+          },
+          facebookId: {
+            $cond: {
+              if: { $eq: [id, "$_id"] },
+              then: "$facebookId",
+              else: "$$REMOVE",
+            },
+          },
+          googleId: {
+            $cond: {
+              if: { $eq: [id, "$_id"] },
+              then: "$googleId",
+              else: "$$REMOVE",
+            },
+          },
           bio: 1,
           mediaLink: 1,
           followers: 1,
           following: 1,
-          postLike: 1, // Include the total liked posts in the output
+          postLike: 1,
+          myProfile: 1,
         },
       },
     ]);

@@ -96,7 +96,7 @@ const UserSchema = mongoose.Schema(
     },
     lastLogin: {
       type: Number,
-      default: Date.now,
+      default: new Date(),
     },
   },
   {

@@ -16,7 +16,7 @@ const userRouter = express.Router();
 userRouter.post("/user/auth/signup", SignUp);
 userRouter.post("/user/auth/login", Login);
 userRouter.post("/user/auth/logout", Authorized, Logout);
-userRouter.get("/user/profile", Authorized, Profile);
+userRouter.get("/user/profile/:username", Authorized, Profile);
 userRouter.post("/user/auth/forger/password/:email", ForgetOTP);
 userRouter.put("/user/auth/forger/password", PasswordReset);
 userRouter.put("/user/profile/follow/:userId", Authorized, Follow);
