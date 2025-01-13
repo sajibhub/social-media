@@ -18,16 +18,8 @@ const Layout = (props) => {
                 comment && <CommentPopup/>
             }
 
-            <StoryPopup />
-
             <div className="col-span-1 h-full hidden md:block scroll-bar-hidden   overflow-y-auto overflow-x-hidden ">
                 <Menu/>
-                <div >
-                    <Toaster
-                        position="bottom-center"
-                        reverseOrder={false}
-                    />
-                </div>
             </div>
             <div
                 className=" col-span-2 h-full scroll-bar-hidden  overflow-y-auto overflow-x-hidden border-x-2 border-gray-100 ">

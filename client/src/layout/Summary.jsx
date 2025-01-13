@@ -3,9 +3,13 @@ import SummarySuggested from "../Component/summary/SummarySuggested.jsx";
 
 
 const Summary = () => {
+    const pathname = window.location.pathname;
     return (
         <>
-            <SummaryProfileComponent />
+            {
+                pathname !== "/profile" && <SummaryProfileComponent />
+            }
+
             <SummarySuggested />
         </>
     );

@@ -1,10 +1,30 @@
 import SignIn from "../Component/author/SignIn.jsx";
 import uiManage from "../store/uiManage.js";
 import SignUp from "../Component/author/SignUp.jsx";
+import {useEffect} from "react";
 
-
+import {useNavigate} from "react-router-dom";
+import authorStore from "@/store/authorStore.js";
 const AuthorPage = () => {
+    const navigate = useNavigate();
     const {author, setAuthor} = uiManage()
+    const {readProfileReq} = authorStore()
+
+    useEffect(() => {
+
+        (
+
+            async ()=>{
+                let res = await readProfileReq(" ")
+                if(res){
+                    navigate('/')
+                }
+            }
+        )()
+
+    }, []);
+
+
     return (
         <>
             <div className="grid grid-cols-3 grid-rows-none overflow-y-auto  h-screen">

@@ -5,23 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/client/public/image/logo.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/public/image/storyImg.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/Component/story/ActiveComponent.jsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/popup/StoryPopup.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/Component/button/LoadingButton.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/Component/button/LoadingButtonFit.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/Component/profile/UserInfo.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/pages/ProfilePage.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/store/authorStore.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/store/postStore.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/client/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/client/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/public/image/I.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/public/css/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/client/public/css/index.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/author/SignIn.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/author/SignIn.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/Component/home/AddPost.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/home/AddPost.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/Component/utility/try.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/utility/try.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/layout/Layout.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Layout.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/layout/Menu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Menu.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/layout/Summary.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Summary.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/main.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/HomePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/pages/authorPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/authorPage.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,7 +39,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/sajib-bd/social-media.git&quot;,
-    &quot;accountId&quot;: &quot;37ff572a-0149-49ee-a69b-5b0dd5e5f3bb&quot;
+    &quot;accountId&quot;: &quot;41c48dcb-2436-45ab-b2c4-f02661e52ac4&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -57,6 +56,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;E:/Development/social-media&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -75,7 +75,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
+        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-WS-243.21565.180" />
       </set>
     </attachedChunks>
   </component>
@@ -115,6 +115,11 @@
       <workItem from="1736566752106" duration="4371000" />
       <workItem from="1736572957538" duration="305000" />
       <workItem from="1736599796383" duration="6998000" />
+      <workItem from="1736782181593" duration="209000" />
+      <workItem from="1736782478276" duration="19000" />
+      <workItem from="1736782520675" duration="195000" />
+      <workItem from="1736783521422" duration="2667000" />
+      <workItem from="1736786244499" duration="7288000" />
     </task>
     <servers />
   </component>
@@ -126,19 +131,17 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/client/src/Component/author/SignIn.jsx</url>
-          <line>13</line>
+          <line>38</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/client/src/Component/story/ActiveComponent.jsx</url>
           <line>7</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/client/src/Component/story/ActiveComponent.jsx</url>
           <line>51</line>
-          <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>

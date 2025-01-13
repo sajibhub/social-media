@@ -6,10 +6,14 @@ import {useState} from "react";
 import {IoClose} from "react-icons/io5";
 import EmojiPicker from "emoji-picker-react";
 import toast from "react-hot-toast";
+import postStore from "@/store/postStore.js";
+import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 const AddPost = () => {
+    const {createPostReq} = postStore()
     const [image, setImage] = useState(null);
     const [text, setText] = useState("");
     const [showPicker, setShowPicker] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
@@ -28,10 +32,20 @@ const AddPost = () => {
         setShowPicker(false);
     };
 
-    const createPost = () => {
-        setText("");
-        setImage(null);
-        toast.success('Post Create Successfully !')
+    const createPost = async () => {
+
+        setLoading(true);
+        const res = await createPostReq(image,text )
+        if(res){
+            setText("");
+            setImage(null);
+            setLoading(false);
+            toast.success('Post Create Successfully !')
+        }
+        else {
+            setLoading(false);
+            toast.error("Post Create failed !")
+        }
 
     }
 
@@ -110,16 +124,23 @@ const AddPost = () => {
                             className="text-xl text-neutral-700 cursor-pointer "
                         />
                     </div>
-                    <button
-                        onClick={createPost}
 
-                        className="
+                    {
+                        loading ?  <LoadingButtonFit text="Loading..." />: (
+                            <button
+                                onClick={createPost}
+
+                                className="
                         text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
                          rounded-full hover:text-sky-500 hover:border-sky-500
                          "
-                    >
-                        Post
-                    </button>
+                            >
+                                Post
+                            </button>
+                        )
+                    }
+
+
                 </div>
             </motion.div>
         </>

@@ -1,8 +1,33 @@
-import React from "react";
+import React, {useEffect} from "react";
 import uiManage from "../../store/uiManage.js";
+import authorStore from "@/store/authorStore.js";
+import toast from "react-hot-toast";
+import {useNavigate} from "react-router-dom";
+import LoadingButton from "@/Component/button/LoadingButton.jsx";
+
 
 const SignIn = () => {
+    const navigate = useNavigate();
     const {setAuthor}= uiManage()
+    const {setLoginForm , loginForm,loginReq ,} = authorStore()
+    const [loading, setLoading] = React.useState(false);
+
+
+
+    const loginHandler = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        const res = await loginReq(loginForm);
+        setLoading(false);
+        if(res){
+            toast.success("login successfully");
+            navigate("/");
+        }
+        else {
+            toast.error("login error");
+        }
+    }
+
     return (
         <div className="h-full flex flex-col justify-center items-center">
             <div className="max-w-[530px] w-full px-5 md:mx-auto ">
@@ -11,7 +36,10 @@ const SignIn = () => {
                 </h2>
 
                 <div className="mt-5">
-                    <form>
+                    <form
+                        onSubmit={loginHandler}
+                    >
+
                         <div className="mb-4">
                             <label
                                 htmlFor="email"
@@ -20,7 +48,8 @@ const SignIn = () => {
                                 Email
                             </label>
                             <input
-                                type="email"
+                                value={loginForm.username}
+                                onChange={(e)=>setLoginForm("username", e.target.value)}
                                 id="email"
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="Enter your email"
@@ -36,6 +65,8 @@ const SignIn = () => {
                             <input
                                 type="password"
                                 id="password"
+                                value={loginForm.password}
+                                onChange={(e)=>setLoginForm("password", e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="Enter your password"
                             />
@@ -54,12 +85,26 @@ const SignIn = () => {
                                 Forgot password?
                             </a>
                         </div>
-                        <button
-                            type="submit"
-                            className="w-full bg-sky-500 text-white py-2 rounded-lg hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
-                        >
-                            Sign In
-                        </button>
+
+                        {
+                            loading ? (
+                                    <LoadingButton text="sign in" />
+                            ) : (
+                                <button
+                                    type="submit"
+                                    className="
+                            w-full bg-sky-500 text-white py-2 rounded-lg hover:bg-sky-600 focus:outline-none
+                            focus:ring-2 focus:ring-sky-500 focus:ring-offset-2
+                            flex items-center justify-center gap-3 opacity-70
+                            "
+                                >
+                                   Sign in
+
+                                </button>
+                            )
+                        }
+
+
                     </form>
                     <p className="text-center text-sm text-gray-600 mt-6">
                         Don't have an account?{" "}
