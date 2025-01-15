@@ -2,6 +2,7 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 import random from "r-password";
 import mongoose from "mongoose";
+import multer from "multer";
 
 import User from "../models/userModel.js";
 import { Mail } from "../utils/mail.js";
@@ -11,8 +12,10 @@ import {
   OtpMail,
   PasswordResetSuccess,
 } from "../utils/mailTemplate.js";
+import storage from "../utils/cloudinary.js";
 
 const phoneRegex = /^(?:\+88|0088)?(01[3-9]\d{8})$/;
+const usernameRegex = /^[a-zA-Z0-9]+$/;
 
 export const SignUp = async (req, res) => {
   try {
@@ -27,6 +30,18 @@ export const SignUp = async (req, res) => {
     if (fullName === "" || password === "" || email === "" || username === "") {
       return res.status(400).json({
         message: "Fields cannot be empty",
+      });
+    }
+
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({
+        message: "Username should contain only alphanumeric characters.",
+      });
+    }
+
+    if (username == "me") {
+      return res.status(400).json({
+        message: "Username can't be 'me'. Please choose a different one.",
       });
     }
 
@@ -201,8 +216,25 @@ export const Profile = async (req, res) => {
   try {
     const { id } = req.headers;
     const { username } = req.params;
+    if (username != "me") {
+      if (!(await User.findOne({ username }))) {
+        return res.status(404).json({
+          message: "This username has no profile",
+        });
+      }
+    }
     const profile = await User.aggregate([
-      { $match: { username } },
+      {
+        $match: {
+          $expr: {
+            $cond: {
+              if: { $eq: [username, "me"] },
+              then: { $eq: ["$_id", id] },
+              else: { $eq: ["$username", username] },
+            },
+          },
+        },
+      },
       {
         $lookup: {
           from: "posts",
@@ -286,7 +318,74 @@ export const Profile = async (req, res) => {
       profile,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({
+      message: "An error occurred while processing your request.",
+    });
+  }
+};
+
+export const ProfileUpdate = async (req, res) => {
+  try {
+    const upload = multer({ storage }).fields([
+      { name: "profile", maxCount: 1 },
+      { name: "cover", maxCount: 1 },
+    ]);
+
+    upload(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({
+          message: err.message,
+        });
+      }
+
+      const { fullName, username, bio, oldPassword, newPassword } = req.body;
+      const { profile, cover } = req.files;
+
+      if (
+        !fullName &&
+        !username &&
+        !bio &&
+        !newPassword &&
+        !oldPassword &&
+        !profile &&
+        !cover
+      ) {
+        return res.status(400).json({
+          message: "Please provide all required fields and at least one image.",
+        });
+      }
+
+      if (newPassword !== oldPassword) {
+        return res.status(400).json({
+          message: "You can't update the password with OTP.",
+        });
+      }
+
+      let profileImage = null;
+      let coverImage = null;
+
+      if (profile) {
+        profileImage = profile[0].path;
+      }
+      if (cover) {
+        coverImage = cover[0].path;
+      }
+
+      return res.status(200).json({
+        message: "Profile updated successfully!",
+        fullName,
+        username,
+        bio,
+        oldPassword,
+        newPassword,
+        profileImage,
+        coverImage,
+      });
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
   }

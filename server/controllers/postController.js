@@ -1,28 +1,13 @@
-import Post from "../models/postModel.js";
-import multer from "multer";
-import { v2 as cloudinary } from "cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
 import mongoose from "mongoose";
+import multer from "multer";
+
+import Post from "../models/postModel.js";
+import storage from "../utils/cloudinary.js";
 
 export const PostCreate = (req, res) => {
   const { id } = req.headers;
 
   try {
-    cloudinary.config({
-      cloud_name: process.env.CLOUD_NAME,
-      api_key: process.env.CLOUD_API_KEY,
-      api_secret: process.env.CLOUD_API_SECRET,
-    });
-
-    const storage = new CloudinaryStorage({
-      cloudinary,
-      params: {
-        folder: "images",
-        transformation: [{ width: 1000, height: 800, crop: "limit" }],
-        allowed_formats: ["jpg", "png", "jpeg"],
-      },
-    });
-
     const upload = multer({ storage });
     upload.single("image")(req, res, async (err) => {
       if (err) {
@@ -85,24 +70,109 @@ export const PostRead = async (req, res) => {
       {
         $addFields: {
           time: {
-            $dateToString: {
-              format: "%H:%M:%S %Y-%m-%d ",
-              date: {
-                $dateSubtract: {
-                  startDate: "$createdAt",
-                  unit: "minute",
-                  amount: 240,
+            $cond: {
+              if: {
+                $lt: [
+                  {
+                    $divide: [
+                      {
+                        $subtract: [new Date(), "$createdAt"], // Calculate the time difference in milliseconds
+                      },
+                      1000 * 60, // Convert milliseconds to minutes
+                    ],
+                  },
+                  1440, // Less than 1440 minutes (24 hours)
+                ],
+              },
+              then: {
+                $cond: {
+                  if: {
+                    $lt: [
+                      {
+                        $divide: [
+                          {
+                            $subtract: [new Date(), "$createdAt"],
+                          },
+                          1000 * 60,
+                        ],
+                      },
+                      60,
+                    ],
+                  },
+                  then: {
+                    $concat: [
+                      {
+                        $toString: {
+                          $floor: {
+                            $divide: [
+                              {
+                                $subtract: [new Date(), "$createdAt"],
+                              },
+                              1000 * 60,
+                            ],
+                          },
+                        },
+                      },
+                      " minutes ago",
+                    ],
+                  },
+                  else: {
+                    $cond: {
+                      if: {
+                        $lt: [
+                          {
+                            $divide: [
+                              {
+                                $subtract: [new Date(), "$createdAt"],
+                              },
+                              1000 * 60 * 60,
+                            ],
+                          },
+                          24,
+                        ],
+                      },
+                      then: {
+                        $concat: [
+                          {
+                            $toString: {
+                              $floor: {
+                                $divide: [
+                                  {
+                                    $subtract: [new Date(), "$createdAt"],
+                                  },
+                                  1000 * 60 * 60,
+                                ],
+                              },
+                            },
+                          },
+                          " hours ago",
+                        ],
+                      },
+                      else: {
+                        $dateToString: {
+                          format: "%H:%M:%S %Y-%m-%d",
+                          date: "$createdAt",
+                          timezone: "Asia/Dhaka",
+                        },
+                      },
+                    },
+                  },
                 },
               },
-              timezone: "Asia/Dhaka",
+              else: {
+                $dateToString: {
+                  format: "%H:%M:%S %Y-%m-%d",
+                  date: "$createdAt",
+                  timezone: "Asia/Dhaka",
+                },
+              },
             },
           },
-        },
-      },
-      {
-        $addFields: {
           liked: {
             $in: [id, "$likes"],
+          },
+          myPost: {
+            $eq: [id, "$userId"],
           },
         },
       },
@@ -122,6 +192,7 @@ export const PostRead = async (req, res) => {
           comment: { $size: "$comments" },
           view: { $size: "$view" },
           liked: 1,
+          myPost: 1,
         },
       },
     ]);
@@ -151,7 +222,7 @@ export const PostUpdate = async (req, res) => {
     }
     const updatedPost = await Post.findByIdAndUpdate(
       postId,
-      { caption },
+      { $set: { caption } },
       { new: true }
     );
     if (!updatedPost) {
@@ -267,6 +338,63 @@ export const PostComment = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "An error occurred while processing your request.",
+    });
+  }
+};
+
+export const PostCommentUpdate = async (req, res) => {
+  try {
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
+    const commentId = new mongoose.Types.ObjectId(req.params.commentId);
+    const { id } = req.headers;
+    const { comment } = req.body;
+    if (!commentId || !postId) {
+      return res.status(400).json({
+        message: "Please provide a comment and post ID .",
+      });
+    }
+    if (comment == "") {
+      return res.status(400).json({
+        message: "Please provide a comment.",
+      });
+    }
+    const findPost = await Post.findById(postId);
+    if (!findPost) {
+      return res.status(404).json({
+        message: "Post not found.",
+      });
+    }
+    const commentExists = findPost.comments.find((comment) => {
+      if (comment._id.toString() != commentId) {
+        return res.status(404).json({
+          message: "Comment not found ",
+        });
+      }
+      if (comment.userId.toString() != id.toString()) {
+        return res.status(401).json({
+          message: "You are not allowed to edit this comment",
+        });
+      }
+    });
+    const updatedPost = await Post.findByIdAndUpdate(
+      postId,
+      {
+        $set: {
+          "comments.$[comment].comment": comment, 
+        },
+      },
+      {
+        new: true,
+        arrayFilters: [{ "comment._id": commentId }], 
+      }
+    );
+    return res.status(200).json({
+      message: "Comment updated successfully",
+      post: updatedPost,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred while processing your request",
     });
   }
 };
