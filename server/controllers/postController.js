@@ -168,11 +168,24 @@ export const PostRead = async (req, res) => {
               },
             },
           },
-          liked: {
+          isLike: {
             $in: [id, "$likes"],
           },
           myPost: {
             $eq: [id, "$userId"],
+          },
+        },
+        isFollowing: {
+          $cond: {
+            if: { $ne: [id, "$_id"] },
+            then: {
+              $cond: {
+                if: { $in: [id, "$followers"] },
+                then: true,
+                else: false,
+              },
+            },
+            else: "$$REMOVE",
           },
         },
       },
@@ -191,7 +204,7 @@ export const PostRead = async (req, res) => {
           like: { $size: "$likes" },
           comment: { $size: "$comments" },
           view: { $size: "$view" },
-          liked: 1,
+          isLike: 1,
           myPost: 1,
         },
       },
@@ -380,12 +393,12 @@ export const PostCommentUpdate = async (req, res) => {
       postId,
       {
         $set: {
-          "comments.$[comment].comment": comment, 
+          "comments.$[comment].comment": comment,
         },
       },
       {
         new: true,
-        arrayFilters: [{ "comment._id": commentId }], 
+        arrayFilters: [{ "comment._id": commentId }],
       }
     );
     return res.status(200).json({

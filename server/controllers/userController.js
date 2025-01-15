@@ -261,6 +261,19 @@ export const Profile = async (req, res) => {
               else: false,
             },
           },
+          isFollowing: {
+            $cond: {
+              if: { $ne: [id, "$_id"] },
+              then: {
+                $cond: {
+                  if: { $in: [id, "$followers"] },
+                  then: true,
+                  else: false,
+                },
+              },
+              else: "$$REMOVE",
+            },
+          },
         },
       },
       {
@@ -310,6 +323,7 @@ export const Profile = async (req, res) => {
           following: 1,
           postLike: 1,
           myProfile: 1,
+          isFollowing: 1,
         },
       },
     ]);
