@@ -17,7 +17,7 @@ const HomePage = () => {
         (
 
             async ()=>{
-                let res = await readProfileReq()
+                let res = await readProfileReq("me")
                 if(res !== true){
                     navigate('/author')
                 }

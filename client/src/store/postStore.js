@@ -8,6 +8,7 @@ const My_Post_Api= Base_url + "/user/post/read";
 const Update_Post_Api= Base_url + "user/post/update/";
 const Delete_Post_Api= Base_url + "user/post/delete/";
 const Like_Post_Api= Base_url + "user/post/like/";
+const CommentList_Post_Api= Base_url + "user/post/comment/view/";
 const Comment_Post_Api= Base_url + "user/post/comment/";
 
 const postStore  = create((set) => ({
@@ -86,6 +87,24 @@ const postStore  = create((set) => ({
             return false;
         }
     },
+
+    commentList: null,
+    removeCommentList : (e)=>{
+        set({commentList:e})
+    },
+    commentListReq : async (id)=>{
+        try {
+            const res = await axios.get(CommentList_Post_Api + id , {withCredentials: true})
+            set({commentList: res.data.comments})
+            return true
+        }
+
+        catch {
+            return false
+        }
+    },
+
+
     commentPostData: null,
     clearCommentPostData : (e)=>{
         set({commentPostData : e})

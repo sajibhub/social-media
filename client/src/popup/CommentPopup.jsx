@@ -1,17 +1,30 @@
 import {IoClose} from "react-icons/io5";
 import {FaImages} from "react-icons/fa";
 import {MdEmojiEmotions,} from "react-icons/md";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import EmojiPicker from "emoji-picker-react";
 import toast from "react-hot-toast";
 import postStore from "@/store/postStore.js";
+import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 
 const CommentPopup = () => {
     const [image, setImage] = useState(null);
     const [showPicker, setShowPicker] = useState(false);
 
-    const {setCommentPostData,  commentPostData, clearCommentPostData , commentPostReq , myPostReq} = postStore()
+    const {setCommentPostData,  commentPostData, clearCommentPostData , commentPostReq , myPostReq,commentListReq, commentList  } = postStore()
+    const id =  commentPostData.id
 
+    const [loader, setLoader] = useState(false)
+
+    useEffect(() => {
+        (
+            async ()=>{
+                await commentListReq (id)
+            }
+        )()
+    }, []);
+
+    console.log(commentList)
 
     const handleEmojiClick = (emojiData) => {
         let newCommentPostData = commentPostData.comment + (emojiData.emoji)
@@ -33,9 +46,11 @@ const CommentPopup = () => {
     };
 
     const submitComment = async () => {
+        setLoader(true)
         let res = await commentPostReq(commentPostData);
+        setLoader(false)
         if(res){
-            myPostReq ()
+            await myPostReq ()
             clearCommentPostData(null)
             toast.success('Comment Create Successfully')
         }
@@ -73,27 +88,31 @@ const CommentPopup = () => {
 
                 <div className="scroll-bar-hidden  overflow-y-auto h-full pb-64">
                     {
-                        [ 1,1,1,1,1,1,1,1].map((item, index) => {
+                        commentList === null && <h1 className="text-center font-lg mt-5"> loading .... </h1>
+                    }
+                    {
+                        commentList !== null &&
+                        commentList.map((item, index) => {
                             return (
 
-                                <div key={index} className="flex flex-row gap-3 justify-start items-start pt-3 px-5">
+                                <div key={index} className="flex flex-row gap-3 justify-start items-start pt-3 px-5 border-b mx-4">
                                     <div
                                         className=" mt-2 flex-shrink-0  h-[35px] w-[35px] rounded-full overflow-hidden flex flex-row justify-center items-center">
                                         <img
-                                            src="/image/profile.jpg"
+                                            src={item.user.profile}
                                             alt="profile image"
                                             className="min-w-full min-h-full "
                                         />
                                     </div>
                                     <div className="mb-2 flex-grow">
-                                        <h2 className="text-base font-medium text-neutral-800">
-                                            Imran
+                                        <h2 className="text-base font-semibold text-neutral-800">
+                                            {item.user.fullName}
+                                        </h2>
+                                        <h2 className="text-base font-normal text-neutral-700 mb-2">
+                                            {item.user.username}
                                         </h2>
                                         <p className="text-sm text-neutral-600 ">
-                                            Kenan Foundation Asia believes in a world where everyone has the
-                                            right to build a better life for themselves Kenan Foundation Asia believes in a
-                                            world where everyone has the
-                                            right to build a better life for themselves
+                                            {item.comment}
                                         </p>
                                     </div>
 
@@ -188,15 +207,22 @@ const CommentPopup = () => {
                             />
                         </div>
 
-                        <button
-                            onClick={submitComment}
-                            className="
+
+                        {
+                            loader ? <LoadingButtonFit text="Loading..." /> : (
+                                <button
+                                    onClick={submitComment}
+                                    className="
                             px-3 py-1 rounded-full border border-sky-500 text-sky-500
                             hover:bg-sky-500 hover:text-sky-50
                             "
-                        >
-                            Comment
-                        </button>
+                                >
+                                    Comment
+                                </button>
+                            )
+                        }
+
+
                     </div>
 
                 </div>

@@ -2,22 +2,18 @@ import { motion } from "framer-motion";
 import {AiFillDelete, AiFillLike} from "react-icons/ai";
 import { FaCommentDots, FaShare } from "react-icons/fa";
 import { IoBookmark } from "react-icons/io5";
-import uiManage from "@/store/uiManage.js";
 import postStore from "@/store/postStore.js";
 import {RiEdit2Fill} from "react-icons/ri";
 import toast from "react-hot-toast";
 import {useState} from "react";
 
 const PostCard = () => {
-  const pathname = window.location.pathname
-
-  const {my_post_data, setUpdatePostData,  deletePostReq, myPostReq ,likePostReq , setCommentPostData} = postStore()
+  const {my_post_data, setUpdatePostData,  deletePostReq, myPostReq ,likePostReq , setCommentPostData, removeCommentList} = postStore()
   const [loader, setLoader] = useState({
     status : false,
     id: ""
   });
 
-  let like = 1
 
   if(my_post_data === null) {
     return <h1 className="h-full text-center text-3xl py-[100px]">Loading ..........</h1>
@@ -36,15 +32,15 @@ const PostCard = () => {
                       duration: 0.3,
                       scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
                     }}
-                    className="max-w-[560px] pt-3 mt-3 rounded shadow mx-auto cursor-pointer"
+                    className="max-w-[560px] pt-3 mt-3 rounded shadow-md mx-auto cursor-pointer"
                 >
                   <div className="flex flex-row ms-3 me-5 gap-3 justify-start items-center">
-                    <div className=" flex-shrink-0  h-[35px] w-[35px] rounded-full
-                    overflow-hidden flex flex-row justify-center items-center"
+                    <div className=" flex-shrink-0  h-[40px] w-[40px] rounded-full
+                    overflow-hidden flex flex-row justify-center items-center shadow"
                     >
 
                       <img
-                          src="/image/profile.jpg"
+                          src={items.user.profile}
                           alt="profile image"
                           className="min-w-full min-h-full"
                       />
@@ -63,7 +59,7 @@ const PostCard = () => {
                     </div>
 
                     {
-                      pathname === "/profile" ? (
+                      items.myPost ? (
                           <>
                             <button
                                 onClick={() => {
@@ -161,7 +157,7 @@ const PostCard = () => {
 
                               <AiFillLike
                                   className={`${
-                                      like === i ? "text-neutral-800" : "text-neutral-600"
+                                      items.isLike ? "text-neutral-800" : "text-neutral-600"
                                   } text-lg`}
                               />
                           )
@@ -169,7 +165,7 @@ const PostCard = () => {
 
                       <h1
                           className={`text-base font-medium hidden md:block ${
-                              like === i ? "text-neutral-800" : "text-neutral-600"
+                              items.isLike ? "text-neutral-800" : "text-neutral-600"
                           } `}
                       >
                         {items.like} Like
@@ -179,6 +175,7 @@ const PostCard = () => {
                     <div
                         onClick={() =>{
                           setCommentPostData("id", items._id);
+                          removeCommentList(null)
                           }
                         }
                         className="flex flex-row gap-2 justify-start items-center

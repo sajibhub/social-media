@@ -5,7 +5,7 @@ import axios from "axios";
 
 const Base_url = "https://matrix-media.up.railway.app/api/v1/"
 const Login_api = Base_url + "user/auth/login";
-const Read_Profile_api = Base_url + "user/profile/username";
+const Read_Profile_api = Base_url + "user/profile/";
 
 
 
@@ -31,18 +31,25 @@ const authorStore = create((set) => ({
         }
     },
 
+
+
+
+
+
+
+
+
     profileData: null,
 
-    readProfileReq : async ()=>{
+    readProfileReq : async (user)=>{
         try {
-           let res =  await axios.get(Read_Profile_api,  {withCredentials: true})
+           let res =  await axios.get(Read_Profile_api +user,  {withCredentials: true})
             set({profileData: res.data.profile[0]})
             return true
         }
         catch{
             return false
         }
-
     }
 }))
 

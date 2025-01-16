@@ -27,13 +27,13 @@ const SummaryProfileComponent = () => {
                 "
                 >
 
-                    <div className="h-[100px] w-full overflow-hidden flex flex-row justify-between items-center ">
+                    <div className="h-[100px] w-full overflow-hidden flex flex-row justify-between items-center shadow ">
                         <img src={profileData.cover} alt="Cover Photo" className="min-w-full min-h-full" />
                     </div>
                     <div
                         className="
                     h-[70px] w-[70px] rounded-full overflow-hidden flex flex-row
-                     justify-between items-center mx-[10px] mt-[-35px]
+                     justify-between items-center mx-[10px] mt-[-35px] shadow
                      "
                     >
                         <img src={profileData.profile} alt="Cover Photo" className="min-w-full min-h-full"/>
