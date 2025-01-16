@@ -3,15 +3,14 @@ import {IoLocation} from "react-icons/io5";
 
 const UserInfo = () => {
     return (
-        <div className=" rounded  border border-gray-200">
-
-            <div className="h-[250px] w-full overflow-hidden flex flex-row justify-between items-center ">
+        <div className=" rounded  border border-gray-200 mb-6">
+            <div className="h-[200px] w-full overflow-hidden flex flex-row justify-between items-center ">
                 <img src="/image/coverPhoto.jpeg" alt="Cover Photo" className="min-w-full min-h-full"/>
             </div>
             <div
                 className="
-                    h-[120px] w-[120px] rounded-full overflow-hidden flex flex-row
-                     justify-between items-center mx-[25px] mt-[-60px]
+                    h-[100px] w-[100px] rounded-full overflow-hidden flex flex-row
+                     justify-between items-center mx-[25px] mt-[-50px]
                      "
             >
                 <img src="/image/profile.jpg" alt="Cover Photo" className="min-w-full min-h-full"/>
@@ -42,7 +41,7 @@ const UserInfo = () => {
             </div>
 
             <div className=" mx-3">
-                <button className="font-medium text-lg py-3 px-4  text-neutral-700 border-b-2 border-neutral-700 ">
+                <button className="font-medium text-lg py-2 px-3  text-neutral-700 border-b-2 border-neutral-700 ">
                     My Post
                 </button>
             </div>

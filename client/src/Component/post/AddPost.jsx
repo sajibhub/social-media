@@ -8,15 +8,18 @@ import EmojiPicker from "emoji-picker-react";
 import toast from "react-hot-toast";
 import postStore from "@/store/postStore.js";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
+
 const AddPost = () => {
     const {createPostReq} = postStore()
     const [image, setImage] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
     const [text, setText] = useState("");
     const [showPicker, setShowPicker] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleImageUpload = (event) => {
         const file = event.target.files[0];
+        setImageFile(file);
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
@@ -35,7 +38,7 @@ const AddPost = () => {
     const createPost = async () => {
 
         setLoading(true);
-        const res = await createPostReq(image,text )
+        const res = await createPostReq(imageFile,text )
         if(res){
             setText("");
             setImage(null);

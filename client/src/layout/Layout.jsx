@@ -1,22 +1,27 @@
 import Menu from "./Menu.jsx";
 import Summary from "./Summary.jsx";
 import CommentPopup from "@/popup/CommentPopup.jsx";
-import uiManage from "@/store/uiManage.js";
 import BottomMenu from "@/layout/BottomMenu.jsx";
-import {Toaster} from "react-hot-toast";
-import StoryPopup from "@/popup/StoryPopup.jsx";
+import postStore from "@/store/postStore.js";
+import UpdatePostPopup from "@/popup/UpdatePostPopup.jsx";
 
 
 
 const Layout = (props) => {
-    const {comment } =uiManage()
+
+    const {updatePostData ,commentPostData} = postStore()
     return (
         <div className="
         container h-screen overflow-hidden w-full  mb-3 mx-auto grid md:grid-cols-3 lg:grid-cols-4
         ">
             {
-                comment && <CommentPopup/>
+                commentPostData !== null && <CommentPopup/>
             }
+
+            {
+                updatePostData != null && <UpdatePostPopup/>
+            }
+
 
             <div className="col-span-1 h-full hidden md:block scroll-bar-hidden   overflow-y-auto overflow-x-hidden ">
                 <Menu/>

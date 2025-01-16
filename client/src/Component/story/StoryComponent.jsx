@@ -3,7 +3,7 @@ import {motion} from "framer-motion";
 import {useRef} from "react";
 import {MdKeyboardDoubleArrowRight, MdOutlineKeyboardDoubleArrowLeft} from "react-icons/md";
 
-const HomeStoryComponent = () => {
+const StoryComponent = () => {
 
     const scrollRef = useRef(null);
 
@@ -88,4 +88,4 @@ const HomeStoryComponent = () => {
     );
 };
 
-export default HomeStoryComponent;
+export default StoryComponent;

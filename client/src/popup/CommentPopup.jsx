@@ -3,19 +3,19 @@ import {FaImages} from "react-icons/fa";
 import {MdEmojiEmotions,} from "react-icons/md";
 import {useState} from "react";
 import EmojiPicker from "emoji-picker-react";
-import uiManage from "../store/uiManage.js";
 import toast from "react-hot-toast";
+import postStore from "@/store/postStore.js";
 
 const CommentPopup = () => {
     const [image, setImage] = useState(null);
-    const [text, setText] = useState("");
     const [showPicker, setShowPicker] = useState(false);
 
-    const {setComment} = uiManage()
+    const {setCommentPostData,  commentPostData, clearCommentPostData , commentPostReq , myPostReq} = postStore()
+
 
     const handleEmojiClick = (emojiData) => {
-        let newText = text + (emojiData.emoji)
-        setText(newText);
+        let newCommentPostData = commentPostData.comment + (emojiData.emoji)
+        setCommentPostData("comment", newCommentPostData);
         setShowPicker(false);
     };
 
@@ -32,9 +32,19 @@ const CommentPopup = () => {
         }
     };
 
-    const submitComment = () => {
-        setComment(false)
-        toast.success('Comment Create Successfully')
+    const submitComment = async () => {
+        let res = await commentPostReq(commentPostData);
+        if(res){
+            myPostReq ()
+            clearCommentPostData(null)
+            toast.success('Comment Create Successfully')
+        }
+        else {
+            toast.error('Comment Create Failed')
+        }
+
+
+
     }
     return (
         <div
@@ -56,7 +66,7 @@ const CommentPopup = () => {
                 >
                     <h2 className="text-lg text-neutral-700 font-semibold">Add Comment</h2>
                     <IoClose
-                        onClick={() => setComment(false)}
+                        onClick={() => clearCommentPostData(null)}
                         className="text-2xl font-semibold text-neutral-800 cursor-pointer"
                     />
                 </div>
@@ -121,8 +131,8 @@ const CommentPopup = () => {
 
                         <textarea
                             rows={2}
-                            value={text}
-                            onChange={(e) => setText(e.target.value)}
+                            value={commentPostData.comment}
+                            onChange={(e) => setCommentPostData("comment",e.target.value)}
                             className="text-base text-neutral-800 flex-grow  bg-transparent w-full"
                             placeholder="Type Comment"
                         />

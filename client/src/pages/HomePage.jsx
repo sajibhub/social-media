@@ -1,11 +1,31 @@
 import Layout from "../layout/Layout.jsx";
-import HomeStoryComponent from "../Component/home/HomeStoryComponent.jsx";
-import AddPost from "../Component/home/AddPost.jsx";
-import PostCard from "../Component/home/PostCard.jsx";
-import ActiveComponent from "@/Component/story/ActiveComponent.jsx";
+import StoryComponent from "../Component/story/StoryComponent.jsx";
+import AddPost from "../Component/post/AddPost.jsx";
+import PostCard from "../Component/post/PostCard.jsx";
+import {useEffect} from "react";
+import {useNavigate} from "react-router-dom";
+import authorStore from "@/store/authorStore.js";
 
 
 const HomePage = () => {
+
+    const{readProfileReq}= authorStore()
+    const navigate = useNavigate();
+
+    useEffect(() => {
+
+        (
+
+            async ()=>{
+                let res = await readProfileReq()
+                if(res !== true){
+                    navigate('/author')
+                }
+            }
+        )()
+
+    }, []);
+
     return (
         <Layout>
             <div className="flex flex-row items-center border-b-2 sticky top-0 bg-blur bg-white bg-opacity-20 z-[999999] ">
@@ -18,11 +38,10 @@ const HomePage = () => {
                 </button>
             </div>
 
-            <HomeStoryComponent />
+            <StoryComponent />
             <AddPost />
             <PostCard />
 
-            <ActiveComponent />
         </Layout>
     );
 };

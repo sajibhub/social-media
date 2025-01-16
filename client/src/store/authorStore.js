@@ -31,13 +31,12 @@ const authorStore = create((set) => ({
         }
     },
 
+    profileData: null,
 
-    readProfileReq : async (data)=>{
-
+    readProfileReq : async ()=>{
         try {
-
-            await axios.post(Read_Profile_api, data , {withCredentials: true})
-
+           let res =  await axios.get(Read_Profile_api,  {withCredentials: true})
+            set({profileData: res.data.profile[0]})
             return true
         }
         catch{

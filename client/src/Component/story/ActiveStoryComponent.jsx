@@ -3,7 +3,7 @@ import {IoIosSend} from "react-icons/io";
 import {AiFillLike} from "react-icons/ai";
 
 
-const ActiveComponent = () => {
+const ActiveStoryComponent = () => {
     return (
         <div className="h-full border-x relative ">
             <div className="flex flex-col justify-between h-full">
@@ -57,4 +57,4 @@ const ActiveComponent = () => {
     );
 };
 
-export default ActiveComponent;
+export default ActiveStoryComponent;

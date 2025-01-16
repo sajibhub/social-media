@@ -5,6 +5,7 @@ import {useEffect} from "react";
 
 import {useNavigate} from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
+
 const AuthorPage = () => {
     const navigate = useNavigate();
     const {author, setAuthor} = uiManage()
@@ -15,7 +16,7 @@ const AuthorPage = () => {
         (
 
             async ()=>{
-                let res = await readProfileReq(" ")
+                let res = await readProfileReq()
                 if(res){
                     navigate('/')
                 }
