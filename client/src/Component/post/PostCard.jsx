@@ -95,7 +95,7 @@ const PostCard = () => {
                     }
 
                   </div>
-                  <h4 className=" px-3 mb-2  text-base font-medium text-neutral-600">
+                  <h4 className=" px-3 mb-2  text-base font-medium text-neutral-700">
 
                     {
                         items.images !== null && items.caption
@@ -117,8 +117,8 @@ const PostCard = () => {
                             )
                           })
                         ):(
-                          <div className="h-full w-full flex flex-row justify-center items-center bg-gray-50">
-                            <h4 className=" px-3 mb-2  text-base font-medium text-neutral-600">
+                          <div className="h-full w-full flex flex-row justify-center items-center bg-gray-100">
+                            <h4 className=" px-3 mb-2  text-xl  font-semibold text-neutral-800">
                               {items.caption}
                             </h4>
                           </div>
@@ -181,23 +181,23 @@ const PostCard = () => {
                         className="flex flex-row gap-2 justify-start items-center
                         "
                     >
-                      <FaCommentDots className="text-neutral-700 text-lg" />
-                      <h1 className="text-base font-medium text-neutral-700 hidden md:block">
+                      <FaCommentDots className="text-neutral-900 text-lg" />
+                      <h1 className="text-base font-medium text-neutral-900 hidden md:block">
                         {items.comment} Comment
                       </h1>
                     </div>
 
                     <div className="flex flex-row gap-2 justify-start items-center">
-                      <FaShare className="text-neutral-700 text-lg" />
-                      <h1 className="text-base font-medium text-neutral-700 hidden md:block">
+                      <FaShare className="text-neutral-900 text-lg" />
+                      <h1 className="text-base font-medium text-neutral-900 hidden md:block">
                         {items.view} Share
                       </h1>
                     </div>
 
                     <div className="flex flex-row flex-grow gap-2 justify-end items-center">
-                      <IoBookmark className="text-neutral-700 text-lg" />
-                      <h1 className="text-base font-medium text-neutral-700">
-                        1 Save
+                      <IoBookmark className="text-neutral-800 text-lg" />
+                      <h1 className="text-base font-medium text-neutral-800">
+                        0 Save
                       </h1>
                     </div>
                   </div>

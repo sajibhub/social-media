@@ -8,11 +8,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/Component/summary/SummaryProfileComponent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/summary/SummaryProfileComponent.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/pages/HomePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/HomePage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/pages/authorPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/authorPage.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/store/authorStore.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/store/authorStore.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/store/postStore.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/store/postStore.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/users/UserInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/users/UserInfo.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,12 +24,12 @@
     &quot;assignee&quot;: &quot;enamul90&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/sajib-bd/social-media.git",
-    "accountId": "37ff572a-0149-49ee-a69b-5b0dd5e5f3bb"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/sajib-bd/social-media.git&quot;,
+    &quot;accountId&quot;: &quot;37ff572a-0149-49ee-a69b-5b0dd5e5f3bb&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
 }</component>
@@ -125,7 +121,8 @@
       <workItem from="1736949670816" duration="275000" />
       <workItem from="1736950579663" duration="12000" />
       <workItem from="1736950629691" duration="681000" />
-      <workItem from="1737003600331" duration="7847000" />
+      <workItem from="1737003600331" duration="8038000" />
+      <workItem from="1737014899237" duration="4550000" />
     </task>
     <servers />
   </component>
