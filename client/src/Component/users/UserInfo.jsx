@@ -1,10 +1,15 @@
 import authorStore from "@/store/authorStore.js";
 import {MdEmail, MdOutlineAlternateEmail} from "react-icons/md";
 import {IoCallSharp} from "react-icons/io5";
-
+import {FaSquareFacebook} from "react-icons/fa6";
+import {IoLogoLinkedin} from "react-icons/io";
+import {TbBrandFiverr} from "react-icons/tb";
+import {FaGithub} from "react-icons/fa";
+import {useNavigate} from "react-router-dom";
 
 const UserInfo = () => {
-        const {profileData} = authorStore()
+    const navigate = useNavigate();
+    const {profileData} = authorStore()
 
     if(profileData === null || profileData === undefined) {
         return (
@@ -46,19 +51,19 @@ const UserInfo = () => {
 
                     <div className="flex flex-grow justify-start items-center gap-4">
                         <div className="flex flex-row justify-start items-center mt-1">
-                            <h1> {profileData.followers}</h1>
+                            <h1 className="font-semibold"> {profileData.followers}</h1>
                             <p className="text-sm font-medium ms-1 text-neutral-600">
                                 Followers
                             </p>
                         </div>
                         <div className="flex flex-row justify-start items-center mt-1">
-                            <h1> {profileData.following}</h1>
+                            <h1 className="font-semibold"> {profileData.following}</h1>
                             <p className="text-sm font-medium ms-1 text-neutral-600">
                                 Following
                             </p>
                         </div>
                         <div className="flex flex-row justify-start items-center mt-1">
-                            <h1> {profileData.postLike}</h1>
+                            <h1 className="font-semibold"> {profileData.postLike}</h1>
                             <p className="text-sm font-medium ms-1 text-neutral-600">
                                 Post Like
                             </p>
@@ -74,7 +79,7 @@ const UserInfo = () => {
                         }
                     </div>
 
-                    <div className="flex flex-grow justify-start items-center gap-4">
+                    <div className="flex flex-wrap justify-start items-center gap-4">
                         <div className="flex flex-row justify-start items-center ">
                             <IoCallSharp className="text-neutral-800"/>
                             <p className="text-base font-medium ms-1 text-neutral-800">
@@ -86,6 +91,22 @@ const UserInfo = () => {
                             <p className="text-base font-medium ms-1 text-neutral-800">
                                 {profileData.email}
                             </p>
+                        </div>
+
+                        <div className="flex flex-row justify-end items-center gap-4 flex-grow ">
+                            {
+                                profileData.mediaLink?.facebook !== "" && <FaSquareFacebook className="font-lg text-neutral-800 cursor-pointer" onClick={()=>navigate("/")} />
+                            }
+                            {
+                                profileData.mediaLink?.linkedin !== "" && <IoLogoLinkedin className="font-lg text-neutral-800 cursor-pointer" onClick={()=>navigate("/")} />
+                            }
+                            {
+                                profileData.mediaLink?.github !== "" && <FaGithub className="font-lg text-neutral-800 cursor-pointer" onClick={()=>navigate("/")} />
+                            }
+                            {
+                                profileData.mediaLink?.fiver !== "" && <TbBrandFiverr className="font-lg text-neutral-800 cursor-pointer" onClick={()=>navigate("/")} />
+                            }
+
                         </div>
                     </div>
                 </div>

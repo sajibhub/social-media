@@ -5,10 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_1_16_2025_10_44_PM_[Changes]/shelved.patch" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_1_16_2025_10_44_PM__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/Component/summary/SummaryProfileComponent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/summary/SummaryProfileComponent.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/Component/users/UserInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/users/UserInfo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/layout/Menu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Menu.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/pages/ProfilePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/ProfilePage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -16,6 +19,11 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -27,7 +35,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/sajib-bd/social-media.git&quot;,
-    &quot;accountId&quot;: &quot;37ff572a-0149-49ee-a69b-5b0dd5e5f3bb&quot;
+    &quot;accountId&quot;: &quot;41c48dcb-2436-45ab-b2c4-f02661e52ac4&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -68,7 +76,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
+        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-WS-243.21565.180" />
       </set>
     </attachedChunks>
   </component>
@@ -121,8 +129,8 @@
       <workItem from="1736949670816" duration="275000" />
       <workItem from="1736950579663" duration="12000" />
       <workItem from="1736950629691" duration="681000" />
-      <workItem from="1737003600331" duration="8038000" />
-      <workItem from="1737014899237" duration="4550000" />
+      <workItem from="1737046536890" duration="199000" />
+      <workItem from="1737047137281" duration="5318000" />
     </task>
     <servers />
   </component>

@@ -6,6 +6,8 @@ import EmojiPicker from "emoji-picker-react";
 import toast from "react-hot-toast";
 import postStore from "@/store/postStore.js";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
+import {RiEdit2Fill} from "react-icons/ri";
+import {AiFillDelete} from "react-icons/ai";
 
 const CommentPopup = () => {
     const [image, setImage] = useState(null);
@@ -95,25 +97,36 @@ const CommentPopup = () => {
                         commentList.map((item, index) => {
                             return (
 
-                                <div key={index} className="flex flex-row gap-3 justify-start items-start pt-3 px-5 border-b mx-4">
-                                    <div
-                                        className=" mt-2 flex-shrink-0  h-[35px] w-[35px] rounded-full overflow-hidden flex flex-row justify-center items-center">
-                                        <img
-                                            src={item.user.profile}
-                                            alt="profile image"
-                                            className="min-w-full min-h-full "
-                                        />
+                                <div key={index}
+                                     className=" pt-3 pb-1 ps-2 pe-1 border-b mx-4">
+                                    <div className="flex flex-row gap-3 justify-start items-start">
+                                        <div
+                                            className=" flex-shrink-0  h-[35px] w-[35px] rounded-full overflow-hidden flex  justify-center items-center">
+                                            <img
+                                                src={item.user.profile}
+                                                alt="profile image"
+                                                className="min-w-full min-h-full "
+                                            />
+                                        </div>
+                                        <div className=" flex-grow">
+                                            <h2 className="text-base font-semibold text-neutral-800">
+                                                {item.user.fullName}
+                                            </h2>
+                                            <h2 className="text-base font-normal text-neutral-700 ">
+                                                {item.user.username}
+                                            </h2>
+                                        </div>
                                     </div>
-                                    <div className="mb-2 flex-grow">
-                                        <h2 className="text-base font-semibold text-neutral-800">
-                                            {item.user.fullName}
-                                        </h2>
-                                        <h2 className="text-base font-normal text-neutral-700 mb-2">
-                                            {item.user.username}
-                                        </h2>
+
+                                    <div className="mt-2">
                                         <p className="text-sm text-neutral-600 ">
                                             {item.comment}
                                         </p>
+
+                                        <div className="flex justify-end items-center gap-3">
+                                            <button><RiEdit2Fill className="text-lg font-semibold"/></button>
+                                            <button><AiFillDelete className="text-lg font-semibold"/></button>
+                                        </div>
                                     </div>
 
                                 </div>
@@ -124,7 +137,7 @@ const CommentPopup = () => {
                 </div>
 
                 {showPicker && (
-                    <div className=" absolute top-0 right-0 z-30" >
+                    <div className=" absolute top-0 right-0 z-30">
                         <EmojiPicker className="ms-auto" onEmojiClick={handleEmojiClick}/>
                     </div>
                 )}
