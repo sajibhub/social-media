@@ -91,14 +91,19 @@ export const SignUp = async (req, res) => {
       });
     }
 
+    const demoProfile = `https://avatar.iran.liara.run/username?username=${fullName.replaceAll(
+      " ",
+      "+"
+    )}`;
+
     const userCreate = await User.create({
       username,
       fullName,
       email,
       phone,
       password: await bcrypt.hash(password, 10),
-      profile: `https://avatar.iran.liara.run/userfullName?userfullName=${fullName}`,
-      cover: `https://avatar.iran.liara.run/userfullName?userfullName=${fullName}`,
+      profile: demoProfile,
+      cover: demoProfile,
       provider: "email",
       visitorId: "",
     });
@@ -254,6 +259,9 @@ export const Profile = async (req, res) => {
           postLike: {
             $size: "$likedPosts",
           },
+          postSave: {
+            $size: "$postSave",
+          },
           myProfile: {
             $cond: {
               if: { $eq: [id, "$_id"] },
@@ -318,10 +326,12 @@ export const Profile = async (req, res) => {
             },
           },
           bio: 1,
+          currentAddress: 1,
           mediaLink: 1,
           followers: 1,
           following: 1,
           postLike: 1,
+          postSave: 1,
           myProfile: 1,
           isFollowing: 1,
         },
@@ -339,7 +349,7 @@ export const Profile = async (req, res) => {
   }
 };
 
-export const ProfileUpdate = async (req, res) => {
+export const ProfilePicUpdate = async (req, res) => {
   try {
     const upload = multer({ storage }).fields([
       { name: "profile", maxCount: 1 },
@@ -353,49 +363,134 @@ export const ProfileUpdate = async (req, res) => {
         });
       }
 
-      const { fullName, username, bio, oldPassword, newPassword } = req.body;
-      const { profile, cover } = req.files;
+      const files = req.files || {};
+      const profile = files.profile;
+      const cover = files.cover;
 
-      if (
-        !fullName &&
-        !username &&
-        !bio &&
-        !newPassword &&
-        !oldPassword &&
-        !profile &&
-        !cover
-      ) {
+      if (!profile && !cover) {
         return res.status(400).json({
-          message: "Please provide all required fields and at least one image.",
+          message: "Please provide at least one image.",
         });
       }
 
-      if (newPassword !== oldPassword) {
-        return res.status(400).json({
-          message: "You can't update the password with OTP.",
-        });
-      }
-
-      let profileImage = null;
-      let coverImage = null;
+      const updateData = {};
 
       if (profile) {
-        profileImage = profile[0].path;
-      }
-      if (cover) {
-        coverImage = cover[0].path;
+        updateData.profile = profile[0].path;
       }
 
+      if (cover) {
+        updateData.cover = cover[0].path;
+      }
+
+      const profileImgUpdate = await User.findByIdAndUpdate(
+        req.headers.id,
+        updateData,
+        {
+          new: true,
+        }
+      );
       return res.status(200).json({
-        message: "Profile updated successfully!",
+        message: "Profile pic updated successfully.",
+      });
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred while processing your request.",
+    });
+  }
+};
+
+export const ProfileInfoUpdate = async (req, res) => {
+  try {
+    const {
+      fullName,
+      username,
+      bio,
+      currentAddress,
+      oldPassword,
+      newPassword,
+    } = req.body;
+
+    if (
+      !fullName &&
+      !username &&
+      !bio &&
+      currentAddress &&
+      !newPassword &&
+      !oldPassword
+    ) {
+      return res.status(400).json({
+        message: "Please fill in at least one field.",
+      });
+    }
+
+    const user = await User.findById(req.headers.id);
+
+    if (username) {
+      if (!usernameRegex.test(username)) {
+        return res.status(400).json({
+          message: "Username should contain only alphanumeric characters.",
+        });
+      }
+
+      if (username == user.username) {
+        return res.status(400).json({
+          message: "Username cannot be the same as the current username.",
+        });
+      }
+
+      const usernameFind = await User.findOne({ username }).select({
+        _id: 0,
+        username: 1,
+      });
+      if (usernameFind) {
+        return res.status(400).json({
+          message: "Username is already taken.",
+        });
+      }
+    }
+    if (oldPassword || newPassword) {
+      if (!oldPassword || !newPassword) {
+        return res.status(400).json({
+          message: "Both old and new passwords must be provided.",
+        });
+      }
+
+      if (!(await bcrypt.compare(oldPassword, user.password))) {
+        return res.status(400).json({
+          message: "Incorrect old password. Please try again.",
+        });
+      }
+
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          message: "Password should be at least 6 characters long.",
+        });
+      }
+
+      if (await bcrypt.compare(newPassword, user.password)) {
+        return res.status(400).json({
+          message: "New password should not be the same as the old password.",
+        });
+      }
+
+      user.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    const profileUpdate = await User.findByIdAndUpdate(
+      req.headers.id,
+      {
         fullName,
         username,
         bio,
-        oldPassword,
-        newPassword,
-        profileImage,
-        coverImage,
-      });
+        currentAddress,
+        password: user.password,
+      },
+      { new: true }
+    );
+    return res.status(200).json({
+      message: "Profile info updated successfully!",
     });
   } catch (error) {
     console.log(error);

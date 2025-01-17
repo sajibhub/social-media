@@ -3,6 +3,7 @@ import multer from "multer";
 
 import Post from "../models/postModel.js";
 import storage from "../utils/cloudinary.js";
+import User from "../models/userModel.js";
 
 export const PostCreate = (req, res) => {
   const { id } = req.headers;
@@ -175,17 +176,21 @@ export const PostRead = async (req, res) => {
             $eq: [id, "$userId"],
           },
         },
-        isFollowing: {
-          $cond: {
-            if: { $ne: [id, "$_id"] },
-            then: {
-              $cond: {
-                if: { $in: [id, "$followers"] },
-                then: true,
-                else: false,
+      },
+      {
+        $addFields: {
+          isFollowing: {
+            $cond: {
+              if: { $ne: [id, "$userId"] },
+              then: {
+                $cond: {
+                  if: { $in: [id, "$followers"] },
+                  then: true,
+                  else: false,
+                },
               },
+              else: "$$REMOVE",
             },
-            else: "$$REMOVE",
           },
         },
       },
@@ -314,7 +319,7 @@ export const PostLike = async (req, res) => {
       { new: true }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Post liked successfully.",
     });
   } catch (error) {
@@ -349,6 +354,72 @@ export const PostComment = async (req, res) => {
       message: "Comment added successfully.",
     });
   } catch (error) {
+    res.status(500).json({
+      message: "An error occurred while processing your request.",
+    });
+  }
+};
+
+export const PostCommentView = async (req, res) => {
+  try {
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
+    const { id } = req.headers;
+
+    const findPost = await Post.findById(postId);
+    if (!findPost) {
+      return res.status(404).json({
+        message: "Post not found.",
+      });
+    }
+
+    const comments = await Post.aggregate([
+      {
+        $match: { _id: postId },
+      },
+
+      {
+        $unwind: "$comments",
+      },
+      {
+        $sort: { "comments.time": -1 },
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "comments.userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+
+      {
+        $project: {
+          comment: "$comments.comment",
+          _id: "$comments._id",
+          isComment: {
+            $cond: {
+              if: { $eq: ["$comments.userId", id] },
+              then: true,
+              else: false,
+            },
+          },
+          "user.username": 1,
+          "user.fullName": 1,
+          "user.profile": 1,
+          time: "$comments.time",
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      comments,
+    });
+  } catch (error) {
+    console.log(error);
     res.status(500).json({
       message: "An error occurred while processing your request.",
     });
@@ -403,7 +474,6 @@ export const PostCommentUpdate = async (req, res) => {
     );
     return res.status(200).json({
       message: "Comment updated successfully",
-      post: updatedPost,
     });
   } catch (error) {
     res.status(500).json({
@@ -457,6 +527,71 @@ export const PostCommentDelete = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "An error occurred while processing your request.",
+    });
+  }
+};
+
+export const PostSave = async (req, res) => {
+  try {
+    const { id } = req.headers;
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
+
+    if (!postId) {
+      return res.status(400).json({
+        message: "Please provide a post ID.",
+      });
+    }
+
+    const findPost = await Post.findById(postId);
+    if (!findPost) {
+      return res.status(404).json({
+        message: "Post not found.",
+      });
+    }
+    const UserFind = await User.findById(id);
+    if (UserFind.postSave.toString().includes(postId.toString())) {
+      await Post.findByIdAndUpdate(
+        postId,
+        {
+          $pull: { save: id },
+        },
+        { new: true }
+      );
+
+      await User.findByIdAndUpdate(
+        id,
+        {
+          $pull: { postSave: postId },
+        },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        message: "Post unsaved successfully.",
+      });
+    }
+
+    await Post.findByIdAndUpdate(
+      postId,
+      {
+        $push: { save: id },
+      },
+      { new: true }
+    );
+    await User.findByIdAndUpdate(
+      id,
+      {
+        $push: { postSave: postId },
+      },
+      { new: true }
+    );
+    return res.status(200).json({
+      message: "Post save successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "An error occurred while saving your request.",
     });
   }
 };

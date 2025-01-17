@@ -30,23 +30,17 @@ const PostSchema = mongoose.Schema(
           type: String,
           required: true,
         },
+        time: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
-    reports: [
+    save: [
       {
-        userId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        type: {
-          type: String,
-          enum: ["spam", "hate speech", "violence"],
-          required: true,
-        },
-        description: {
-          type: String,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
       },
     ],
     view: [

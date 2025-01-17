@@ -7,15 +7,21 @@ import hpp from "hpp";
 import dotenv from "dotenv";
 import compression from "compression";
 import mongodbSanitize from "mongodb-sanitize";
+import http from "http";
+import { Server } from "socket.io";
 
 import DATABASE from "./config/DATABASE.js";
 import UserAgentMiddleware from "./middleware/userAgent.js";
 import userRouter from "./router/userRouter.js";
 import postRouter from "./router/postRouter.js";
+import { newsFeed } from "./controllers/socketNewsFeed.js";
+import Post from "./models/postModel.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
 
 const limit = rateLimit({
   windowMs: process.env.REQ_MS,
@@ -51,7 +57,15 @@ app.use(UserAgentMiddleware);
 
 app.use("/api/v1", userRouter, postRouter);
 
-app.listen(PORT, () => {
+io.on("connection", (socket) => {
+  console.log("A user connected");
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
+});
+
+server.listen(PORT, () => {
   DATABASE();
   console.log(`Server Is Running On Port ${PORT}`);
 });
