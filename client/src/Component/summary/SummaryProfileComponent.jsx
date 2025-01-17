@@ -1,7 +1,6 @@
-import {IoLocation} from "react-icons/io5";
-
 import {motion} from "framer-motion";
 import authorStore from "@/store/authorStore.js";
+import {MdOutlineAlternateEmail} from "react-icons/md";
 
 const SummaryProfileComponent = () => {
     const {profileData} = authorStore()
@@ -44,14 +43,11 @@ const SummaryProfileComponent = () => {
                             {profileData.fullName}
                         </h1>
                         <h3 className="text-base font-normal text-neutral-700">
-                            User Experience Designer at LIDI
+                            {profileData.username}
                         </h3>
-                        <div className="flex flex-row justify-start items-center mt-1">
-                            <IoLocation className="text-lg text-neutral-700" />
-                            <p className="text-sm font-medium ms-1 text-neutral-600">
-                                Dhaka, Dhaka
-                            </p>
-                        </div>
+
+
+
                     </div>
                 </motion.div>
             </>

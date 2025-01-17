@@ -119,7 +119,7 @@ const Menu = () => {
                         className="menu mb-3"
                     >
                         <RiStickyNoteAddFill className="text-xl font-medium "/>
-                        <h3 className="text-lg font-bold  ">Add Post</h3>
+                        <h3 className="text-lg font-medium  ">Add Post</h3>
                     </motion.div>
 
                     <motion.div
