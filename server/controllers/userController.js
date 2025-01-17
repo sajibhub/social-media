@@ -91,6 +91,13 @@ export const SignUp = async (req, res) => {
       });
     }
 
+    if (!validator.isStrongPassword(password)) {
+      return res.status(400).json({
+        message:
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+      });
+    }
+
     const demoProfile = `https://avatar.iran.liara.run/username?username=${fullName.replaceAll(
       " ",
       "+"
@@ -469,6 +476,13 @@ export const ProfileInfoUpdate = async (req, res) => {
         });
       }
 
+      if (!validator.isStrongPassword(password)) {
+        return res.status(400).json({
+          message:
+            "Password should contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+        });
+      }
+
       if (await bcrypt.compare(newPassword, user.password)) {
         return res.status(400).json({
           message: "New password should not be the same as the old password.",
@@ -646,6 +660,11 @@ export const PasswordReset = async (req, res) => {
 
 export const Follow = async (req, res) => {
   try {
+    if (!validator.isMongoId(req.params.postId)) {
+      return res.status(400).json({
+        message: "Invalid postId",
+      });
+    }
     const userId = new mongoose.Types.ObjectId(req.params.userId);
     const { id } = req.headers;
     if (id.toString() == userId.toString()) {
