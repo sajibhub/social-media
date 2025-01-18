@@ -64,6 +64,13 @@ const UserSchema = mongoose.Schema(
         default: [],
       },
     ],
+    postSave: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+        default: [],
+      },
+    ],
     bio: {
       type: String,
       default: "",
@@ -90,9 +97,17 @@ const UserSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
     visitorId: {
       type: String,
       default: null,
+    },
+    currentAddress: {
+      type: String,
+      default: "",
     },
     lastLogin: {
       type: Number,

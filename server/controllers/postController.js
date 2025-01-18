@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import multer from "multer";
+import validator from "validator";
 
 import Post from "../models/postModel.js";
 import storage from "../utils/cloudinary.js";
+import User from "../models/userModel.js";
 
 export const PostCreate = (req, res) => {
   const { id } = req.headers;
@@ -48,10 +50,15 @@ export const PostCreate = (req, res) => {
 
 export const PostRead = async (req, res) => {
   const { id } = req.headers;
+  const { username } = req.params;
+  const userFind = await User.findOne({ username });
+
   try {
     const post = await Post.aggregate([
       {
-        $match: { userId: id },
+        $match: {
+          userId: userFind?._id,
+        },
       },
       {
         $sort: { createdAt: -1 },
@@ -75,13 +82,11 @@ export const PostRead = async (req, res) => {
                 $lt: [
                   {
                     $divide: [
-                      {
-                        $subtract: [new Date(), "$createdAt"], // Calculate the time difference in milliseconds
-                      },
-                      1000 * 60, // Convert milliseconds to minutes
+                      { $subtract: [new Date(), "$createdAt"] },
+                      1000 * 60,
                     ],
                   },
-                  1440, // Less than 1440 minutes (24 hours)
+                  1440,
                 ],
               },
               then: {
@@ -90,9 +95,7 @@ export const PostRead = async (req, res) => {
                     $lt: [
                       {
                         $divide: [
-                          {
-                            $subtract: [new Date(), "$createdAt"],
-                          },
+                          { $subtract: [new Date(), "$createdAt"] },
                           1000 * 60,
                         ],
                       },
@@ -105,9 +108,7 @@ export const PostRead = async (req, res) => {
                         $toString: {
                           $floor: {
                             $divide: [
-                              {
-                                $subtract: [new Date(), "$createdAt"],
-                              },
+                              { $subtract: [new Date(), "$createdAt"] },
                               1000 * 60,
                             ],
                           },
@@ -122,9 +123,7 @@ export const PostRead = async (req, res) => {
                         $lt: [
                           {
                             $divide: [
-                              {
-                                $subtract: [new Date(), "$createdAt"],
-                              },
+                              { $subtract: [new Date(), "$createdAt"] },
                               1000 * 60 * 60,
                             ],
                           },
@@ -137,9 +136,7 @@ export const PostRead = async (req, res) => {
                             $toString: {
                               $floor: {
                                 $divide: [
-                                  {
-                                    $subtract: [new Date(), "$createdAt"],
-                                  },
+                                  { $subtract: [new Date(), "$createdAt"] },
                                   1000 * 60 * 60,
                                 ],
                               },
@@ -169,30 +166,33 @@ export const PostRead = async (req, res) => {
             },
           },
           isLike: {
-            $in: [id, "$likes"],
+            $in: [id, { $ifNull: ["$likes", []] }],
           },
           myPost: {
             $eq: [id, "$userId"],
           },
         },
-        isFollowing: {
-          $cond: {
-            if: { $ne: [id, "$_id"] },
-            then: {
-              $cond: {
-                if: { $in: [id, "$followers"] },
-                then: true,
-                else: false,
+      },
+      {
+        $addFields: {
+          isFollowing: {
+            $cond: {
+              if: { $ne: [id, "$userId"] },
+              then: {
+                $cond: {
+                  if: { $in: [id, { $ifNull: ["$followers", []] }] },
+                  then: true,
+                  else: false,
+                },
               },
+              else: "$$REMOVE",
             },
-            else: "$$REMOVE",
           },
         },
       },
       {
         $project: {
           _id: 1,
-
           user: {
             fullName: 1,
             username: 1,
@@ -201,11 +201,12 @@ export const PostRead = async (req, res) => {
           caption: 1,
           images: 1,
           time: 1,
-          like: { $size: "$likes" },
-          comment: { $size: "$comments" },
-          view: { $size: "$view" },
+          like: { $size: { $ifNull: ["$likes", []] } },
+          comment: { $size: { $ifNull: ["$comments", []] } },
+          view: { $size: { $ifNull: ["$view", []] } },
           isLike: 1,
           myPost: 1,
+          postSave: { $size: { $ifNull: ["$postSave", []] } },
         },
       },
     ]);
@@ -223,7 +224,11 @@ export const PostRead = async (req, res) => {
 
 export const PostUpdate = async (req, res) => {
   try {
-    const postId = new mongoose.Types.ObjectId(req.params.id);
+    if (!validator.isMongoId(postId)) {
+      return res.status(400).json({ message: "Invalid Post ID." });
+    }
+
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
     const { id } = req.headers;
     const { caption } = req.body;
 
@@ -256,7 +261,11 @@ export const PostUpdate = async (req, res) => {
 
 export const PostDelete = async (req, res) => {
   try {
-    const postId = new mongoose.Types.ObjectId(req.params.id);
+    if (!validator.isMongoId(req.params.postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
     const { id } = req.headers;
 
     const findPost = await Post.findById(postId).select({ userId: 1 });
@@ -286,7 +295,11 @@ export const PostDelete = async (req, res) => {
 
 export const PostLike = async (req, res) => {
   try {
-    const postId = new mongoose.Types.ObjectId(req.params.id);
+    if (!validator.isMongoId(req.params.postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
     const { id } = req.headers;
 
     const findPost = await Post.findById(postId);
@@ -314,7 +327,7 @@ export const PostLike = async (req, res) => {
       { new: true }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Post liked successfully.",
     });
   } catch (error) {
@@ -326,9 +339,14 @@ export const PostLike = async (req, res) => {
 
 export const PostComment = async (req, res) => {
   try {
-    const postId = new mongoose.Types.ObjectId(req.params.id);
+    if (!validator.isMongoId(req.params.postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
     const { id } = req.headers;
     const { comment } = req.body;
+
     if (!comment) {
       return res.status(400).json({
         message: "Please provide a comment.",
@@ -355,12 +373,184 @@ export const PostComment = async (req, res) => {
   }
 };
 
+export const PostCommentView = async (req, res) => {
+  try {
+    if (!validator.isMongoId(req.params.postId)) {
+      return res.status(400).json({ message: "Invalid Post ID." });
+    }
+
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
+    const { id } = req.headers;
+
+    const findPost = await Post.findById(postId);
+    if (!findPost) {
+      return res.status(404).json({
+        message: "Post not found.",
+      });
+    }
+
+    const comments = await Post.aggregate([
+      {
+        $match: { _id: postId },
+      },
+
+      {
+        $unwind: "$comments",
+      },
+      {
+        $sort: { "comments.time": -1 },
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          localField: "comments.userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+
+      {
+        $addFields: {
+          time: {
+            $cond: {
+              if: {
+                $lt: [
+                  {
+                    $divide: [
+                      { $subtract: [new Date(), "$comments.time"] },
+                      1000 * 60,
+                    ],
+                  },
+                  1440,
+                ],
+              },
+              then: {
+                $cond: {
+                  if: {
+                    $lt: [
+                      {
+                        $divide: [
+                          { $subtract: [new Date(), "$comments.time"] },
+                          1000 * 60,
+                        ],
+                      },
+                      60,
+                    ],
+                  },
+                  then: {
+                    $concat: [
+                      {
+                        $toString: {
+                          $floor: {
+                            $divide: [
+                              { $subtract: [new Date(), "$comments.time"] },
+                              1000 * 60,
+                            ],
+                          },
+                        },
+                      },
+                      " minutes ago",
+                    ],
+                  },
+                  else: {
+                    $cond: {
+                      if: {
+                        $lt: [
+                          {
+                            $divide: [
+                              { $subtract: [new Date(), "$comments.time"] },
+                              1000 * 60 * 60,
+                            ],
+                          },
+                          24,
+                        ],
+                      },
+                      then: {
+                        $concat: [
+                          {
+                            $toString: {
+                              $floor: {
+                                $divide: [
+                                  { $subtract: [new Date(), "$comments.time"] },
+                                  1000 * 60 * 60,
+                                ],
+                              },
+                            },
+                          },
+                          " hours ago",
+                        ],
+                      },
+                      else: {
+                        $dateToString: {
+                          format: "%H:%M:%S %Y-%m-%d",
+                          date: "$comments.time",
+                          timezone: "Asia/Dhaka",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              else: {
+                $dateToString: {
+                  format: "%H:%M:%S %Y-%m-%d",
+                  date: "$comments.time",
+                  timezone: "Asia/Dhaka",
+                },
+              },
+            },
+          },
+        },
+      },
+
+      {
+        $project: {
+          comment: "$comments.comment",
+          _id: "$comments._id",
+          isComment: {
+            $cond: {
+              if: { $eq: ["$comments.userId", id] },
+              then: true,
+              else: false,
+            },
+          },
+          "user.username": 1,
+          "user.fullName": 1,
+          "user.profile": 1,
+          time: 1,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      comments,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "An error occurred while processing your request.",
+    });
+  }
+};
+
 export const PostCommentUpdate = async (req, res) => {
   try {
+    if (!validator.isMongoId(req.params.postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+    if (!validator.isMongoId(req.params.commentId)) {
+      return res.status(400).json({ message: "Invalid comment ID" });
+    }
+
     const postId = new mongoose.Types.ObjectId(req.params.postId);
     const commentId = new mongoose.Types.ObjectId(req.params.commentId);
     const { id } = req.headers;
     const { comment } = req.body;
+
     if (!commentId || !postId) {
       return res.status(400).json({
         message: "Please provide a comment and post ID .",
@@ -403,7 +593,6 @@ export const PostCommentUpdate = async (req, res) => {
     );
     return res.status(200).json({
       message: "Comment updated successfully",
-      post: updatedPost,
     });
   } catch (error) {
     res.status(500).json({
@@ -414,9 +603,17 @@ export const PostCommentUpdate = async (req, res) => {
 
 export const PostCommentDelete = async (req, res) => {
   try {
-    const postId = new mongoose.Types.ObjectId(req.params.id);
+    if (!validator.isMongoId(req.params.postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+    if (!validator.isMongoId(req.params.commentId)) {
+      return res.status(400).json({ message: "Invalid comment ID" });
+    }
+
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
+    const commentId = new mongoose.Types.ObjectId(req.params.commentId);
     const { id } = req.headers;
-    const { commentId } = req.params;
+
     if (!commentId) {
       return res.status(400).json({
         message: "Please provide a comment ID.",
@@ -429,7 +626,7 @@ export const PostCommentDelete = async (req, res) => {
       });
     }
     const commentExists = findPost.comments.find((comment) => {
-      if (comment._id.toString() != commentId) {
+      if (comment._id.toString() != commentId.toString()) {
         return res.status(404).json({
           message: "Comment not found ",
         });
@@ -457,6 +654,75 @@ export const PostCommentDelete = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "An error occurred while processing your request.",
+    });
+  }
+};
+
+export const PostSave = async (req, res) => {
+  try {
+    if (!validator.isMongoId(req.params.postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const { id } = req.headers;
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
+
+    if (!postId) {
+      return res.status(400).json({
+        message: "Please provide a post ID.",
+      });
+    }
+
+    const findPost = await Post.findById(postId);
+    if (!findPost) {
+      return res.status(404).json({
+        message: "Post not found.",
+      });
+    }
+    const UserFind = await User.findById(id);
+    if (UserFind.postSave.toString().includes(postId.toString())) {
+      await Post.findByIdAndUpdate(
+        postId,
+        {
+          $pull: { postSave: id },
+        },
+        { new: true }
+      );
+
+      await User.findByIdAndUpdate(
+        id,
+        {
+          $pull: { postSave: postId },
+        },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        message: "Post unsaved successfully.",
+      });
+    }
+
+    await Post.findByIdAndUpdate(
+      postId,
+      {
+        $push: { postSave: id },
+      },
+      { new: true }
+    );
+    await User.findByIdAndUpdate(
+      id,
+      {
+        $push: { postSave: postId },
+      },
+      { new: true }
+    );
+    return res.status(200).json({
+      message: "Post save successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "An error occurred while saving your request.",
     });
   }
 };
