@@ -5,13 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_1_16_2025_10_44_PM_[Changes]/shelved.patch" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_1_16_2025_10_44_PM__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/author/SignUp.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/author/SignUp.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/summary/SummaryProfileComponent.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/summary/SummaryProfileComponent.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/Component/users/UserInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/users/UserInfo.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/layout/Menu.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Menu.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/layout/Summary.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/layout/Summary.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/pages/ProfilePage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/pages/ProfilePage.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/popup/CommentPopup.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/store/authorStore.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/store/authorStore.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/store/postStore.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/store/postStore.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,7 +40,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/sajib-bd/social-media.git&quot;,
-    &quot;accountId&quot;: &quot;41c48dcb-2436-45ab-b2c4-f02661e52ac4&quot;
+    &quot;accountId&quot;: &quot;37ff572a-0149-49ee-a69b-5b0dd5e5f3bb&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -76,7 +81,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-WS-243.21565.180" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
       </set>
     </attachedChunks>
   </component>
@@ -131,6 +136,13 @@
       <workItem from="1736950629691" duration="681000" />
       <workItem from="1737046536890" duration="199000" />
       <workItem from="1737047137281" duration="5318000" />
+      <workItem from="1737084701556" duration="2961000" />
+      <workItem from="1737091353711" duration="1044000" />
+      <workItem from="1737092915897" duration="300000" />
+      <workItem from="1737096663494" duration="2121000" />
+      <workItem from="1737099128150" duration="1596000" />
+      <workItem from="1737103489979" duration="4576000" />
+      <workItem from="1737171263870" duration="8000" />
     </task>
     <servers />
   </component>

@@ -1,11 +1,10 @@
 import {motion} from "framer-motion";
 import authorStore from "@/store/authorStore.js";
-import {MdOutlineAlternateEmail} from "react-icons/md";
 
 const SummaryProfileComponent = () => {
-    const {profileData} = authorStore()
+    const {myProfileData} = authorStore()
 
-    if(profileData === null || profileData === undefined) {
+    if(myProfileData === null || myProfileData === undefined) {
         return (
             <h1>Loading......</h1>
         )
@@ -27,7 +26,7 @@ const SummaryProfileComponent = () => {
                 >
 
                     <div className="h-[100px] w-full overflow-hidden flex flex-row justify-between items-center shadow ">
-                        <img src={profileData.cover} alt="Cover Photo" className="min-w-full min-h-full" />
+                        <img src={myProfileData.cover} alt="Cover Photo" className="min-w-full min-h-full" />
                     </div>
                     <div
                         className="
@@ -35,15 +34,15 @@ const SummaryProfileComponent = () => {
                      justify-between items-center mx-[10px] mt-[-35px] shadow
                      "
                     >
-                        <img src={profileData.profile} alt="Cover Photo" className="min-w-full min-h-full"/>
+                        <img src={myProfileData.profile} alt="Cover Photo" className="min-w-full min-h-full"/>
                     </div>
 
                     <div className="mx-[15px] pb-3 mt-3">
                         <h1 className="text-xl font-medium text-neutral-700">
-                            {profileData.fullName}
+                            {myProfileData.fullName}
                         </h1>
                         <h3 className="text-base font-normal text-neutral-700">
-                            {profileData.username}
+                            {myProfileData.username}
                         </h3>
 
 

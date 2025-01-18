@@ -4,9 +4,11 @@ import postStore from "@/store/postStore.js";
 import {useEffect} from "react";
 import PostCard from "@/Component/post/PostCard.jsx";
 import authorStore from "@/store/authorStore.js";
+import {useParams} from "react-router-dom";
 
 
 const ProfilePage = () => {
+    const {user} = useParams();
     const {myPostReq} = postStore()
     const {readProfileReq}= authorStore()
 
@@ -14,10 +16,10 @@ const ProfilePage = () => {
         (
             async ()=>{
                   await myPostReq();
-                  await readProfileReq("me")
+                  await readProfileReq(user)
             }
         )()
-    }, []);
+    }, [user]);
 
     return (
         <Layout>

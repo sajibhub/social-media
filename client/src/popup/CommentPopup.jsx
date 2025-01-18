@@ -118,12 +118,12 @@ const CommentPopup = () => {
                                         </div>
                                     </div>
 
-                                    <div className="mt-2">
-                                        <p className="text-sm text-neutral-600 ">
+                                    <div className="mt-2 flex flex-wrap items-end" >
+                                        <p className="text-sm text-neutral-600 flex-grow ">
                                             {item.comment}
                                         </p>
 
-                                        <div className="flex justify-end items-center gap-3">
+                                        <div className="flex justify-end items-center gap-3 my-1">
                                             <button><RiEdit2Fill className="text-lg font-semibold"/></button>
                                             <button><AiFillDelete className="text-lg font-semibold"/></button>
                                         </div>

@@ -5,10 +5,16 @@ import {RiMessage3Fill, RiStickyNoteAddFill} from "react-icons/ri";
 import {IoSettingsSharp} from "react-icons/io5";
 import{motion} from "framer-motion";
 import {useNavigate} from "react-router-dom";
+import authorStore from "@/store/authorStore.js";
+import {useState} from "react";
+import toast from "react-hot-toast";
 
 const Menu = () => {
+    const {SignOutReq} = authorStore()
     const navigate = useNavigate();
     const pathname = window.location.pathname;
+
+    const [signOutLoading, setSignOutLoading] = useState(false);
     return (
         <>
             <div className=" px-3 scroll-bar-hidden ">
@@ -132,7 +138,7 @@ const Menu = () => {
                             scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className={pathname === "/profile" ? "menu-active mb-3" :"menu mb-3"}
-                        onClick={() => navigate("/profile")}
+                        onClick={() => navigate("/profile/me")}
                     >
                         <FaUser className="text-xl font-medium "/>
                         <h3 className="text-lg font-medium  ">Profile</h3>
@@ -165,8 +171,24 @@ const Menu = () => {
                             scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                         }}
                         className="menu mb-3"
+                        onClick={async ()=>{
+                            setSignOutLoading(true)
+                            const res = await SignOutReq()
+                            setSignOutLoading(false)
+                            if(res){
+                                navigate("/author")
+                                toast.success("Sign Out Successfully")
+                            }
+                            else {
+                                toast.error('Sign Out Fail')
+                            }
+
+                        }}
                     >
-                        <FaSignOutAlt className="text-xl font-medium "/>
+                        {
+                            signOutLoading ? <div className="loader-dark"></div> : <FaSignOutAlt className="text-xl font-medium "/>
+                        }
+
                         <h3 className="text-lg font-medium  ">Sign Out</h3>
                     </motion.div>
 

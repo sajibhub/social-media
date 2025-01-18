@@ -7,7 +7,7 @@ const Summary = () => {
     return (
         <>
             {
-                pathname !== "/profile" && <SummaryProfileComponent />
+                pathname !== "/profile/me" && <SummaryProfileComponent />
             }
 
             <SummarySuggested />

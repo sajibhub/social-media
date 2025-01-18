@@ -1,25 +1,29 @@
-import React, { useState } from "react";
+
 import uiManage from "../../store/uiManage.js";
+import toast from "react-hot-toast";
+import {useState} from "react";
+import authorStore from "@/store/authorStore.js";
 
 const SignUp = () => {
+
+    const [loading, setLoading] = useState(false);
+    const { signUpFrom, setSignUpFrom , signUpReq} = authorStore()
     const {setAuthor} =uiManage()
-    const [formData, setFormData] = useState({
-        username: "",
-        fullName: "",
-        email: "",
-        phone: "",
-        password: "",
-    });
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-    };
+    const handleSubmit = async (e) => {
+        e.preventDefault()
+        setLoading(true)
+        const res =   await signUpReq(signUpFrom)
+        setLoading(false)
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        console.log("Form submitted:", formData);
-        // Add your form submission logic here
+        if (res) {
+            toast.success(' Your account successfully created!')
+            setAuthor('signIn')
+        }
+        else {
+            toast.error("Something went wrong")
+        }
+
     };
 
     return (
@@ -40,8 +44,8 @@ const SignUp = () => {
                             type="text"
                             id="username"
                             name="username"
-                            value={formData.username}
-                            onChange={handleChange}
+                            value={signUpFrom.username}
+                            onChange={(e)=>setSignUpFrom('username', e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your username"
                             required
@@ -58,8 +62,8 @@ const SignUp = () => {
                             type="text"
                             id="fullName"
                             name="fullName"
-                            value={formData.fullName}
-                            onChange={handleChange}
+                            value={signUpFrom.fullName}
+                            onChange={(e)=>setSignUpFrom('fullName', e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your full name"
                             required
@@ -76,8 +80,8 @@ const SignUp = () => {
                             type="email"
                             id="email"
                             name="email"
-                            value={formData.email}
-                            onChange={handleChange}
+                            value={signUpFrom.email}
+                            onChange={(e)=>setSignUpFrom('email', e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your email"
                             required
@@ -94,8 +98,8 @@ const SignUp = () => {
                             type="text"
                             id="phone"
                             name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
+                            value={signUpFrom.phone}
+                            onChange={(e)=>setSignUpFrom('phone', e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your phone number"
                             required
@@ -112,24 +116,45 @@ const SignUp = () => {
                             type="password"
                             id="password"
                             name="password"
-                            value={formData.password}
-                            onChange={handleChange}
+                            value={signUpFrom.password}
+                            onChange={(e)=>setSignUpFrom('password', e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your password"
                             required
                         />
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full bg-sky-500 text-white py-2 rounded-lg hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2"
-                    >
-                        Sign Up
-                    </button>
+
+                    {
+                        loading === false? (
+                                <button
+                                    type={"submit"}
+                                    className="w-full bg-sky-500 text-white py-2 rounded-lg
+                                hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2
+                                "
+                                >
+                                    Sign Up
+                                </button>
+                            ) :
+                            (
+                                <button
+                                    type={"submit"}
+                                    className="
+                                    w-full bg-sky-300 text-white py-2 rounded-lg
+                                     hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2
+                                     text-lg
+                                     "
+                                >
+                                    loading .............
+
+                                </button>
+                            )
+                    }
+
                 </form>
                 <p className="text-center text-sm text-gray-600 mt-6">
                     Already have an account?{" "}
                     <a
-                        onClick={() => setAuthor("signIn")}
+                        onClick={() => setAuthor('signIn')}
                         className="text-sky-500 hover:underline cursor-pointer">
                         Sign in
                     </a>

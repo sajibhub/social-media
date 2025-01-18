@@ -26,7 +26,7 @@ const PostCard = () => {
             return (
                 <motion.div
                     key={i}
-                    whileHover={{ opacity: 1, scale: 1.02 }}
+                    whileHover={{ opacity: 1, scale: 1.01 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{
                       duration: 0.3,

@@ -1,15 +1,17 @@
 import authorStore from "@/store/authorStore.js";
-import {MdEmail, MdOutlineAlternateEmail} from "react-icons/md";
+import {MdEmail} from "react-icons/md";
 import {IoCallSharp} from "react-icons/io5";
 import {FaSquareFacebook} from "react-icons/fa6";
 import {IoLogoLinkedin} from "react-icons/io";
 import {TbBrandFiverr} from "react-icons/tb";
 import {FaGithub} from "react-icons/fa";
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useParams,} from "react-router-dom";
 
 const UserInfo = () => {
     const navigate = useNavigate();
+    const {user} = useParams();
     const {profileData} = authorStore()
+
 
     if(profileData === null || profileData === undefined) {
         return (
@@ -36,15 +38,33 @@ const UserInfo = () => {
                     <h1 className="text-2xl font-medium text-neutral-700">
                         {profileData.fullName}
                     </h1>
-                    <button
-                        className="
-                    absolute top-0 right-0
-                        text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
-                         rounded-full hover:text-sky-500 hover:border-sky-500
-                    "
-                    >
-                        Edit Profile
-                    </button>
+
+                    {
+                        user === "me" ? (
+                            <button
+                                className="
+                                             absolute top-0 right-0
+                                             text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
+                                             rounded-full hover:text-sky-500 hover:border-sky-500
+                                "
+                            >
+                                Edit Profile
+                            </button>
+                        ) :
+                            (
+                                <button
+                                    className="
+                                             absolute top-0 right-0
+                                             text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
+                                             rounded-full hover:text-sky-500 hover:border-sky-500
+                                "
+                                >
+                                    Flowing
+                                </button>
+                            )
+                    }
+
+
                     <h3 className="text-base font-normal text-neutral-700">
                         {profileData.username}
                     </h3>
@@ -74,7 +94,7 @@ const UserInfo = () => {
                         {
                             profileData.bio === "" ?
                                 <h1 className="text-sm font-medium text-neutral-700">Please add bio</h1> : (
-                                    <h1 className="text-sm font-medium text-neutral-700"></h1>
+                                    <h1 className="text-sm font-medium text-neutral-700">"{profileData.bio}"</h1>
                                 )
                         }
                     </div>
