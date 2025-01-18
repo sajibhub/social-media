@@ -211,7 +211,7 @@ export const PostRead = async (req, res) => {
       },
     ]);
 
-    res.status(200).json({
+    return res.status(200).json({
       post,
     });
   } catch (error) {
