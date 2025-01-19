@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="" />
+    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/Component/users/UserInfo.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/users/UserInfo.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/store/authorStore.js" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/store/authorStore.js" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,7 +32,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/sajib-bd/social-media.git&quot;,
-    &quot;accountId&quot;: &quot;37ff572a-0149-49ee-a69b-5b0dd5e5f3bb&quot;
+    &quot;accountId&quot;: &quot;41c48dcb-2436-45ab-b2c4-f02661e52ac4&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -68,7 +73,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-WS-242.23726.96" />
+        <option value="bundled-js-predefined-d6986cc7102b-e768b9ed790e-JavaScript-WS-243.21565.180" />
       </set>
     </attachedChunks>
   </component>
@@ -135,6 +140,8 @@
       <workItem from="1737287671108" duration="9617000" />
       <workItem from="1737299370398" duration="90000" />
       <workItem from="1737302658439" duration="4131000" />
+      <workItem from="1737307671335" duration="1566000" />
+      <workItem from="1737309290050" duration="3105000" />
     </task>
     <servers />
   </component>
@@ -161,7 +168,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/client/src/Component/post/AddPost.jsx</url>
-          <line>66</line>
+          <line>68</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>

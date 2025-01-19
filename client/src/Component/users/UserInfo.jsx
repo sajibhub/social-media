@@ -6,11 +6,15 @@ import {IoLogoLinkedin} from "react-icons/io";
 import {TbBrandFiverr} from "react-icons/tb";
 import {FaGithub} from "react-icons/fa";
 import {useNavigate, useParams,} from "react-router-dom";
+import toast from "react-hot-toast";
+import {useState} from "react";
+import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 
 const UserInfo = () => {
+    const [loader, setLoader] = useState(false);
     const navigate = useNavigate();
     const {user} = useParams();
-    const {profileData} = authorStore()
+    const {profileData ,flowReq ,readProfileReq} = authorStore()
 
 
     if(profileData === null || profileData === undefined) {
@@ -53,13 +57,33 @@ const UserInfo = () => {
                         ) :
                             (
                                 <button
-                                    className="
-                                             absolute top-0 right-0
-                                             text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
-                                             rounded-full hover:text-sky-500 hover:border-sky-500
-                                "
+                                    onClick={async () => {
+                                        setLoader(true)
+                                       const res = await flowReq(profileData._id)
+                                        if(res){
+                                            await readProfileReq(user)
+                                            toast.success("Work successfully !")
+                                        }
+                                        else {
+                                            toast.error("Work flow failed!")
+                                        }
+                                        setLoader(false)
+                                    }}
+                                    className={`
+                                            absolute top-0 right-0
+                                            ${!loader && "text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500 rounded-full hover:text-sky-500 hover:border-sky-500"}
+                                            ${ profileData.isFollowing && "bg-sky-500 text-white border-sky-500 hover:bg-transparent" }
+                                             `
+                                    }
+
                                 >
-                                    Flowing
+                                    {
+                                        loader && <LoadingButtonFit />
+                                    }
+                                    {
+                                        loader === false && (profileData.isFollowing ? "Unfollow" : "Flow")
+                                    }
+
                                 </button>
                             )
                     }

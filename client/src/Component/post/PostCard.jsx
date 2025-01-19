@@ -14,7 +14,7 @@ const PostCard = () => {
   const path = window.location.pathname;
   const navigate = useNavigate();
   const {my_post_data, setUpdatePostData,  deletePostReq, myPostReq ,likePostReq , setCommentPostData, removeCommentList, newsFeedReq} = postStore()
-  const {myProfileData} = authorStore()
+  const {myProfileData, profileData} = authorStore()
   const [loader, setLoader] = useState({
     status : false,
     id: ""
@@ -126,9 +126,22 @@ const PostCard = () => {
                             }
                           </>
                       ) : (
-                          <button className="text-sm font-medium text-neutral-800 hover:text-sky-500">
-                            Follow
-                          </button>
+
+                            <>
+
+                              {
+                                profileData.isFollowing === true? (
+                                    <button className="text-sm font-medium text-sky-500">
+                                      Unfollow
+                                    </button>
+                                ) : (
+                                    <button className="text-sm font-medium text-neutral-800 hover:text-sky-500">
+                                      Follow
+                                    </button>
+                                )
+                              }
+                            </>
+
                       )
                     }
 

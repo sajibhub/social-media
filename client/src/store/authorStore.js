@@ -9,6 +9,8 @@ const Login_api = Base_url + "user/auth/login";
 const SignOut_api = Base_url + "user/auth/logout";
 const Read_Profile_api = Base_url + "user/profile/";
 
+const Follow_api = Base_url + "user/profile/follow/";
+
 
 
 
@@ -84,7 +86,18 @@ const authorStore = create((set) => ({
         catch{
             return false
         }
+    },
+    flowReq : async (id)=>{
+        try {
+            await axios.put(Follow_api + id, " " ,{withCredentials: true})
+            return true
+        }
+        catch{
+            return false
+        }
     }
+
+
 }))
 
 export default authorStore;
