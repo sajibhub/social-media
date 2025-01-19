@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/Component/post/PostCard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/src/popup/UpdatePostPopup.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/popup/UpdatePostPopup.jsx" afterDir="false" />
-    </list>
+    <list default="true" id="3af7cd61-b7e0-4982-b41b-3f9fa5597790" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -138,7 +134,7 @@
       <workItem from="1737272102100" duration="1200000" />
       <workItem from="1737287671108" duration="9617000" />
       <workItem from="1737299370398" duration="90000" />
-      <workItem from="1737302658439" duration="3744000" />
+      <workItem from="1737302658439" duration="4131000" />
     </task>
     <servers />
   </component>
