@@ -83,33 +83,47 @@ const PostCard = () => {
                     {
                       items.myPost ? (
                           <>
-                            <button
-                                onClick={() => {
-                                  setUpdatePostData("id", items._id);
-                                  setUpdatePostData("caption", items.caption);
-                                }}
-                                className="text-sm font-medium text-neutral-800 hover:text-sky-500"
-                            >
-                              <RiEdit2Fill className="text-lg font-semibold"/>
-                            </button>
-                            <button
-                                onClick={ async () => {
-                                   let data = confirm("Are you sure you want to delete this post?");
-                                    if(data){
-                                      let res = await deletePostReq(items._id);
-                                      if(res){
-                                        toast.success("Deleting this post");
+                            {
+                              path !=="/" && (
+                                    <>
+                                      <button
+                                          onClick={() => {
+                                            setUpdatePostData("id", items._id);
+                                            setUpdatePostData("caption", items.caption);
+                                          }}
+                                          className="text-sm font-medium text-neutral-800 hover:text-sky-500"
+                                      >
+                                        <RiEdit2Fill className="text-lg font-semibold"/>
+                                      </button>
+                                      <button
+                                          onClick={async () => {
+                                            let data = confirm("Are you sure you want to delete this post?");
+                                            if (data) {
+                                              let res = await deletePostReq(items._id);
+                                              if (res) {
+                                                toast.success("Deleting this post");
+                                                if(path === "/"){
+                                                  await newsFeedReq()
+                                                }
+                                                else {
+                                                  if(user !== "me"){
+                                                    await myPostReq(user);
 
-                                        await myPostReq()
-
-
-                                      }
-                                    }
-                                }}
-                                className="text-sm font-medium text-neutral-800 hover:text-sky-500"
-                            >
-                              <AiFillDelete className="text-lg font-semibold"/>
-                            </button>
+                                                  }
+                                                  else {
+                                                    await myPostReq(myProfileData.username);
+                                                  }
+                                                }
+                                              }
+                                            }
+                                          }}
+                                          className="text-sm font-medium text-neutral-800 hover:text-sky-500"
+                                      >
+                                        <AiFillDelete className="text-lg font-semibold"/>
+                                      </button>
+                                    </>
+                                )
+                            }
                           </>
                       ) : (
                           <button className="text-sm font-medium text-neutral-800 hover:text-sky-500">
@@ -140,7 +154,7 @@ const PostCard = () => {
                                 />
                             )
                           })
-                        ):(
+                      ) : (
                           <div className="h-full w-full flex flex-row justify-center items-center bg-gray-100">
                             <h4 className=" px-3 mb-2  text-xl  font-semibold text-neutral-800">
                               {items.caption}

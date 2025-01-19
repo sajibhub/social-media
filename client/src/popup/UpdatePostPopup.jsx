@@ -6,11 +6,17 @@ import {MdEmojiEmotions} from "react-icons/md";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import {useState} from "react";
 import toast from "react-hot-toast";
+import {useParams} from "react-router-dom";
+import authorStore from "@/store/authorStore.js";
 
 
 
 const UpdatePostPopup = () => {
-    const {updatePostData , setUpdatePostData , updatePostReq, myPostReq ,clearUpdatePostData} = postStore()
+    const {user} = useParams();
+    const path = window.location.pathname;
+
+    const {updatePostData , setUpdatePostData , updatePostReq, myPostReq ,clearUpdatePostData , newsFeedReq} = postStore()
+    const {myProfileData} = authorStore()
 
     const [showPicker, setShowPicker] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -26,13 +32,25 @@ const UpdatePostPopup = () => {
         const res = await updatePostReq(updatePostData);
         clearUpdatePostData(null)
         setLoading(false)
-        {
-            res && await myPostReq()
-        }
-        if (res)(
-            toast.success("Update Post successfully")
 
-        )
+        if (res){
+            toast.success("Update Post successfully")
+            if(path === "/"){
+                await newsFeedReq()
+            }
+            else {
+                if(user !== "me"){
+                    await myPostReq(user);
+
+                }
+                else {
+                    await myPostReq(myProfileData.username);
+                }
+            }
+        }
+
+
+
         else {
             toast.error("Update Post successfully");
         }
