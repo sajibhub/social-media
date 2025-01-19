@@ -6,18 +6,33 @@ import postStore from "@/store/postStore.js";
 import {RiEdit2Fill} from "react-icons/ri";
 import toast from "react-hot-toast";
 import {useState} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import authorStore from "@/store/authorStore.js";
 
 const PostCard = () => {
-  const {my_post_data, setUpdatePostData,  deletePostReq, myPostReq ,likePostReq , setCommentPostData, removeCommentList} = postStore()
+  const {user} = useParams();
+  const path = window.location.pathname;
+  const navigate = useNavigate();
+  const {my_post_data, setUpdatePostData,  deletePostReq, myPostReq ,likePostReq , setCommentPostData, removeCommentList, newsFeedReq} = postStore()
+  const {myProfileData} = authorStore()
   const [loader, setLoader] = useState({
     status : false,
     id: ""
   });
 
+  const goToProfile = (isPost , user)=>{
+    if(isPost ){
+      navigate("/profile/me")
+    }
+    else {
+      navigate("/profile/"+user)
+    }
+  }
 
   if(my_post_data === null) {
     return <h1 className="h-full text-center text-3xl py-[100px]">Loading ..........</h1>
   }
+
 
   else {
     return (
@@ -40,6 +55,7 @@ const PostCard = () => {
                     >
 
                       <img
+                          onClick={()=>goToProfile(items.myPost, items.user.username)}
                           src={items.user.profile}
                           alt="profile image"
                           className="min-w-full min-h-full"
@@ -47,13 +63,19 @@ const PostCard = () => {
 
                     </div>
                     <div className="mb-2 flex-grow">
-                      <h2 className="text-base font-medium text-neutral-800">
+                      <h2
+                          onClick={()=>goToProfile(items.myPost, items.user.username)}
+                          className="text-base font-medium text-neutral-800"
+                      >
                         {items.user?.fullName}
                         <span className="text-sm font-normal ms-2 text-sky-500 ">
                           {items.time}
                          </span>
                       </h2>
-                      <p className="text-base text-neutral-600 ">
+                      <p
+                          onClick={()=>goToProfile(items.myPost, items.user.username)}
+                          className="text-base text-neutral-600 "
+                      >
                         {items.user?.username}
                       </p>
                     </div>
@@ -76,8 +98,10 @@ const PostCard = () => {
                                     if(data){
                                       let res = await deletePostReq(items._id);
                                       if(res){
-                                        await myPostReq()
                                         toast.success("Deleting this post");
+
+                                        await myPostReq()
+
 
                                       }
                                     }
@@ -141,7 +165,19 @@ const PostCard = () => {
                             id:""
                           })
                           if(res){
-                            await myPostReq()
+                            if(path === "/"){
+                              await newsFeedReq()
+                            }
+                            else {
+                              if(user !== "me"){
+                                await myPostReq(user);
+
+                              }
+                              else {
+                                await myPostReq(myProfileData.username);
+                              }
+                            }
+
                           }
                         }}
                         className="flex flex-row gap-2 justify-start items-center"

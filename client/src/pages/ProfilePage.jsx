@@ -10,13 +10,19 @@ import {useParams} from "react-router-dom";
 const ProfilePage = () => {
     const {user} = useParams();
     const {myPostReq} = postStore()
-    const {readProfileReq}= authorStore()
+    const {readProfileReq ,  myProfileData}= authorStore()
+
 
     useEffect(() => {
         (
             async ()=>{
-                  await myPostReq();
-                  await readProfileReq(user)
+                await readProfileReq(user)
+                if(user === "me"){
+                    await myPostReq(myProfileData.username);
+                }
+                else {
+                    await myPostReq(user);
+                }
             }
         )()
     }, [user]);

@@ -4,7 +4,8 @@ import axios from "axios";
 
 const Base_url = "https://matrix-media.up.railway.app/api/v1/"
 const Create_Post_Api= Base_url + "user/post/create";
-const My_Post_Api= Base_url + "/user/post/read";
+const My_Post_Api= Base_url + "/user/post/read/";
+const newsFeed_Post_Api= Base_url + "/user/post/feed";
 const Update_Post_Api= Base_url + "user/post/update/";
 const Delete_Post_Api= Base_url + "user/post/delete/";
 const Like_Post_Api= Base_url + "user/post/like/";
@@ -28,9 +29,23 @@ const postStore  = create((set) => ({
     },
 
     my_post_data:null,
-    myPostReq : async ()=>{
+    myPostReq : async (user)=>{
         try{
-            const res = await axios.get( My_Post_Api ,  {withCredentials:true} );
+            const res = await axios.get( My_Post_Api + user ,  {withCredentials:true} );
+            if(res.status === 200){
+                set({my_post_data : res.data.post});
+            }
+            return true
+        }
+        catch {
+            return false;
+
+        }
+    },
+
+    newsFeedReq : async ()=>{
+        try{
+            const res = await axios.get( newsFeed_Post_Api ,  {withCredentials:true} );
             if(res.status === 200){
                 set({my_post_data : res.data.post});
             }
@@ -42,6 +57,8 @@ const postStore  = create((set) => ({
 
         }
     },
+
+
 
     updatePostData :null,
     clearUpdatePostData : (e)=>{

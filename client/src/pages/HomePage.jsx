@@ -5,11 +5,13 @@ import PostCard from "../Component/post/PostCard.jsx";
 import {useEffect} from "react";
 import {useNavigate} from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
+import postStore from "@/store/postStore.js";
 
 
 const HomePage = () => {
 
     const{readProfileReq}= authorStore()
+    const {newsFeedReq} = postStore()
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,6 +19,7 @@ const HomePage = () => {
         (
 
             async ()=>{
+                await newsFeedReq()
                 let res = await readProfileReq("me")
                 if(res !== true){
                     navigate('/author')

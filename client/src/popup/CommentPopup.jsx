@@ -8,12 +8,17 @@ import postStore from "@/store/postStore.js";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import {RiEdit2Fill} from "react-icons/ri";
 import {AiFillDelete} from "react-icons/ai";
+import {useParams} from "react-router-dom";
+import authorStore from "@/store/authorStore.js";
 
 const CommentPopup = () => {
+    const {user} = useParams();
+    const path = window.location.pathname;
     const [image, setImage] = useState(null);
     const [showPicker, setShowPicker] = useState(false);
 
-    const {setCommentPostData,  commentPostData, clearCommentPostData , commentPostReq , myPostReq,commentListReq, commentList  } = postStore()
+    const {setCommentPostData,  commentPostData, clearCommentPostData , commentPostReq , myPostReq,commentListReq, commentList, newsFeedReq  } = postStore()
+    const {myProfileData} = authorStore()
     const id =  commentPostData.id
 
     const [loader, setLoader] = useState(false)
@@ -48,11 +53,23 @@ const CommentPopup = () => {
     };
 
     const submitComment = async () => {
+
         setLoader(true)
         let res = await commentPostReq(commentPostData);
         setLoader(false)
         if(res){
-            await myPostReq ()
+            if(path === "/"){
+                await newsFeedReq()
+            }
+            else {
+                if(user !== "me"){
+                    await myPostReq(user);
+
+                }
+                else {
+                    await myPostReq(myProfileData.username);
+                }
+            }
             clearCommentPostData(null)
             toast.success('Comment Create Successfully')
         }

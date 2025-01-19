@@ -72,7 +72,6 @@ const authorStore = create((set) => ({
 
     readProfileReq : async (user)=>{
         try {
-
             let res =  await axios.get(Read_Profile_api +user,  {withCredentials: true})
             set({profileData: res.data.profile[0]})
 

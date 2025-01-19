@@ -10,6 +10,7 @@ import postStore from "@/store/postStore.js";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 
 const AddPost = () => {
+    const {newsFeedReq} = postStore()
     const {createPostReq} = postStore()
     const [image, setImage] = useState(null);
     const [imageFile, setImageFile] = useState(null);
@@ -40,6 +41,7 @@ const AddPost = () => {
         setLoading(true);
         const res = await createPostReq(imageFile,text )
         if(res){
+            await  newsFeedReq()
             setText("");
             setImage(null);
             setLoading(false);
