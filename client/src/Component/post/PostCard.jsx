@@ -59,6 +59,7 @@ const PostCard = () => {
   }, []);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
   else {
     return (
@@ -79,6 +80,9 @@ const PostCard = () => {
                     <div className=" flex-shrink-0  h-[40px] w-[40px] rounded-full
 =======
   if (my_post_data === null) {
+=======
+  if (post === null) {
+>>>>>>> 21d2aed (add some api endpoient and update future)
     return (
       <h1 className="h-full text-center text-3xl py-[100px]">
         Loading ..........
@@ -87,7 +91,7 @@ const PostCard = () => {
   } else {
     return (
       <>
-        {my_post_data.map((items, i) => {
+        {post.map((items, i) => {
           return (
             <motion.div
               key={i}

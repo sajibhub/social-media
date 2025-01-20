@@ -10,6 +10,10 @@ import {
   Follow,
   ProfilePicUpdate,
   ProfileInfoUpdate,
+  GetFollowers,
+  GetFollowing,
+  GetSavePost,
+  SearchUser,
 } from "../controllers/userController.js";
 import Authorized from "../middleware/authorized.js";
 
@@ -24,5 +28,9 @@ userRouter.put("/user/profile/info/update", Authorized, ProfileInfoUpdate);
 userRouter.post("/user/auth/forger/password/:email", ForgetOTP);
 userRouter.put("/user/auth/forger/password", PasswordReset);
 userRouter.put("/user/profile/follow/:userId", Authorized, Follow);
+userRouter.get("/user/followers", Authorized, GetFollowers);
+userRouter.get("/user/following", Authorized, GetFollowing);
+userRouter.get("/user/save/post", Authorized, GetSavePost)
+userRouter.post("/user/search", Authorized, SearchUser)
 
 export default userRouter;

@@ -1,52 +1,7 @@
-import express from "express";
-import http from "http";
-import { Server } from "socket.io";
-import cors from "cors";
-import jwt from "jsonwebtoken";
-
 import Post from "../models/postModel.js";
 
-const app = express();
 
-export const server = http.createServer(app);
-export const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-    credentials: true,
-  },
-});
-
-
-io.on("connection", async (socket) => {
-  console.log("Connection established");
-  
-  // io.use(async (socket, next) => {
-  //   try {
-  //     const { token } = socket.handshake.headers.cookie;
-  
-  //     if (!token) {
-  //       return next(new Error("Unauthorized"));
-  //     }
-  
-  //     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  //     if (!decoded) {
-  //       return next(new Error("Unauthorized"));
-  //     }
-  
-  //     const user = await User.findById(decoded.userId);
-  //     if (!user) {
-  //       return next(new Error("Unauthorized"));
-  //     }
-  
-  //     socket.user = user; 
-  //     console.log(user)
-  //     next();
-  
-  //   } catch (error) {
-  //     return next(new Error("Unauthorized"));
-  //   }
-  // });
+export const SocketPosts = async (socket) => {
   Post.watch().on("change", async (change) => {
     const posts = await Post.find({});
     socket.emit("posts", posts);
@@ -54,10 +9,10 @@ io.on("connection", async (socket) => {
   const id = "";
   const post = await Post.aggregate([
     {
-      $match: {}, // Optional filtering criteria
+      $match: {},
     },
     {
-      $sort: { createdAt: -1 }, // Sort posts by newest
+      $sort: { createdAt: -1 },
     },
     {
       $lookup: {
@@ -84,9 +39,9 @@ io.on("connection", async (socket) => {
     {
       $lookup: {
         from: "users",
-        localField: "likes", // Directly use the `likes` array of user IDs
+        localField: "likes",
         foreignField: "_id",
-        as: "likeUsers", // Get user details for all user IDs in `likes`
+        as: "likeUsers",
       },
     },
     {
@@ -195,7 +150,7 @@ io.on("connection", async (socket) => {
             input: {
               $sortArray: {
                 input: "$comments",
-                sortBy: { time: -1 }, // Sort comments by `time`
+                sortBy: { time: -1 },
               },
             },
             as: "comment",
@@ -274,7 +229,7 @@ io.on("connection", async (socket) => {
                   default: {
                     $dateToString: {
                       format: "%H:%M:%S %Y-%m-%d",
-                      date: "$$comment.time", // Use `time`
+                      date: "$$comment.time",
                       timezone: "Asia/Dhaka",
                     },
                   },
@@ -339,10 +294,5 @@ io.on("connection", async (socket) => {
       },
     },
   ]);
-
   socket.emit("posts", post);
-
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
-});
+};

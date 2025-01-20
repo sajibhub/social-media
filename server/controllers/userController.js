@@ -131,7 +131,7 @@ export const SignUp = async (req, res) => {
       second: "2-digit",
       hourCycle: "h12",
     })
-      .format(new Date(userCreate.createdAt))
+      .format(new Date(userCreate.savedPosts.createdAt))
       .replace(",", "")
       .replaceAll("/", "-");
     Mail(email, "New Account Create", NewAccount(fullName, email, phone, date));
@@ -660,44 +660,308 @@ export const PasswordReset = async (req, res) => {
 
 export const Follow = async (req, res) => {
   try {
-    if (!validator.isMongoId(req.params.postId)) {
+    if (!validator.isMongoId(req.params.userId)) {
       return res.status(400).json({
-        message: "Invalid postId",
+        message: "Invalid userId",
       });
     }
+
     const userId = new mongoose.Types.ObjectId(req.params.userId);
     const { id } = req.headers;
-    if (id.toString() == userId.toString()) {
+
+    if (id.toString() === userId.toString()) {
       return res.status(400).json({
         message: "You can't follow yourself",
       });
     }
+
     const findUser = await User.findById(userId).select({ followers: 1 });
-    if (findUser.followers.toString().includes(userId)) {
-      const updateFollowers = await User.findByIdAndUpdate(
-        id,
+    if (!findUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const alreadyFollowing = findUser.followers.includes(id);
+
+    if (alreadyFollowing) {
+      await User.findByIdAndUpdate(
+        userId,
         {
           $pull: { followers: id },
         },
         { new: true }
       );
       return res.status(200).json({
-        message: "Unfollowed Successfully",
+        message: "Unfollowed successfully",
+      });
+    } else {
+      await User.findByIdAndUpdate(
+        userId,
+        {
+          $push: { followers: id },
+        },
+        { new: true }
+      );
+      return res.status(200).json({
+        message: "Followed successfully",
       });
     }
-    const updateFollowing = await User.findByIdAndUpdate(
-      id,
-      {
-        $push: { followers: id },
-      },
-      { new: true }
-    );
-    return res.status(200).json({
-      message: "Followed Successfully",
-    });
   } catch (error) {
     res.status(500).json({
       message: "An error occurred while processing your request.",
     });
   }
 };
+
+export const GetFollowers = async (req, res) => {
+  try {
+    const { id } = req.headers
+
+    const followers = await User.aggregate([
+      { $match: { _id: id } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "followers",
+          foreignField: "_id",
+          as: "followers",
+        }
+      },
+      { $unwind: "$followers" },
+      {
+        $project: {
+          _id: 0,
+          _id: "$followers._id",
+          fullName: "$followers.fullName",
+          username: "$followers.username",
+          profile: "$followers.profile",
+        }
+      }
+    ])
+    return res.status(200).json({
+      followers
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred while processing your request.",
+    });
+  }
+}
+
+export const GetFollowing = async (req, res) => {
+  try {
+    const { id } = req.headers
+
+    const following = await User.aggregate([
+      { $match: { _id: id } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "following",
+          foreignField: "_id",
+          as: "following",
+        }
+      },
+      { $unwind: "$following" },
+      {
+        $project: {
+          _id: 0,
+          _id: "$following._id",
+          fullName: "$following.fullName",
+          username: "$following.username",
+          profile: "$following.profile",
+        }
+      }
+    ])
+    return res.status(200).json({
+      following
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred while processing your request.",
+    });
+  }
+}
+
+export const GetSavePost = async (req, res) => {
+  try {
+    const { id } = req.headers
+    const savedPosts = await User.aggregate([
+      { $match: { _id: id } },
+      {
+        $lookup: {
+          from: "posts",
+          localField: "postSave",
+          foreignField: "_id",
+          as: "savedPosts",
+        },
+      },
+      { $unwind: "$savedPosts" },
+      {
+        $lookup: {
+          from: "users",
+          localField: "savedPosts.userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: "$user" },
+
+      {
+        $addFields: {
+          time: {
+            $cond: {
+              if: {
+                $lt: [
+                  {
+                    $divide: [
+                      { $subtract: [new Date(), "$savedPosts.createdAt"] },
+                      1000 * 60,
+                    ],
+                  },
+                  1440,
+                ],
+              },
+              then: {
+                $cond: {
+                  if: {
+                    $lt: [
+                      {
+                        $divide: [
+                          { $subtract: [new Date(), "$savedPosts.createdAt"] },
+                          1000 * 60,
+                        ],
+                      },
+                      60,
+                    ],
+                  },
+                  then: {
+                    $concat: [
+                      {
+                        $toString: {
+                          $floor: {
+                            $divide: [
+                              { $subtract: [new Date(), "$savedPosts.createdAt"] },
+                              1000 * 60,
+                            ],
+                          },
+                        },
+                      },
+                      " minutes ago",
+                    ],
+                  },
+                  else: {
+                    $concat: [
+                      {
+                        $toString: {
+                          $floor: {
+                            $divide: [
+                              { $subtract: [new Date(), "$savedPosts.createdAt"] },
+                              1000 * 60 * 60,
+                            ],
+                          },
+                        },
+                      },
+                      " hours ago",
+                    ],
+                  },
+                },
+              },
+              else: {
+                $dateToString: {
+                  format: "%H:%M:%S %Y-%m-%d",
+                  date: "$savedPosts.createdAt",
+                  timezone: "Asia/Dhaka",
+                },
+              },
+            },
+          },
+          isLike: { $in: [id, "$savedPosts.likes"] },
+          myPost: { $eq: [id, "$savedPosts.userId"] },
+          isFollowing: {
+            $cond: {
+              if: { $ne: [id, "$savedPosts.userId"] },
+              then: { $in: [id, "$user.followers"] },
+              else: "$$REMOVE",
+            },
+          },
+          isSave: { $in: [id, "$savedPosts.postSave",] },
+        }
+      },
+
+      {
+        $project: {
+          _id: 1,
+          user: { _id: 1, fullName: 1, username: 1, profile: 1 },
+          caption: "$savedPosts.caption",
+          images: "$savedPosts.images",
+          time: 1,
+          like: { $size: "$savedPosts.likes" },
+          comment: { $size: "$savedPosts.comments" },
+          view: { $size: "$savedPosts.view" },
+          isLike: 1,
+          myPost: 1,
+          postSave: { $size: "$savedPosts.postSave" },
+          isFollowing: 1,
+          isSave: 1,
+        }
+      }
+    ]);
+
+
+    return res.status(200).json({
+      savedPosts
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      message: "An error occurred while processing your request.",
+    });
+  }
+}
+
+export const GetImages = async (req, res) => {
+  try {
+
+  } catch (error) {
+    res.status(500).json({
+      message: "An error occurred while processing your request.",
+    });
+
+  }
+}
+
+export const SearchUser = async (req, res) => {
+  try {
+
+    const { id } = req.headers
+    const { search } = req.body
+
+    const searchUser = await User.aggregate([
+      {
+        $match: {
+          $or: [
+            { username: { $regex: search, $options: "i" } },
+            { fullName: { $regex: search, $options: "i" } }
+          ]
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          fullName: 1,
+          username: 1,
+          profile: 1
+        }
+      }
+    ]);
+    return res.status(200).json({
+      searchUser
+    })
+  } catch (error) {
+    res.status(500).json({
+      message:"An error occurred while processing your request."
+    })
+  }
+}

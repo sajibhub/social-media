@@ -51,13 +51,17 @@ export const PostCreate = (req, res) => {
 export const PostRead = async (req, res) => {
   const { id } = req.headers;
   const { username } = req.params;
-  const userFind = await User.findOne({ username });
 
   try {
+    const userFind = await User.findOne({ username });
+    if (!userFind) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     const post = await Post.aggregate([
       {
         $match: {
-          userId: userFind?._id,
+          userId: userFind._id,
         },
       },
       {
@@ -118,41 +122,19 @@ export const PostRead = async (req, res) => {
                     ],
                   },
                   else: {
-                    $cond: {
-                      if: {
-                        $lt: [
-                          {
+                    $concat: [
+                      {
+                        $toString: {
+                          $floor: {
                             $divide: [
                               { $subtract: [new Date(), "$createdAt"] },
                               1000 * 60 * 60,
                             ],
                           },
-                          24,
-                        ],
-                      },
-                      then: {
-                        $concat: [
-                          {
-                            $toString: {
-                              $floor: {
-                                $divide: [
-                                  { $subtract: [new Date(), "$createdAt"] },
-                                  1000 * 60 * 60,
-                                ],
-                              },
-                            },
-                          },
-                          " hours ago",
-                        ],
-                      },
-                      else: {
-                        $dateToString: {
-                          format: "%H:%M:%S %Y-%m-%d",
-                          date: "$createdAt",
-                          timezone: "Asia/Dhaka",
                         },
                       },
-                    },
+                      " hours ago",
+                    ],
                   },
                 },
               },
@@ -165,29 +147,16 @@ export const PostRead = async (req, res) => {
               },
             },
           },
-          isLike: {
-            $in: [id, { $ifNull: ["$likes", []] }],
-          },
-          myPost: {
-            $eq: [id, "$userId"],
-          },
-        },
-      },
-      {
-        $addFields: {
+          isLike: { $in: [id, "$likes"] },
+          myPost: { $eq: [id, "$userId"] },
           isFollowing: {
             $cond: {
               if: { $ne: [id, "$userId"] },
-              then: {
-                $cond: {
-                  if: { $in: [id, { $ifNull: ["$followers", []] }] },
-                  then: true,
-                  else: false,
-                },
-              },
+              then: { $in: [id, "$user.followers"] },
               else: "$$REMOVE",
             },
           },
+          isSave: { $in: [id, "$postSave"] },
         },
       },
       {
@@ -207,16 +176,16 @@ export const PostRead = async (req, res) => {
           isLike: 1,
           myPost: 1,
           postSave: { $size: { $ifNull: ["$postSave", []] } },
+          isFollowing: 1,
+          isSave: 1
         },
       },
     ]);
 
-    return res.status(200).json({
-      post,
-    });
+    return res.status(200).json({ post });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
   }
@@ -224,7 +193,7 @@ export const PostRead = async (req, res) => {
 
 export const PostUpdate = async (req, res) => {
   try {
-    if (!validator.isMongoId(postId)) {
+    if (!validator.isMongoId(req.params.postId)) {
       return res.status(400).json({ message: "Invalid Post ID." });
     }
 
@@ -334,6 +303,55 @@ export const PostLike = async (req, res) => {
     return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
+  }
+};
+
+export const PostLikeRead = async (req, res) => {
+  try {
+    if (!validator.isMongoId(req.params.postId)) {
+      return res.status(400).json({ message: "Invalid post ID" });
+    }
+
+    const postId = new mongoose.Types.ObjectId(req.params.postId);
+
+    const findPost = await Post.findById(postId);
+    if (!findPost) {
+      return res.status(404).json({
+        message: "Post not found.",
+      });
+    }
+
+    const likeUserFind = await Post.aggregate([
+      {
+        $match: { _id: postId },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "likes",
+          foreignField: "_id",
+          as: "likedUsers",
+        },
+      },
+      {
+        $unwind: "$likedUsers",
+      },
+      {
+        $project: {
+          _id: 0,
+          fullName: "$likedUsers.fullName",
+          username: "$likedUsers.username",
+          profile: "$likedUsers.profile",
+        },
+      },
+    ]);
+
+
+    return res.status(200).json({
+      user: likeUserFind,
+    });
+  } catch (error) {
+    message: "An error occurred while processing your request";
   }
 };
 
@@ -722,7 +740,7 @@ export const PostSave = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({
-      message: "An error occurred while saving your request.",
+      message: "An error occurred while processing your request.",
     });
   }
 };
