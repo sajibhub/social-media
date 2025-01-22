@@ -183,6 +183,9 @@ export const PostRead = async (req, res) => {
     ]);
 
     return res.status(200).json({ post });
+    return res.status(200).json({
+      post,
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -278,7 +281,6 @@ export const PostLike = async (req, res) => {
         message: "Post not found.",
       });
     }
-
     if (findPost.likes.toString().includes(id.toString())) {
       const updatedPost = await Post.findByIdAndUpdate(
         postId,
@@ -296,6 +298,13 @@ export const PostLike = async (req, res) => {
       { new: true }
     );
 
+    const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 })
+    await Notification.create({
+      userId: userId._id,
+      type: "like",
+      sourceId: id,
+      postId,
+    })
     return res.status(200).json({
       message: "Post liked successfully.",
     });
@@ -381,7 +390,15 @@ export const PostComment = async (req, res) => {
       { $push: { comments: { comment, userId: id } } },
       { new: true }
     );
-    res.status(200).json({
+
+    const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 })
+    await Notification.create({
+      userId: userId._id,
+      type: "comment",
+      sourceId: id,
+      postId,
+    })
+    return res.status(200).json({
       message: "Comment added successfully.",
     });
   } catch (error) {

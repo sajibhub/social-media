@@ -13,6 +13,7 @@ import {
   PasswordResetSuccess,
 } from "../utils/mailTemplate.js";
 import storage from "../utils/cloudinary.js";
+import Notification from "../models/notificationModel.js";
 
 const phoneRegex = /^(?:\+88|0088)?(01[3-9]\d{8})$/;
 const usernameRegex = /^[a-zA-Z0-9]+$/;
@@ -131,7 +132,7 @@ export const SignUp = async (req, res) => {
       second: "2-digit",
       hourCycle: "h12",
     })
-      .format(new Date(userCreate.savedPosts.createdAt))
+      .format(new Date(userCreate.createdAt))
       .replace(",", "")
       .replaceAll("/", "-");
     Mail(email, "New Account Create", NewAccount(fullName, email, phone, date));
@@ -692,6 +693,12 @@ export const Follow = async (req, res) => {
         },
         { new: true }
       );
+      await User.findByIdAndUpdate(id, {
+        $pull: { following: userId },
+      },
+        {
+          new: true
+        })
       return res.status(200).json({
         message: "Unfollowed successfully",
       });
@@ -703,11 +710,25 @@ export const Follow = async (req, res) => {
         },
         { new: true }
       );
+      await User.findByIdAndUpdate(
+        id,
+        {
+          $push: { following: userId },
+        },
+        { new: true }
+      );
+      await Notification.create({
+        userId,
+        type: "follow",
+        sourceId: id,
+        postId: null
+      })
       return res.status(200).json({
         message: "Followed successfully",
       });
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       message: "An error occurred while processing your request.",
     });
@@ -716,10 +737,11 @@ export const Follow = async (req, res) => {
 
 export const GetFollowers = async (req, res) => {
   try {
-    const { id } = req.headers
+    const { username } = req.params;
 
+    const userFind = await User.findOne({ username }).select({ _id: 1 })
     const followers = await User.aggregate([
-      { $match: { _id: id } },
+      { $match: { _id: userFind._id } },
       {
         $lookup: {
           from: "users",
@@ -751,10 +773,11 @@ export const GetFollowers = async (req, res) => {
 
 export const GetFollowing = async (req, res) => {
   try {
-    const { id } = req.headers
+    const { username } = req.params;
 
+    const userFind = await User.findOne({ username }).select({ _id: 1 })
     const following = await User.aggregate([
-      { $match: { _id: id } },
+      { $match: { _id: userFind._id } },
       {
         $lookup: {
           from: "users",
@@ -766,7 +789,6 @@ export const GetFollowing = async (req, res) => {
       { $unwind: "$following" },
       {
         $project: {
-          _id: 0,
           _id: "$following._id",
           fullName: "$following.fullName",
           username: "$following.username",
@@ -892,7 +914,7 @@ export const GetSavePost = async (req, res) => {
 
       {
         $project: {
-          _id: 1,
+          _id: "$savedPosts._id",
           user: { _id: 1, fullName: 1, username: 1, profile: 1 },
           caption: "$savedPosts.caption",
           images: "$savedPosts.images",
@@ -961,7 +983,7 @@ export const SearchUser = async (req, res) => {
     })
   } catch (error) {
     res.status(500).json({
-      message:"An error occurred while processing your request."
+      message: "An error occurred while processing your request."
     })
   }
 }

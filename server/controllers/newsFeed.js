@@ -85,7 +85,7 @@ export const NewsFeed = async (req, res) => {
               },
               else: {
                 $dateToString: {
-                  format: "%H:%M:%S %Y-%m-%d",
+                  format: "%H:%M:%S %d-%m-%Y",
                   date: "$createdAt",
                   timezone: "Asia/Dhaka",
                 },
@@ -164,6 +164,7 @@ export const NewsFeed = async (req, res) => {
       post,
     });
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       message: "An error occurred while processing your request.",
     });
@@ -178,7 +179,7 @@ export const SuggestUser = async (req, res) => {
       {
         $match: {
           _id: { $ne: id },
-          followers: { $not: { $in: [id] } }
+          following: { $not: { $in: [id] } }
         },
       },
       {
@@ -192,7 +193,7 @@ export const SuggestUser = async (req, res) => {
       {
         $addFields: {
           postCount: { $size: "$posts" },
-
+          isFollowing: { $in: [id, "$followers"] },
         }
       },
       {
@@ -207,6 +208,7 @@ export const SuggestUser = async (req, res) => {
           fullName: 1,
           username: 1,
           profile: 1,
+          isFollowing: 1
         }
       }
     ]);
