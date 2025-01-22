@@ -5,6 +5,8 @@ import validator from "validator";
 import Post from "../models/postModel.js";
 import storage from "../utils/cloudinary.js";
 import User from "../models/userModel.js";
+import Notification from "../models/notificationModel.js";
+
 
 export const PostCreate = (req, res) => {
   const { id } = req.headers;
@@ -603,17 +605,14 @@ export const PostCommentUpdate = async (req, res) => {
       });
     }
     const commentExists = findPost.comments.find((comment) => {
-      if (comment._id.toString() != commentId) {
-        return res.status(404).json({
-          message: "Comment not found ",
-        });
-      }
-      if (comment.userId.toString() != id.toString()) {
-        return res.status(401).json({
-          message: "You are not allowed to edit this comment",
-        });
-      }
+      return comment._id.toString() === commentId.toString();
     });
+    if (!commentExists) {
+      return res.status(404).json({ message: "Comment not found." });
+    }
+    if (!commentExists.userId.toString() == id.toString()) {
+      return res.status(401).json({ message: "You are not authorized to delete this comment." });
+    }
     const updatedPost = await Post.findByIdAndUpdate(
       postId,
       {
@@ -661,17 +660,14 @@ export const PostCommentDelete = async (req, res) => {
       });
     }
     const commentExists = findPost.comments.find((comment) => {
-      if (comment._id.toString() != commentId.toString()) {
-        return res.status(404).json({
-          message: "Comment not found ",
-        });
-      }
-      if (comment.userId.toString() != id.toString()) {
-        return res.status(401).json({
-          message: "You are not allowed ",
-        });
-      }
+      return comment._id.toString() === commentId.toString();
     });
+    if (!commentExists) {
+      return res.status(404).json({ message: "Comment not found." });
+    }
+    if (!commentExists.userId.toString() == id.toString()) {
+      return res.status(401).json({ message: "You are not authorized to delete this comment." });
+    }
 
     const updatedPost = await Post.findByIdAndUpdate(
       postId,

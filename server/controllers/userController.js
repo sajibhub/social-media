@@ -970,11 +970,17 @@ export const SearchUser = async (req, res) => {
         }
       },
       {
+        $addFields: {
+          isFollowing: { $in: [id, "$following"] }  
+        }
+      },
+      {
         $project: {
           _id: 1,
           fullName: 1,
           username: 1,
-          profile: 1
+          profile: 1,
+          isFollowing: 1
         }
       }
     ]);
