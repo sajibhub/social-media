@@ -180,14 +180,18 @@ export const SuggestUser = async (req, res) => {
         $match: {
           _id: { $ne: id },
           following: { $not: { $in: [id] } }
-        },
+        }
       },
       {
         $lookup: {
           from: "posts",
           localField: "_id",
           foreignField: "userId",
-          as: "posts"
+          as: "posts",
+          pipeline: [
+            { $sort: { createdAt: -1 } },
+            { $limit: 5 }
+          ]
         }
       },
       {
@@ -213,10 +217,10 @@ export const SuggestUser = async (req, res) => {
       }
     ]);
 
-    res.status(200).json(users);
+    return res.status(200).json(users);
 
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       message: "An error occurred while processing your request.",
     });

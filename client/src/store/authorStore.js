@@ -8,8 +8,14 @@ const Sign_up_api = Base_url + "user/auth/signup"
 const Login_api = Base_url + "user/auth/login";
 const SignOut_api = Base_url + "user/auth/logout";
 const Read_Profile_api = Base_url + "user/profile/";
+const Profile_Update_api = Base_url + "user/profile/pic/update";
+const Profile_info_update_api = Base_url + "user/profile/info/update"
 
 const Follow_api = Base_url + "user/profile/follow/";
+const Suggest_user_api = Base_url + "user/suggest";
+const Search_user_api = Base_url + "user/search";
+const follower_list_api = Base_url + "user/followers/";
+const following_list_api = Base_url + "user/following/";
 
 
 
@@ -71,6 +77,24 @@ const authorStore = create((set) => ({
 
     profileData: null,
     myProfileData: null,
+    updateProfileData: (name,value)=>{
+        set((state)=>({
+            myProfileData:{
+                ...state.myProfileData , [name]:value
+            }
+        }))
+    },
+
+    updateProfileReq : async (data)=>{
+        console.log(data)
+        try {
+            await axios.put(Profile_info_update_api, data , {withCredentials:true});
+            return true
+        } 
+        catch  {
+            return true
+        }
+    },
 
     readProfileReq : async (user)=>{
         try {
@@ -80,6 +104,7 @@ const authorStore = create((set) => ({
 
             let me =  await axios.get(Read_Profile_api +"me",  {withCredentials: true})
             set({myProfileData: me.data.profile[0]})
+            localStorage.setItem('userName', me.data.profile[0].username);
 
             return true
         }
@@ -87,6 +112,33 @@ const authorStore = create((set) => ({
             return false
         }
     },
+
+    profileUpdateData: null,
+    setProfileUpdateData: (name,value)=>{
+        set((state)=>({
+            profileUpdateData:{
+                ...state.profileUpdateData , [name]:value
+            }
+    
+        }))
+    },
+    updateProfileRuq:async(cover, profile)=>{
+
+        let formData = new FormData();
+        formData.append("profile", profile);
+        formData.append("cover", cover);
+
+        try {
+            await axios.put(Profile_Update_api, formData, {withCredentials: true})
+            return true
+        }
+        catch{
+            return false
+        }
+
+    } ,
+        
+
     flowReq : async (id)=>{
         try {
             await axios.put(Follow_api + id, " " ,{withCredentials: true})
@@ -95,8 +147,65 @@ const authorStore = create((set) => ({
         catch{
             return false
         }
-    }
+    },
 
+
+    suggestUser : null,
+    suggestUserReq : async ()=>{
+        try {
+           const res =  await axios.get(Suggest_user_api, {withCredentials: true})
+            set({suggestUser: res.data})
+            return true
+        }
+        catch{
+            return false
+        }
+    },
+
+    searchKeywords : null,
+    setSearchKeywords : (e)=>{
+        set({searchKeywords : e})
+    },
+    searchUserData : null ,
+    searchUserReq : async (data)=>{
+
+        const body = {
+            search : data
+        }
+        try{
+            const res =  await axios.post(Search_user_api , body, {withCredentials: true})
+            set({searchUserData: res.data.searchUser})
+            return true
+        }
+        catch{
+            return false
+        }
+
+    },
+
+    followersList: null,
+    followersReq : async (data)=>{
+        try{
+            const res =  await axios.get(follower_list_api + data, {withCredentials: true})
+            set({followersList: res.data.followers})
+            return true
+        }
+        catch{
+            return false
+        }
+    },
+
+    followingList: null,
+    followingListReq : async (data)=>{
+        try{
+            const res =  await axios.get(following_list_api + data, {withCredentials: true})
+            set({followingList: res.data.following})
+            return true
+        }
+        catch{
+            return false
+        }
+    }
 
 }))
 

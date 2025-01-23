@@ -14,6 +14,7 @@ import {
 } from "../utils/mailTemplate.js";
 import storage from "../utils/cloudinary.js";
 import Notification from "../models/notificationModel.js";
+import Post from "../models/postModel.js";
 
 const phoneRegex = /^(?:\+88|0088)?(01[3-9]\d{8})$/;
 const usernameRegex = /^[a-zA-Z0-9]+$/;
@@ -945,7 +946,25 @@ export const GetSavePost = async (req, res) => {
 
 export const GetImages = async (req, res) => {
   try {
+    const { id } = req.headers;
+    const images = await Post.aggregate([
+      { $match: { userId: id } },
+      { $unwind: "$images" },
+      {
+        $project: {
+          _id: 0,
+          images: 1
+        }
+      }
+    ])
 
+    const flatImages = images
+      .flatMap(item => item.images || [])
+      .filter(url => url !== null);
+
+    return res.status(200).json({
+      images: flatImages
+    })
   } catch (error) {
     res.status(500).json({
       message: "An error occurred while processing your request.",
@@ -971,7 +990,7 @@ export const SearchUser = async (req, res) => {
       },
       {
         $addFields: {
-          isFollowing: { $in: [id, "$following"] }  
+          isFollowing: { $in: [id, "$following"] }
         }
       },
       {

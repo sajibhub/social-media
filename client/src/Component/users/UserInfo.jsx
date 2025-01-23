@@ -9,13 +9,14 @@ import {useNavigate, useParams,} from "react-router-dom";
 import toast from "react-hot-toast";
 import {useState} from "react";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
+import uiManage from "@/store/uiManage.js";
 
 const UserInfo = () => {
     const [loader, setLoader] = useState(false);
     const navigate = useNavigate();
     const {user} = useParams();
     const {profileData ,flowReq ,readProfileReq} = authorStore()
-
+    const {set_profile_tab, profile_tab , set_edit_profile_Ui_Control} = uiManage()
 
     if(profileData === null || profileData === undefined) {
         return (
@@ -46,6 +47,7 @@ const UserInfo = () => {
                     {
                         user === "me" ? (
                             <button
+                                onClick={() => set_edit_profile_Ui_Control(true)}
                                 className="
                                              absolute top-0 right-0
                                              text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
@@ -156,9 +158,36 @@ const UserInfo = () => {
                 </div>
 
 
-                <div className=" mx-3">
-                    <button className="font-medium text-lg py-2 px-3  text-neutral-700 border-b-2 border-neutral-700 ">
+                <div className="flex flex-row gap-3 ">
+                    <button
+                        onClick={() => set_profile_tab("my-post")}
+                        className={profile_tab ==="my-post" ? "profile-tab-active" : "profile-tab"}
+                    >
                         My Post
+                    </button>
+                    <button
+                        onClick={() => set_profile_tab("post-photo")}
+                        className={ profile_tab === "post-photo" ? "profile-tab-active" : "profile-tab"}
+                    >
+                        Photo
+                    </button>
+                    <button
+                        onClick={() => set_profile_tab("followers")}
+                        className={ profile_tab === "followers" ? "profile-tab-active" : "profile-tab"}
+                    >
+                        Followers
+                    </button>
+                    <button
+                        onClick={() => set_profile_tab("following")}
+                        className={ profile_tab === "following" ? "profile-tab-active" : "profile-tab"}
+                    >
+                        Following
+                    </button>
+                    <button
+                        onClick={() => set_profile_tab("about")}
+                        className={ profile_tab === "about" ? "profile-tab-active" : "profile-tab"}
+                    >
+                        About
                     </button>
                 </div>
 

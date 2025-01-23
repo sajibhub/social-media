@@ -14,6 +14,7 @@ import {
   GetFollowing,
   GetSavePost,
   SearchUser,
+  GetImages,
 } from "../controllers/userController.js";
 import Authorized from "../middleware/authorized.js";
 
@@ -32,5 +33,6 @@ userRouter.get("/user/followers/:username", Authorized, GetFollowers);
 userRouter.get("/user/following/:username", Authorized, GetFollowing);
 userRouter.get("/user/save/post", Authorized, GetSavePost)
 userRouter.post("/user/search", Authorized, SearchUser)
+userRouter.get("/user/profile/post/images", Authorized, GetImages)
 
 export default userRouter;

@@ -17,11 +17,15 @@ const CommentPopup = () => {
     const [image, setImage] = useState(null);
     const [showPicker, setShowPicker] = useState(false);
 
-    const {setCommentPostData,  commentPostData, clearCommentPostData , commentPostReq , myPostReq,commentListReq, commentList, newsFeedReq  } = postStore()
+    const {setCommentPostData,  commentPostData, clearCommentPostData , commentPostReq , myPostReq,commentListReq, commentList, newsFeedReq, deletePostCommentReq, updateComment} = postStore()
     const {myProfileData} = authorStore()
     const id =  commentPostData.id
 
     const [loader, setLoader] = useState(false)
+    const [deleteLoader, setDeleteLoader] = useState({
+        status : false,
+        id: null
+    })
 
     useEffect(() => {
         (
@@ -31,9 +35,11 @@ const CommentPopup = () => {
         )()
     }, []);
 
-    console.log(commentList)
 
     const handleEmojiClick = (emojiData) => {
+        if(commentPostData.comment === undefined){
+            commentPostData.comment = ""
+        }
         let newCommentPostData = commentPostData.comment + (emojiData.emoji)
         setCommentPostData("comment", newCommentPostData);
         setShowPicker(false);
@@ -55,34 +61,91 @@ const CommentPopup = () => {
     const submitComment = async () => {
 
         setLoader(true)
-        let res = await commentPostReq(commentPostData);
-        setLoader(false)
-        if(res){
-            if(path === "/"){
-                await newsFeedReq()
-            }
-            else {
-                if(user !== "me"){
-                    await myPostReq(user);
 
+        if( commentPostData.commentId === undefined){
+            let res = await commentPostReq(commentPostData);
+            if(res){
+                if(path === "/"){
+                    await newsFeedReq()
                 }
                 else {
-                    await myPostReq(myProfileData.username);
+                    if(user !== "me"){
+                        await myPostReq(user);
+    
+                    }
+                    else {
+                        await myPostReq(myProfileData.username);
+                    }
                 }
+                clearCommentPostData(null)
+                toast.success('Comment Create Successfully')
             }
-            clearCommentPostData(null)
-            toast.success('Comment Create Successfully')
+            else {
+                toast.error('Comment Create Failed')
+            }
         }
-        else {
-            toast.error('Comment Create Failed')
+        else{
+            let res = await updateComment(commentPostData);
+            if(res){
+                if(path === "/"){
+                    await newsFeedReq()
+                }
+                else {
+                    if(user !== "me"){
+                        await myPostReq(user);
+    
+                    }
+                    else {
+                        await myPostReq(myProfileData.username);
+                    }
+                }
+                clearCommentPostData(null)
+                toast.success('Comment Update Successfully')
+            }
+            else {
+                toast.error('Comment Update Failed')
+            }
         }
+        
+        setLoader(false)
+    }
 
+    const deleteComment = async (id) => {
+        setDeleteLoader(
+            {
+                status : true,
+                 id: id
+            }
+        )
+        
+          const postId = commentPostData.id
+          let res = await deletePostCommentReq(postId,id)
+          setDeleteLoader(
+            {
+                status :false,
+                 id: null,
+            }
+          )
+          if(res){
+              toast.success('Comment Delete Successfully')
+              await commentListReq (postId)
+          }
+          else {
+              toast.error('Comment Delete Failed')
+          }
+    }
 
+    const editComment = (id , data)=>{
+        setCommentPostData("comment", data )
+        setCommentPostData("commentId", id )
 
     }
+    
+
+
     return (
         <div
-            className="h-screen w-screen absolute top-0 right-0 bg- z-[9999999999999] bg-white bg-opacity-60
+            className="h-screen w-screen absolute top-0 right-0 bg- z-[9999999] bg-white bg-opacity-60
             mx-auto flex justify-center items-center overflow-hidden
             "
         >
@@ -140,10 +203,27 @@ const CommentPopup = () => {
                                             {item.comment}
                                         </p>
 
-                                        <div className="flex justify-end items-center gap-3 my-1">
-                                            <button><RiEdit2Fill className="text-lg font-semibold"/></button>
-                                            <button><AiFillDelete className="text-lg font-semibold"/></button>
-                                        </div>
+                                        {
+                                            item.isComment && (
+                                                <div className="flex justify-end items-center gap-3 my-1">
+                                                <button
+                                                    onClick={()=>editComment(item._id, item.comment)}
+                                                >
+                                                    <RiEdit2Fill className="text-lg font-semibold"/>
+                                                    </button>
+                                                <button
+                                                    onClick={
+                                                        ()=>deleteComment(item._id)
+                                                    }
+                                                >
+                                                    { 
+                                                        deleteLoader.status &&  (deleteLoader.id === item._id) ? <div className="loader-dark"></div> : <AiFillDelete className="text-lg font-semibold"/>
+                                                    }
+                                                    
+                                                </button>
+                                            </div>
+                                            )
+                                        }
                                     </div>
 
                                 </div>
@@ -247,7 +327,10 @@ const CommentPopup = () => {
                             hover:bg-sky-500 hover:text-sky-50
                             "
                                 >
-                                    Comment
+                                    {
+                                        commentPostData.commentId !== undefined ?" Update" :" Comment"
+                                    }
+                                    
                                 </button>
                             )
                         }

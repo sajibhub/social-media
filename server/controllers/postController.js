@@ -301,12 +301,14 @@ export const PostLike = async (req, res) => {
     );
 
     const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 })
-    await Notification.create({
-      userId: userId._id,
-      type: "like",
-      sourceId: id,
-      postId,
-    })
+    if (id.toString() != findPost.userId.toString()) {
+      await Notification.create({
+        userId: userId._id,
+        type: "like",
+        sourceId: id,
+        postId,
+      })
+    }
     return res.status(200).json({
       message: "Post liked successfully.",
     });
@@ -394,12 +396,14 @@ export const PostComment = async (req, res) => {
     );
 
     const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 })
-    await Notification.create({
-      userId: userId._id,
-      type: "comment",
-      sourceId: id,
-      postId,
-    })
+    if (id.toString() != findPost.userId) {
+      await Notification.create({
+        userId: userId._id,
+        type: "comment",
+        sourceId: id,
+        postId,
+      })
+    }
     return res.status(200).json({
       message: "Comment added successfully.",
     });

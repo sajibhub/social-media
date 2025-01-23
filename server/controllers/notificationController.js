@@ -19,6 +19,77 @@ export const NotificationGet = async (req, res) => {
             },
             { $unwind: "$user" },
             {
+                $addFields: {
+                    time: {
+                        $cond: {
+                            if: {
+                                $lt: [
+                                    {
+                                        $divide: [
+                                            { $subtract: [new Date(), "$createdAt"] },
+                                            1000 * 60,
+                                        ],
+                                    },
+                                    1440,
+                                ],
+                            },
+                            then: {
+                                $cond: {
+                                    if: {
+                                        $lt: [
+                                            {
+                                                $divide: [
+                                                    { $subtract: [new Date(), "$createdAt"] },
+                                                    1000 * 60,
+                                                ],
+                                            },
+                                            60,
+                                        ],
+                                    },
+                                    then: {
+                                        $concat: [
+                                            {
+                                                $toString: {
+                                                    $floor: {
+                                                        $divide: [
+                                                            { $subtract: [new Date(), "$createdAt"] },
+                                                            1000 * 60,
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            " minutes ago",
+                                        ],
+                                    },
+                                    else: {
+                                        $concat: [
+                                            {
+                                                $toString: {
+                                                    $floor: {
+                                                        $divide: [
+                                                            { $subtract: [new Date(), "$createdAt"] },
+                                                            1000 * 60 * 60,
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                            " hours ago",
+                                        ],
+                                    },
+                                },
+                            },
+                            else: {
+                                $dateToString: {
+                                    format: "%H:%M:%S %Y-%m-%d",
+                                    date: "$createdAt",
+                                    timezone: "Asia/Dhaka",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+            {
                 $project: {
                     _id: 1,
                     userId: 1,
@@ -26,6 +97,7 @@ export const NotificationGet = async (req, res) => {
                     type: 1,
                     postId: 1,
                     isRead: 1,
+                    time:1,
                     user: {
                         fullName: 1,
                         username: 1,

@@ -18,6 +18,13 @@
     .author-tab-active{
         @apply lg:block my-1 w-full px-4 py-2 lg:rounded-s font-semibold bg-white text-lg text-sky-500 ;
     }
+
+    .profile-tab-active{
+        @apply text-lg font-medium text-sky-500 border-b-2 border-sky-500 p-2 cursor-pointer;
+    }
+    .profile-tab{
+        @apply text-lg font-medium text-neutral-700 p-2 cursor-pointer;
+    }
 }
 
 
@@ -31,6 +38,7 @@ body{
 
 .loader {
     width: 24px;
+    height: 24px;
     padding: 5px;
     aspect-ratio: 1;
     border-radius: 50%;
@@ -47,6 +55,7 @@ body{
 
 .loader-dark {
     width: 20px;
+    height: 20px;
     padding: 4px;
     aspect-ratio: 1;
     border-radius: 50%;

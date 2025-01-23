@@ -1,5 +1,5 @@
-import SummaryProfileComponent from "../Component/summary/SummaryProfileComponent.jsx";
-import SummarySuggested from "../Component/summary/SummarySuggested.jsx";
+import ProfileSummaryComponent from "../Component/users/ProfileSummaryComponent.jsx";
+import SuggestUserComponent from "../Component/users/SuggestUserComponent.jsx";
 
 
 const Summary = () => {
@@ -7,10 +7,10 @@ const Summary = () => {
     return (
         <>
             {
-                pathname !== "/profile/me" && <SummaryProfileComponent />
+                pathname !== "/profile/me" && <ProfileSummaryComponent />
             }
 
-            <SummarySuggested />
+            <SuggestUserComponent />
         </>
     );
 };

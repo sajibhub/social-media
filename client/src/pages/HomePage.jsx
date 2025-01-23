@@ -10,7 +10,7 @@ import postStore from "@/store/postStore.js";
 
 const HomePage = () => {
 
-    const{readProfileReq}= authorStore()
+    const{readProfileReq ,suggestUserReq}= authorStore()
     const {newsFeedReq} = postStore()
     const navigate = useNavigate();
 
@@ -19,6 +19,7 @@ const HomePage = () => {
         (
 
             async ()=>{
+                await suggestUserReq()
                 await newsFeedReq()
                 let res = await readProfileReq("me")
                 if(res !== true){
