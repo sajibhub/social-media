@@ -6,8 +6,28 @@ const ProfileSummaryComponent = () => {
 
     if(myProfileData === null || myProfileData === undefined) {
         return (
-            <h1>Loading......</h1>
-        )
+            <>
+                <div
+                    className="mx-2 mt-2 rounded border-2 border-gray-100 overflow-hidden animate-pulse"
+                >
+                    {/* Cover Photo Skeleton */}
+                    <div className="h-[100px] w-full bg-gray-300 shadow"></div>
+
+                    {/* Profile Picture Skeleton */}
+                    <div
+                        className="
+          h-[70px] w-[70px] rounded-full bg-gray-300 mx-[10px] mt-[-35px] shadow
+        "
+                    ></div>
+
+                    {/* Text Skeleton */}
+                    <div className="mx-[15px] pb-3 mt-3 space-y-2">
+                        <div className="h-6 bg-gray-300 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-300 rounded w-1/3"></div>
+                    </div>
+                </div>
+            </>
+        );
     }
 
     else {
@@ -21,7 +41,7 @@ const ProfileSummaryComponent = () => {
                         duration: 0.5,
                         scale: { type: "spring", visualDuration: 0.1, bounce: 0.1 },
                     }}
-                    className="mx-2 mt-2  rounded border-2 border-gray-100 overflow-hidden cursor-pointer
+                    className="mx-2 mt-2  rounded border-2 shadow border-gray-100 overflow-hidden cursor-pointer
                 "
                 >
 

@@ -36,14 +36,8 @@ const SearchResultComponent = () => {
             }
         )
         if(res){
-            await readProfileReq(url)
-            if(url === "me"){
-                await followingListReq(myProfileData.username);
 
-            }
-            else {
-                await followingListReq(url);
-            }
+
             toast.success("Following Successful")
 
         }
@@ -147,15 +141,15 @@ const SearchResultComponent = () => {
                                 </div>
 
                                 {
-                                    (followLoader.id === user._id) ? <LoadingButtonFit /> : (
+                                    (followLoader.id === user._id) ? <div className="loader-dark me-5"></div> : (
                                         <button
                                             onClick={() => followHandel(user._id)}
-                                            className="hover:text-sky-500 text-base"
+                                            className="hover:text-sky-500 text-sm font-medium"
                                         >
                                             {
-                                                user.isFollowing ? "Unfollow" : "FlowBack"
+                                                user.isFollowing ? "Unfollow" : "Followback"
                                             }
-                                            
+
                                         </button>
                                     )
                                 }

@@ -14,8 +14,8 @@ const PostCard = () => {
   const {user} = useParams();
   const path = window.location.pathname;
   const navigate = useNavigate();
-  const {my_post_data, setUpdatePostData,  deletePostReq, myPostReq ,likePostReq , setCommentPostData, removeCommentList, newsFeedReq , savePostReq ,savePostListReq} = postStore()
-  const {myProfileData,flowReq } = authorStore()
+  const {my_post_data, setUpdatePostData,  deletePostReq, myPostReq ,likePostReq , setCommentPostData, removeCommentList, newsFeedReq , savePostReq ,savePostListReq, update_my_post_data ,clear_my_post_data} = postStore()
+  const {myProfileData,flowReq  } = authorStore()
   const [loader, setLoader] = useState({
     status : false,
     id: null
@@ -32,11 +32,14 @@ const PostCard = () => {
   });
 
   const goToProfile = (isPost , user)=>{
+
     if(isPost ){
       navigate("/profile/me")
+      clear_my_post_data()
     }
     else {
       navigate("/profile/"+user)
+      clear_my_post_data()
     }
   }
 
@@ -86,8 +89,68 @@ const PostCard = () => {
     )
   }
 
-  if(my_post_data === null) {
-    return <h1 className="h-full text-center text-3xl py-[100px]">Loading ..........</h1>
+  const likePostHandler = async (id,isLike ,Like ) => {
+    console.log(isLike , id, Like)
+    setLoader({
+      status: true,
+      id: id
+    })
+    const res =  await likePostReq(id);
+
+    setLoader({
+      status: false,
+      id: null
+    })
+
+    let like = Like-1
+    let add = Like + 1
+
+    if (res && (isLike === true)) {
+      update_my_post_data(id, { isLike: false, like:like})
+
+    }
+    if (res && (isLike ===false)) {
+      update_my_post_data(id, { isLike: true, like:add})
+
+    }
+  }
+
+  if(my_post_data === null ) {
+    return (
+        Array.from({ length: 5 }).map((_, index) => (
+            <div
+                key={index}
+                className="max-w-[560px] pt-3 mt-3 rounded shadow-md mx-auto animate-pulse"
+            >
+              <div className="flex flex-row ms-3 me-5 gap-3 justify-start items-center">
+                {/* Profile Picture Skeleton */}
+                <div className="flex-shrink-0 h-[40px] w-[40px] bg-gray-300 rounded-full" />
+
+                {/* Text Skeleton */}
+                <div className="flex-grow space-y-2">
+                  <div className="h-4 bg-gray-300 rounded w-1/2" />
+                  <div className="h-3 bg-gray-200 rounded w-1/3" />
+                </div>
+              </div>
+
+              {/* Caption Skeleton */}
+              <div className="px-3 mt-4">
+                <div className="h-3 bg-gray-300 rounded w-3/4 mb-2" />
+                <div className="h-3 bg-gray-300 rounded w-1/2" />
+              </div>
+
+              {/* Image Placeholder Skeleton */}
+              <div className="px-3 w-full h-[320px] bg-gray-200 rounded-md mt-3" />
+
+              {/* Buttons Skeleton */}
+              <div className="px-4 py-5 flex gap-5">
+                <div className="h-4 bg-gray-300 rounded w-16" />
+                <div className="h-4 bg-gray-300 rounded w-20" />
+                <div className="h-4 bg-gray-300 rounded w-16" />
+              </div>
+            </div>
+        ))
+    )
   }
 
 
@@ -104,7 +167,7 @@ const PostCard = () => {
                       duration: 0.3,
                       scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                     }}
-                    className="max-w-[560px] pt-3 mt-3 rounded shadow-md mx-auto cursor-pointer"
+                    className="max-w-[560px] pt-3 mt-4 rounded shadow-lg mx-auto cursor-pointer border"
                 >
                   <div className="flex flex-row ms-3 me-5 gap-3 justify-start items-center">
                     <div className=" flex-shrink-0  h-[40px] w-[40px] rounded-full
@@ -246,30 +309,10 @@ const PostCard = () => {
 
                   <div className="px-4 py-5 flex flex-row justify-s items-center gap-5">
                     <div
-                        onClick={async () => {
-                          setLoader({
-                            status: true,
-                            id: items._id
-                          })
-                          const res = await likePostReq(items._id);
-                          setLoader({
-                            status: false,
-                            id: ""
-                          })
-                          if (res) {
-                            if (path === "/") {
-                              await newsFeedReq()
-                            } else {
-                              if (user !== "me") {
-                                await myPostReq(user);
+                        onClick={
+                          ()=>likePostHandler(items._id, items.isLike, items.like)
+                        }
 
-                              } else {
-                                await myPostReq(myProfileData.username);
-                              }
-                            }
-
-                          }
-                        }}
                         className="flex flex-row gap-2 justify-start items-center"
                     >
                       {

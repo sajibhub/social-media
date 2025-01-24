@@ -149,10 +149,10 @@ const SearchResultComponent = () => {
                                 </div>
 
                                 {
-                                    (followLoader.id === user._id) ? <LoadingButtonFit /> : (
+                                    (followLoader.id === user._id) ? <div className="loader-dark me-5"></div> : (
                                         <button
                                             onClick={() => followHandel(user._id)}
-                                            className="hover:text-sky-500 text-base"
+                                            className="hover:text-sky-500 text-sm font-medium"
                                         >
                                             Unfollow
                                         </button>

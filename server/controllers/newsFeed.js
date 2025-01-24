@@ -135,7 +135,7 @@ export const NewsFeed = async (req, res) => {
       {
         $project: {
           _id: 1,
-          user: { _id: 1, fullName: 1, username: 1, profile: 1 },
+          user: { _id: 1, fullName: 1, username: 1, profile: 1, verify: 1 },
           caption: 1,
           images: 1,
           time: 1,
@@ -212,7 +212,8 @@ export const SuggestUser = async (req, res) => {
           fullName: 1,
           username: 1,
           profile: 1,
-          isFollowing: 1
+          isFollowing: 1,
+          verify: 1
         }
       }
     ]);

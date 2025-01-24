@@ -5,10 +5,12 @@ import {useEffect} from "react";
 
 import {useNavigate} from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
+import OtpRequestPopup from "@/popup/OtpRequestPopup.jsx";
+import PasswordPopup from "@/popup/PasswordPopup.jsx";
 
 const AuthorPage = () => {
     const navigate = useNavigate();
-    const {author, setAuthor} = uiManage()
+    const {author, setAuthor ,SendOpt ,Password} = uiManage()
     const {readProfileReq} = authorStore()
 
     useEffect(() => {
@@ -28,6 +30,15 @@ const AuthorPage = () => {
 
     return (
         <>
+            {
+                SendOpt !== null &&  <OtpRequestPopup />
+            }
+
+            {
+                Password !== null &&  <PasswordPopup />
+            }
+
+
             <div className="grid grid-cols-3 grid-rows-none overflow-y-auto  h-screen">
 
                 <div

@@ -51,7 +51,6 @@ app.use(compression());
 app.use(UserAgentMiddleware);
 
 app.use("/api/v1", userRouter, postRouter, Notification);
-
 app.listen(PORT, () => {
   DATABASE();
   console.log(`Server Is Running On Port ${PORT}`);

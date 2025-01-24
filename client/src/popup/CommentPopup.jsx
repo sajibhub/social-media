@@ -12,6 +12,7 @@ import {useParams} from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
 
 const CommentPopup = () => {
+    
     const {user} = useParams();
     const path = window.location.pathname;
     const [image, setImage] = useState(null);
@@ -170,7 +171,38 @@ const CommentPopup = () => {
 
                 <div className="scroll-bar-hidden  overflow-y-auto h-full pb-64">
                     {
-                        commentList === null && <h1 className="text-center font-lg mt-5"> loading .... </h1>
+                        commentList === null && (
+                            [1,1,1,1,].map((item, index) => {
+                                return (
+                                    <div
+                                        key={index}
+                                        className="pt-3 pb-1 ps-2 pe-1 border-b mx-4 animate-pulse"
+                                    >
+                                        <div className="flex flex-row gap-3 justify-start items-start">
+                                            {/* Profile Image Skeleton */}
+                                            <div className="flex-shrink-0 h-[35px] w-[35px] rounded-full bg-gray-300"></div>
+
+                                            {/* Name and Username Skeleton */}
+                                            <div className="flex-grow">
+                                                <div className="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                                                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                                            </div>
+                                        </div>
+
+                                        {/* Comment Text Skeleton */}
+                                        <div className="mt-2 flex flex-wrap items-end">
+                                            <div className="h-4 bg-gray-200 rounded w-full"></div>
+
+                                            {/* Action Buttons Skeleton */}
+                                            <div className="flex justify-end items-center gap-3 my-1 w-full mt-2">
+                                                <div className="h-6 w-6 bg-gray-300 rounded"></div>
+                                                <div className="h-6 w-6 bg-gray-300 rounded"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )
                     }
                     {
                         commentList !== null &&
@@ -252,7 +284,7 @@ const CommentPopup = () => {
                             flex flex-row justify-center items-center"
                         >
                             <img
-                                src="/image/profile.jpg"
+                                src={myProfileData.profile}
                                 alt="profile image"
                                 className="min-w-full min-h-full "
                             />

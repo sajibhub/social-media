@@ -90,12 +90,12 @@ const NotificationList = () => {
   };
 
   const userNavigate = (notification) => {
-    if (notification.type == "follow") {
-      navigate(`/profile/${notification.user.username}`);
-    }
-    if (notification.type == "like") {
-      navigate(`/post/${notification.postId}`);
-    }
+    // if (notification.type == "follow") {
+    //   navigate(`/profile/${notification.user.username}`);
+    // }
+    // if (notification.type == "like") {
+    //   navigate(`/post/${notification.postId}`);
+    // }
   };
 
   useEffect(() => {

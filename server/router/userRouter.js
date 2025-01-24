@@ -33,6 +33,6 @@ userRouter.get("/user/followers/:username", Authorized, GetFollowers);
 userRouter.get("/user/following/:username", Authorized, GetFollowing);
 userRouter.get("/user/save/post", Authorized, GetSavePost)
 userRouter.post("/user/search", Authorized, SearchUser)
-userRouter.get("/user/profile/post/images", Authorized, GetImages)
+userRouter.get("/user/profile/post/images/:username", Authorized, GetImages)
 
 export default userRouter;

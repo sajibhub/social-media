@@ -8,8 +8,10 @@ import EmojiPicker from "emoji-picker-react";
 import toast from "react-hot-toast";
 import postStore from "@/store/postStore.js";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
+import authorStore from "../../store/authorStore";
 
 const AddPost = () => {
+    const {myProfileData} =authorStore()
     const {newsFeedReq} = postStore()
     const {createPostReq} = postStore()
     const [image, setImage] = useState(null);
@@ -63,7 +65,7 @@ const AddPost = () => {
                     duration: 0.3,
                     scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
                 }}
-                className="max-w-[560px] mx-auto mt-5 rounded shadow cursor-pointer p-5"
+                className="max-w-[560px] mx-auto mt-5 rounded shadow-md border cursor-pointer p-5"
             >
                 {showPicker && (
                     <div className=" absolute top-0 right-0 z-30" >
@@ -73,7 +75,7 @@ const AddPost = () => {
 
                 <div className="flex flex-row justify-center items-center gap-3 pb-3 border-b-2 border-gray-100 ">
                     <div className="flex flex-row h-[35px] w-[35px] justify-center items-center rounded-full overflow-hidden">
-                        <img src="/image/profile.jpg" alt="profile image" className="min-w-full min-h-full "/>
+                        <img src={myProfileData?.profile} alt="profile image" className="min-w-full min-h-full "/>
                     </div>
                     <textarea
                         value={text}

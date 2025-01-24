@@ -35,6 +35,18 @@ const postStore  = create((set) => ({
     },
 
     my_post_data:null,
+    clear_my_post_data : ()=>{
+        set({my_post_data : null})
+    },
+
+    update_my_post_data : (id, updatedFields) => {
+        set((state) => ({
+            my_post_data: state. my_post_data.map((item) =>
+                item._id === id ? { ...item, ...updatedFields } : item
+            ),
+        }));
+    },
+
     myPostReq : async (user)=>{
         try{
             const res = await axios.get( My_Post_Api + user ,  {withCredentials:true} );
@@ -169,12 +181,15 @@ const postStore  = create((set) => ({
 
     updateComment : async (data)=>{
         const PostId = data.id
-        const Comment = data.comment
+        const comment = {
+            comment: data.comment
+        }
         const commentId = data.commentId
+
         let api = Post_Comment_Update_api + PostId + "/" + commentId;
         
         try {
-            await axios.put(api, Comment, {withCredentials:true} );
+            await axios.put(api, comment, {withCredentials:true} );
             return true
         } 
         catch {

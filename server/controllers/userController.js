@@ -335,6 +335,7 @@ export const Profile = async (req, res) => {
             },
           },
           bio: 1,
+          verify: 1,
           currentAddress: 1,
           mediaLink: 1,
           followers: 1,
@@ -442,14 +443,7 @@ export const ProfileInfoUpdate = async (req, res) => {
           message: "Username should contain only alphanumeric characters.",
         });
       }
-
-      if (username == user.username) {
-        return res.status(400).json({
-          message: "Username cannot be the same as the current username.",
-        });
-      }
-
-      const usernameFind = await User.findOne({ username }).select({
+      const usernameFind = await User.findOne({ username: { $ne: user.username } }).select({
         _id: 0,
         username: 1,
       });
@@ -738,6 +732,7 @@ export const Follow = async (req, res) => {
 
 export const GetFollowers = async (req, res) => {
   try {
+    const { id } = req.headers
     const { username } = req.params;
 
     const userFind = await User.findOne({ username }).select({ _id: 1 })
@@ -748,17 +743,24 @@ export const GetFollowers = async (req, res) => {
           from: "users",
           localField: "followers",
           foreignField: "_id",
-          as: "followers",
+          as: "follower",
         }
       },
-      { $unwind: "$followers" },
+      { $unwind: "$follower" },
+      {
+        $addFields: {
+          isFollowing: { $in: [id, "$followers",] }
+        }
+      },
       {
         $project: {
           _id: 0,
-          _id: "$followers._id",
-          fullName: "$followers.fullName",
-          username: "$followers.username",
-          profile: "$followers.profile",
+          _id: "$follower._id",
+          fullName: "$follower.fullName",
+          username: "$follower.username",
+          profile: "$follower.profile",
+          isFollowing: 1,
+          verify: 1,
         }
       }
     ])
@@ -766,6 +768,7 @@ export const GetFollowers = async (req, res) => {
       followers
     })
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       message: "An error occurred while processing your request.",
     });
@@ -794,6 +797,7 @@ export const GetFollowing = async (req, res) => {
           fullName: "$following.fullName",
           username: "$following.username",
           profile: "$following.profile",
+          verify: 1,
         }
       }
     ])
@@ -916,7 +920,7 @@ export const GetSavePost = async (req, res) => {
       {
         $project: {
           _id: "$savedPosts._id",
-          user: { _id: 1, fullName: 1, username: 1, profile: 1 },
+          user: { _id: 1, fullName: 1, username: 1, profile: 1, verify: 1 },
           caption: "$savedPosts.caption",
           images: "$savedPosts.images",
           time: 1,
@@ -946,9 +950,15 @@ export const GetSavePost = async (req, res) => {
 
 export const GetImages = async (req, res) => {
   try {
-    const { id } = req.headers;
+    const { username } = req.params;
+    if (!username) {
+      return res.status(400).json({
+        message: "Username is required."
+      })
+    }
+    const userFind = await User.findOne({ username }).select({ _id: 1 })
     const images = await Post.aggregate([
-      { $match: { userId: id } },
+      { $match: { userId: userFind._id } },
       { $unwind: "$images" },
       {
         $project: {
@@ -999,7 +1009,8 @@ export const SearchUser = async (req, res) => {
           fullName: 1,
           username: 1,
           profile: 1,
-          isFollowing: 1
+          isFollowing: 1,
+          verify: 1
         }
       }
     ]);

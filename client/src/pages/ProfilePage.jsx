@@ -9,31 +9,31 @@ import uiManage from "@/store/uiManage.js";
 import FollowersListComponent from "@/Component/users/FollowersListComponent.jsx";
 import FollowingListComponent from "@/Component/users/FollowingListComponent.jsx";
 import PersonalInfoComponent from "../Component/users/PersonalInfoComponent";
-import SocialMediaComponent from "../Component/users/SocialMediaComponent";
+import ImageGallery from "@/Component/users/ImageGallery.jsx";
+
 
 
 const ProfilePage = () => {
     const {user} = useParams();
-    const {myPostReq} = postStore()
-    const {readProfileReq , followersReq ,followingListReq}= authorStore()
+    const {myPostReq, clear_my_post_data} = postStore()
+    const {readProfileReq , followersReq ,followingListReq, imageGalleryReq , clear_profileData ,clear_followersList,clear_followingList, clear_imageGallery }= authorStore()
     const {profile_tab} = uiManage()
 
-    let userName = localStorage.getItem('userName');
 
     useEffect(() => {
         (
             async ()=>{
+                clear_my_post_data()
+                clear_profileData()
+                clear_followersList()
+                clear_followingList()
+                clear_imageGallery()
+
                 await readProfileReq(user)
-                if(user === "me"){
-                    await myPostReq(userName);
-                    await followersReq(userName);
-                    await followingListReq(userName);
-                }
-                else {
-                    await myPostReq(user);
-                    await followersReq(user);
-                    await followingListReq(user);
-                }
+                await myPostReq(user);
+                await followersReq(user);
+                await followingListReq(user);
+                await imageGalleryReq(user)
             }
         )()
     }, [user]);
@@ -47,6 +47,9 @@ const ProfilePage = () => {
                 profile_tab === "my-post" && <PostCard/>
             }
             {
+                profile_tab === "post-photo" && <ImageGallery />
+            }
+            {
                 profile_tab === "followers" && <FollowersListComponent />
             }
             {
@@ -55,9 +58,6 @@ const ProfilePage = () => {
 
             {
                 profile_tab === "about" && <PersonalInfoComponent />
-            }
-            {
-                profile_tab === "about" && <SocialMediaComponent />
             }
 
         </Layout>

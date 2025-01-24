@@ -11,6 +11,7 @@ import {
   PostRead,
   PostSave,
   PostUpdate,
+  SinglePost,
 } from "../controllers/postController.js";
 import Authorized from "../middleware/authorized.js";
 import { NewsFeed, SuggestUser } from "../controllers/newsFeed.js";
@@ -37,6 +38,7 @@ postRouter.delete(
 );
 postRouter.put("/user/post/save/:postId", Authorized, PostSave);
 postRouter.get("/user/post/feed", Authorized, NewsFeed);
+postRouter.get("/user/single/post/:postId", Authorized, SinglePost);
 postRouter.get("/user/suggest", Authorized, SuggestUser)
 
 export default postRouter;

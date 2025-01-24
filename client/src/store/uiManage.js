@@ -10,6 +10,14 @@ const uiManage = create((set) => ({
     edit_profile_Ui_Control: null,
     set_edit_profile_Ui_Control : (e) => set({edit_profile_Ui_Control : e}),
 
+    SendOpt:null,
+    setSendOpt : (e) => set({SendOpt : e}),
+
+    Password:null,
+    setPassword : (e) => set({Password : e}),
+
+
+
 
 }))
 

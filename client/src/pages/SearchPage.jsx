@@ -10,7 +10,9 @@ const SearchPage = () => {
 
     const [loading, setLoading] = useState(false);
 
-    const searchHandel = async ()=>{
+    const searchHandel = async (e)=>{
+        e.preventDefault()
+
         setLoading(true);
         await searchUserReq(searchKeywords);
         setLoading(false);
@@ -19,24 +21,29 @@ const SearchPage = () => {
 
     return (
         <Layout>
-            <div className="w-full  border-b-2 sticky top-0 bg-blur bg-white bg-opacity-20 z-[999999] flex items-center ">
-                <input
-                    onChange={(e) => setSearchKeywords(e.target.value)}
-                    placeholder="Type hare"
-                    className="py-4 ps-4 w-full text-lg flex-grow"
-                />
+            <>
+                <form
+                    onSubmit={searchHandel}
+                    className="w-full  border-b-2 sticky top-0 bg-blur bg-white bg-opacity-20 z-[999999] flex items-center "
+                >
+                    <input
+                        onChange={(e) => setSearchKeywords(e.target.value)}
+                        placeholder="Type hare"
+                        className="py-4 ps-4 w-full text-lg flex-grow"
+                    />
 
-                {
-                    loading ? <div className="loader-dark me-5"></div> : (
-                        <button
-                            onClick={searchHandel}
-                        >
-                            <IoSearch className="text-xl me-5 font-medium hover:text-sky-500"/>
-                        </button>
-                    )
-                }
+                    {
+                        loading ? <div className="loader-dark me-5"></div> : (
+                            <button
+                               type="submit"
+                            >
+                                <IoSearch className="text-xl me-5 font-medium hover:text-sky-500"/>
+                            </button>
+                        )
+                    }
+                </form>
 
-            </div>
+            </>
 
             <SearchResultComponent/>
 

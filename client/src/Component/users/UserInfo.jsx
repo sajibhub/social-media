@@ -12,6 +12,7 @@ import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import uiManage from "@/store/uiManage.js";
 
 const UserInfo = () => {
+
     const [loader, setLoader] = useState(false);
     const navigate = useNavigate();
     const {user} = useParams();
@@ -20,8 +21,57 @@ const UserInfo = () => {
 
     if(profileData === null || profileData === undefined) {
         return (
-            <h1>Loading......</h1>
-        )
+            <div className="rounded border border-gray-200 mb-6 animate-pulse">
+                {/* Cover Photo Skeleton */}
+                <div className="h-[200px] w-full bg-gray-300" />
+
+                {/* Profile Picture Skeleton */}
+                <div
+                    className="h-[100px] w-[100px] rounded-full bg-gray-300 mx-[25px] mt-[-50px] shadow"
+                />
+
+                <div className="mx-[25px] pb-3 mt-3">
+                    {/* Name Skeleton */}
+                    <div className="h-6 bg-gray-300 rounded w-1/3 mb-2" />
+
+                    {/* Username Skeleton */}
+                    <div className="h-4 bg-gray-300 rounded w-1/4 mb-4" />
+
+                    {/* Follow Stats Skeleton */}
+                    <div className="flex gap-4">
+                        <div className="h-4 bg-gray-300 rounded w-16" />
+                        <div className="h-4 bg-gray-300 rounded w-16" />
+                        <div className="h-4 bg-gray-300 rounded w-16" />
+                    </div>
+
+                    {/* Bio Skeleton */}
+                    <div className="mt-4 h-12 bg-gray-200 rounded" />
+
+                    {/* Contact Info Skeleton */}
+                    <div className="mt-4 flex flex-wrap gap-4">
+                        <div className="h-4 bg-gray-300 rounded w-32" />
+                        <div className="h-4 bg-gray-300 rounded w-32" />
+                    </div>
+
+                    {/* Social Media Icons Skeleton */}
+                    <div className="mt-4 flex gap-4">
+                        <div className="h-8 w-8 bg-gray-300 rounded-full" />
+                        <div className="h-8 w-8 bg-gray-300 rounded-full" />
+                        <div className="h-8 w-8 bg-gray-300 rounded-full" />
+                        <div className="h-8 w-8 bg-gray-300 rounded-full" />
+                    </div>
+                </div>
+
+                {/* Tabs Skeleton */}
+                <div className="flex gap-3 mt-4 px-4">
+                    <div className="h-8 w-24 bg-gray-300 rounded" />
+                    <div className="h-8 w-24 bg-gray-300 rounded" />
+                    <div className="h-8 w-24 bg-gray-300 rounded" />
+                    <div className="h-8 w-24 bg-gray-300 rounded" />
+                    <div className="h-8 w-24 bg-gray-300 rounded" />
+                </div>
+            </div>
+        );
     }
 
     else {
@@ -45,7 +95,7 @@ const UserInfo = () => {
                     </h1>
 
                     {
-                        user === "me" ? (
+                        user === profileData.username ? (
                             <button
                                 onClick={() => set_edit_profile_Ui_Control(true)}
                                 className="
@@ -116,7 +166,7 @@ const UserInfo = () => {
                         </div>
                     </div>
 
-                    <div className="p-3 my-3 bg-gray-100 rounded">
+                    <div className="p-3 my-3 bg-gray-100 rounded ">
                         {
                             profileData.bio === "" ?
                                 <h1 className="text-sm font-medium text-neutral-700">Please add bio</h1> : (

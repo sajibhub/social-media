@@ -97,11 +97,12 @@ export const NotificationGet = async (req, res) => {
                     type: 1,
                     postId: 1,
                     isRead: 1,
-                    time:1,
+                    time: 1,
                     user: {
                         fullName: 1,
                         username: 1,
                         profile: 1,
+                        verify: 1,
                     },
                 },
             },

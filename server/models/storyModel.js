@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const storySchema = mongoose.Schema(
   {
@@ -16,18 +16,6 @@ const storySchema = mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
         required: true,
-      },
-    ],
-    comments: [
-      {
-        userId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-        comment: {
-          type: String,
-          required: true,
-        },
       },
     ],
     views: [

@@ -10,7 +10,7 @@ const SuggestUserComponent = () => {
         status : false,
         id: null
     });
-    const {suggestUser ,suggestUserReq , flowReq} = authorStore()
+    const {suggestUser ,suggestUserReq , flowReq ,update_suggestUser} = authorStore()
     useEffect(() => {
         (
           async  ()=>{
@@ -20,7 +20,7 @@ const SuggestUserComponent = () => {
     }, []);
 
 
-    const followHandel = async (id)=>{
+    const followHandel = async (id ,isFollowing)=>{
         setFollowLoader(
             {
                 status : true,
@@ -36,8 +36,7 @@ const SuggestUserComponent = () => {
         )
         if(res){
             toast.success("Following Successful")
-            await suggestUserReq()
-
+            isFollowing ?  update_suggestUser(id, {isFollowing :false}) : update_suggestUser(id, {isFollowing :true})
         }
         else{
             toast.error("Following Fail")
@@ -54,7 +53,39 @@ const SuggestUserComponent = () => {
                 <h1 className="mb-2 font-medium text-base text-neutral-700">SUGGESTED FOR YOU</h1>
 
                 {
-                    suggestUser === null && <h1>loading ...</h1>
+                    suggestUser === null && (
+                        <>
+                            {Array(5) // Replace `5` with the number of skeleton items you'd like to display.
+                                .fill(0)
+                                .map((_, index) => (
+                                    <div
+                                        key={index}
+                                        className="
+                                          flex flex-row justify-start items-center gap-3 p-3 border rounded mb-2 animate-pulse
+                                        "
+                                    >
+                                        {/* Profile Picture Skeleton */}
+                                        <div
+                                            className="
+                                              h-[35px] w-[35px] flex items-center justify-center rounded-full bg-gray-300
+                                            "
+                                        >
+
+                                        </div>
+
+                                        {/* Text Skeleton */}
+                                        <div className="flex-grow space-y-1">
+                                            <div className="h-4 bg-gray-300 rounded w-2/3"></div>
+                                            <div className="h-3 bg-gray-300 rounded w-1/3"></div>
+                                        </div>
+
+                                        {/* Button Skeleton */}
+                                        <div className="h-6 w-16 bg-gray-300 rounded"></div>
+                                    </div>
+                                ))}
+                        </>
+
+                    )
                 }
 
 
@@ -74,7 +105,7 @@ const SuggestUserComponent = () => {
                                         }}
                                         className="
                                          cursor-pointer
-                                         flex flex-row justify-start items-center gap-3 p-3 border rounded mb-2
+                                         flex flex-row justify-start items-center gap-3 p-3 border shadow rounded mb-2
                                          "
                                     >
                                         <div
@@ -102,16 +133,19 @@ const SuggestUserComponent = () => {
                                         </div>
 
                                         {
-                                            (followLoader.status) && (followLoader.id === value._id) ? <LoadingButtonFit /> : (
-                                                <button
-                                                    onClick={() => followHandel(value._id)}
-                                                    className="hover:text-sky-500"
-                                                >
-                                                   {
-                                                     value.isFollowing ? "follow" : "Unfollow"
-                                                   }
-                                                </button>
-                                            )
+                                            (followLoader.status) && (followLoader.id === value._id) ?
+                                                <div className="loader-dark me-5"></div>
+                                                :
+                                                (
+                                                    <button
+                                                        onClick={() => followHandel(value._id, value.isFollowing)}
+                                                        className="hover:text-sky-500 font-medium text-sm"
+                                                    >
+                                                        {
+                                                            value.isFollowing ? "Follow" : "Unfollow"
+                                                        }
+                                                    </button>
+                                                )
                                         }
 
 
