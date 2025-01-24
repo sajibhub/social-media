@@ -1,173 +1,108 @@
-import {motion} from "framer-motion";
+import { motion } from "framer-motion";
 import authorStore from "@/store/authorStore.js";
-
-import {useNavigate} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import {useState} from "react";
-import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
-import { useParams } from "react-router-dom";
+import { useState } from "react";
+import VerifiedBadge from "../VerifyBadge/VerifyBadge";
 
 const SearchResultComponent = () => {
-    let userName = localStorage.getItem('userName');
-    const {user} = useParams();
-    const navigate = useNavigate();
-    const [followLoader, setFollowLoader] = useState({
-        status : false,
-        id: null
-    });
+  const userName = localStorage.getItem("userName");
+  const { user } = useParams();
+  const navigate = useNavigate();
+  const [followLoader, setFollowLoader] = useState({ status: false, id: null });
 
-    const {  followingList , flowReq ,followingListReq,  readProfileReq } = authorStore()
+  const { followingList, flowReq, followingListReq, readProfileReq } =
+    authorStore();
 
+  const goToProfile = (username) => {
+    navigate(`/profile/${username}`);
+  };
 
-    const goToProfile = (url)=>{
-        navigate("/profile/"+url)
+  const followHandler = async (id) => {
+    setFollowLoader({ status: true, id });
+    const res = await flowReq(id);
+    setFollowLoader({ status: false, id: null });
+
+    if (res) {
+      await readProfileReq(user);
+      await followingListReq(user === "me" ? userName : user);
+      toast.success("Action Successful");
+    } else {
+      toast.error("Action Failed");
     }
+  };
 
-    const followHandel = async (id)=>{
-        setFollowLoader(
-            {
-                status : true,
-                id: id
-            }
-        )
-        let res = await flowReq(id)
-        setFollowLoader(
-            {
-                status : false,
-                id: null
-            }
-        )
-        if(res){
-            await readProfileReq(user)
-            if(user === "me"){
-                await followingListReq(userName);
+  const skeletonLoader = Array.from({ length: 7 }).map((_, index) => (
+    <motion.div
+      key={index}
+      className="flex items-center gap-4 p-4 border rounded-lg shadow-md animate-pulse bg-white"
+    >
+      <div className="h-12 w-12 bg-gray-300 rounded-full"></div>
+      <div className="flex flex-col flex-grow space-y-2">
+        <div className="h-4 w-1/3 bg-gray-300 rounded"></div>
+        <div className="h-4 w-1/4 bg-gray-300 rounded"></div>
+      </div>
+      <div className="h-8 w-24 bg-gray-300 rounded-full"></div>
+    </motion.div>
+  ));
 
-            }
-            else {
-                await followingListReq(user);
-            }
-            toast.success("Following Successful")
+  return (
+    <div className=" px-3 space-y-4">
+      {followingList === null
+        ? skeletonLoader
+        : followingList.map((user, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ opacity: 1, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{
+                duration: 0.3,
+                scale: { type: "spring", stiffness: 300 },
+              }}
+              className="cursor-pointer flex flex-row justify-start items-center gap-4 p-4 border rounded-lg shadow-lg mb-2 bg-white hover:shadow-xl transition-shadow"
+            >
+              <div
+                onClick={() => goToProfile(user.username)}
+                className="h-[50px] w-[50px] flex items-center justify-center rounded-full overflow-hidden border-2 border-gray-200"
+              >
+                <img
+                  src={user.profile}
+                  alt={`${user.fullName} profile`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
-        }
-        else{
-            toast.error("Following Fail")
-        }
-    }
+              <div className="flex-grow cursor-pointer">
+                <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-1">
+                  <span
+                    onClick={() => goToProfile(user.username)}
+                    className="cursor-pointer hover:underline"
+                  >
+                    {user.fullName}
+                  </span>
+                  {user.verify && <VerifiedBadge isVerified={user.verify} />}
+                </h2>
+                <p className="text-sm text-gray-600">@{user.username}</p>
+              </div>
 
-    if (followingList === null) {
-        return (
-            <div className="mt-4 px-4">
-
-                {
-                    [1,1,1,1,1,1,1].map((user,i) => {
-                        return (
-                            <motion.div
-                                key={i}
-                                whileHover={{opacity: 1, scale: 1.05}}
-                                animate={{opacity: 1, scale: 1}}
-                                transition={{
-
-                                    duration: 0.5,
-                                    scale: {type: "spring", visualDuration: 0.1, bounce: 0.1},
-                                }}
-                                className="
-                                         cursor-pointer
-                                         flex flex-row justify-start items-center gap-3 p-3 border rounded mb-2
-                                         "
-                            >
-                                <div
-                                    className='
-                               h-[40px] w-[40px] flex flex-col items-center justify-center rounded-full bg-sky-50 overflow-hidden
-                               '
-                                >
-
-                                </div>
-
-                                <div
-                                    className="flex-grow py-4 px-10 rounded-md bg-sky-50"
-                                >
-
-                                </div>
-
-                                <button
-                                    className="py-4 px-10 rounded-full bg-sky-50"
-                                >
-                                </button>
-
-                            </motion.div>
-                        )
-                    })
-                }
-
-            </div>
-        );
-    }
-
-    else {
-        return (
-            <div className="mt-4 px-4">
-
-                {
-                    followingList.map((user,i) => {
-                        return (
-                            <motion.div
-                                key={i}
-                                whileHover={{opacity: 1, scale: 1.05}}
-                                animate={{opacity: 1, scale: 1}}
-                                transition={{
-
-                                    duration: 0.5,
-                                    scale: {type: "spring", visualDuration: 0.1, bounce: 0.1},
-                                }}
-                                className="
-                                         cursor-pointer
-                                         flex flex-row justify-start items-center gap-3 p-3 border rounded mb-2
-                                         "
-                            >
-                                <div
-                                    onClick={() => goToProfile(user.username)}
-                                    className='
-                                     h-[40px] w-[40px] flex flex-col items-center justify-center rounded-full  overflow-hidden
-                                     '
-                                >
-                                    <img src={user.profile} alt={""} className="min-w-full min-h-full"/>
-
-                                </div>
-
-                                <div
-                                    className="flex-grow"
-                                >
-                                    <h2
-                                        onClick={() => goToProfile(user.username)}
-                                        className=" text-base font-medium text-neutral-800">{user.fullName}</h2>
-                                    <h2
-                                        onClick={() => goToProfile(user.username)}
-                                        className="text-sm font-normal text-neutral-700"
-                                    >
-                                        {user.username}
-                                    </h2>
-                                </div>
-
-                                {
-                                    (followLoader.id === user._id) ? <div className="loader-dark me-5"></div> : (
-                                        <button
-                                            onClick={() => followHandel(user._id)}
-                                            className="hover:text-sky-500 text-sm font-medium"
-                                        >
-                                            Unfollow
-                                        </button>
-                                    )
-                                }
-
-                            </motion.div>
-                        )
-                    })
-                }
-
-            </div>
-        );
-    }
-
+              {followLoader.id === user._id ? (
+                <div className="loader-dark w-8 h-8"></div>
+              ) : (
+                <button
+                  onClick={() => followHandler(user._id)}
+                  className={`text-sm font-medium py-2 px-6 rounded-full transition-all ${
+                    user.isFollowing
+                      ? "bg-red-500 text-white hover:bg-red-600"
+                      : "bg-sky-500 text-white hover:bg-sky-600"
+                  }`}
+                >
+                  {user.isFollowing ? "Unfollow" : "Follow"}
+                </button>
+              )}
+            </motion.div>
+          ))}
+    </div>
+  );
 };
 
 export default SearchResultComponent;

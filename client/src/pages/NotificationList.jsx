@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { FaEllipsisH, FaTrashAlt } from "react-icons/fa";
+import { MdVerified } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
 const NotificationList = () => {
@@ -184,9 +185,12 @@ const NotificationList = () => {
                   alt={notification.user.username}
                   className="w-12 h-12 rounded-full object-cover"
                 />
-                <div className="ml-4 flex-1">
-                  <div className="text-lg font-medium text-gray-800">
-                    {notification.user.fullName}
+                <div className="ml-4 flex-1 ">
+                  <div className="flex text-lg font-medium text-gray-800 items-center gap-1">
+                    {notification.user.fullName}{" "}
+                    {notification.user.verify && (
+                      <MdVerified className="text-blue-500" />
+                    )}
                   </div>
                   <div className="text-sm text-gray-600">
                     {renderNotificationMessage(notification)}

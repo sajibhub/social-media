@@ -7,6 +7,7 @@ import SearchPage from "@/pages/SearchPage.jsx";
 import Layout from "@/layout/Layout.jsx";
 import NotificationList from "@/pages/NotificationList.jsx";
 import { Toaster } from "react-hot-toast";
+import NotFound from "./Component/NotFound/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
         <NotificationList />{" "}
       </Layout>
     ),
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 
