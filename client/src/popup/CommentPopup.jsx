@@ -235,7 +235,7 @@ const CommentPopup = () => {
                         </button>
                         <button onClick={() => deleteComment(item._id)}>
                           {deleteLoader.status &&
-                          deleteLoader.id === item._id ? (
+                            deleteLoader.id === item._id ? (
                             <div className="loader-dark"></div>
                           ) : (
                             <AiFillDelete className="text-lg font-semibold" />

@@ -8,6 +8,7 @@ import Layout from "@/layout/Layout.jsx";
 import NotificationList from "@/pages/NotificationList.jsx";
 import { Toaster } from "react-hot-toast";
 import NotFound from "./Component/NotFound/NotFound";
+import SinglePostPreview from "@/pages/SinglePostPreview"
 
 const router = createBrowserRouter([
   {
@@ -34,10 +35,15 @@ const router = createBrowserRouter([
     path: "/notification",
     element: (
       <Layout>
-        {" "}
-        <NotificationList />{" "}
+        <NotificationList />
       </Layout>
     ),
+  },
+  {
+    path: "/post/:postId",
+    element: <Layout>
+      <SinglePostPreview />
+    </Layout>
   },
   {
     path: "*",

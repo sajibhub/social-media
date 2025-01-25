@@ -9,7 +9,6 @@ import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
-import { MdVerified } from "react-icons/md";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import VerifiedBadge from "../VerifyBadge/VerifyBadge";
 
@@ -184,7 +183,6 @@ const PostCard = () => {
       </div>
     );
   };
-  console.log(loader.status);
 
   if (my_post_data === null) {
     return Array.from({ length: 5 }).map((_, index) => (
@@ -228,6 +226,7 @@ const PostCard = () => {
                 duration: 0.3,
                 scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
               }}
+              post-id={items._id}
               className="max-w-[560px] pt-3 mt-4 rounded shadow-lg mx-auto cursor-pointer border"
               onClick={() => (openMenuId != null ? setOpenMenuId(null) : "")}
             >
