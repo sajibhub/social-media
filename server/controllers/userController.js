@@ -359,6 +359,7 @@ export const Profile = async (req, res) => {
   }
 };
 
+
 export const ProfilePicUpdate = async (req, res) => {
   try {
     const upload = multer({ storage }).fields([
@@ -760,7 +761,7 @@ export const GetFollowers = async (req, res) => {
           username: "$follower.username",
           profile: "$follower.profile",
           isFollowing: 1,
-          verify: 1,
+          verify: "$follower.verify",
         }
       }
     ])
@@ -797,7 +798,7 @@ export const GetFollowing = async (req, res) => {
           fullName: "$following.fullName",
           username: "$following.username",
           profile: "$following.profile",
-          verify: 1,
+          verify: "$following.verify",
         }
       }
     ])
@@ -1010,6 +1011,8 @@ export const SearchUser = async (req, res) => {
           username: 1,
           profile: 1,
           isFollowing: 1,
+          followers: { $size: "$followers" },
+          bio: 1,
           verify: 1
         }
       }

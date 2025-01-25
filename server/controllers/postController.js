@@ -243,30 +243,36 @@ export const PostDelete = async (req, res) => {
     const postId = new mongoose.Types.ObjectId(req.params.postId);
     const { id } = req.headers;
 
-    const findPost = await Post.findById(postId).select({ userId: 1 });
-    if (findPost?.userId.toString() != id.toString()) {
-      return res.status(403).json({
-        message: "Post update access denied",
-      });
+    const findPost = await Post.findById(postId).select({ userId: 1, likes: 1, postSave: 1 });
+    if (!findPost) {
+      return res.status(404).json({ message: "Post not found." });
     }
 
-    const updatedPost = await Post.findByIdAndDelete(postId);
-
-    if (!updatedPost) {
-      return res.status(404).json({
-        message: "Post not found.",
-      });
+    if (findPost.userId.toString() !== id.toString()) {
+      return res.status(403).json({ message: "Post update access denied" });
     }
 
-    res.status(200).json({
-      message: "Post delete successfully.",
-    });
+    await User.updateMany(
+      { postSave: { $in: [postId] } },
+      { $pull: { postSave: postId } },
+      { new: true }
+    );
+
+
+    const deletedPost = await Post.findByIdAndDelete(postId);
+
+    if (!deletedPost) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+
+    return res.status(200).json({ message: "Post deleted successfully." });
+
   } catch (error) {
-    res.status(500).json({
-      message: "An error occurred while processing your request.",
-    });
+    console.error(error);
+    return res.status(500).json({ message: "An error occurred while processing your request.", error: error.message });
   }
 };
+
 
 export const PostLike = async (req, res) => {
   try {
