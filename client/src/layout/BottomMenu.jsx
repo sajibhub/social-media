@@ -3,10 +3,11 @@ import { TiHome } from "react-icons/ti";
 import { FaSearch, FaUser } from "react-icons/fa";
 import { IoMdNotifications } from "react-icons/io";
 import { RiMessage3Fill } from "react-icons/ri";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import { useNavigate } from "react-router-dom";
 
 const BottomMenu = () => {
-    const navigate = useNavigate(); // Get the navigate function
+    const navigate = useNavigate();
+    let userName = localStorage.getItem('userName');
 
     return (
         <div className="py-3 w-screen bg-white flex flex-row justify-between">
@@ -20,7 +21,7 @@ const BottomMenu = () => {
                     scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
                 }}
                 className="menu-active mb-3 flex-shrink-0"
-                onClick={() => navigate("/")} // Navigate to home on click
+                onClick={() => navigate("/")}
             >
                 <TiHome className="text-2xl font-medium" />
                 <h3 className="text-xl font-medium">Home</h3>
@@ -41,7 +42,6 @@ const BottomMenu = () => {
                 <FaSearch className="text-2xl font-medium" />
             </motion.div>
 
-            {/* Notifications Icon */}
             <motion.div
                 whileHover={{ opacity: 1, scale: 1.1 }}
                 initial={{ opacity: 0, scale: 0 }}
@@ -51,7 +51,7 @@ const BottomMenu = () => {
                     scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
                 }}
                 className="menu mb-3"
-                onClick={() => navigate("/notification")} // Navigate to notifications on click
+                onClick={() => navigate("/notification")}
             >
                 <IoMdNotifications className="text-2xl font-medium" />
             </motion.div>
@@ -66,7 +66,7 @@ const BottomMenu = () => {
                     scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
                 }}
                 className="menu mb-3"
-                onClick={() => navigate("/messages")} // Navigate to messages on click
+                onClick={() => navigate("/messages")}
             >
                 <RiMessage3Fill className="text-2xl font-medium" />
             </motion.div>
@@ -81,7 +81,7 @@ const BottomMenu = () => {
                     scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
                 }}
                 className="menu mb-3"
-                onClick={() => navigate("/profile/me")} // Navigate to profile on click
+                onClick={() => navigate(`profile/${userName}`)} 
             >
                 <FaUser className="text-2xl font-medium" />
             </motion.div>

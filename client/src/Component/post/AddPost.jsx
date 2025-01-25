@@ -18,7 +18,18 @@ const AddPost = () => {
   const [text, setText] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(true); // Profile loading state
   const textareaRef = useRef(null);
+
+  // Simulate profile data loading
+  useEffect(() => {
+    // Simulate loading profile data
+    setTimeout(() => {
+      if (myProfileData) {
+        setLoadingProfile(false); // Profile data loaded
+      }
+    }, 1000); // Simulate delay in fetching data
+  }, [myProfileData]);
 
   // Resize textarea dynamically as user types
   useEffect(() => {
@@ -87,11 +98,15 @@ const AddPost = () => {
 
         <div className="flex items-center gap-3 pb-3 border-b-2 border-gray-100">
           <div className="h-[50px] w-[50px] rounded-full overflow-hidden border-2 border-neutral-300">
-            <img
-              src={myProfileData?.profile}
-              alt="profile"
-              className="w-full h-full object-cover"
-            />
+            {loadingProfile ? (
+              <div className="w-full h-full bg-gray-300 animate-pulse rounded-full" />
+            ) : (
+              <img
+                src={myProfileData?.profile}
+                alt="profile"
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
           <textarea
             ref={textareaRef}
