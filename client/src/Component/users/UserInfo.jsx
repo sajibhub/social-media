@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { useState } from "react";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import uiManage from "@/store/uiManage.js";
-import VerifiedBadge from "../VerifyBadge/VerifyBadge";
+import VerifiedBadge from "../utility/VerifyBadge.jsx";
 
 const UserInfo = () => {
   const [loader, setLoader] = useState(false);

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import authorStore from "@/store/authorStore.js";
-import VerifiedBadge from "../VerifyBadge/VerifyBadge";
+import VerifiedBadge from "../utility/VerifyBadge.jsx";
 import {useNavigate, useParams} from "react-router-dom";
 
 const ProfileSummaryComponent = () => {

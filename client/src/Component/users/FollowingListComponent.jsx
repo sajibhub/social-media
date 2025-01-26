@@ -3,7 +3,7 @@ import authorStore from "@/store/authorStore.js";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useState } from "react";
-import VerifiedBadge from "../VerifyBadge/VerifyBadge";
+import VerifiedBadge from "../utility/VerifyBadge.jsx";
 
 const SearchResultComponent = () => {
   const userName = localStorage.getItem("userName");

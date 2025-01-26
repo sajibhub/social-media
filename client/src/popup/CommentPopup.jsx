@@ -11,7 +11,7 @@ import { RiEdit2Fill } from "react-icons/ri";
 import { AiFillDelete } from "react-icons/ai";
 import { useParams } from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
-import VerifiedBadge from "../Component/VerifyBadge/VerifyBadge";
+import VerifiedBadge from "../Component/utility/VerifyBadge.jsx";
 
 const CommentPopup = () => {
   const { user } = useParams();

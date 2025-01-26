@@ -10,7 +10,7 @@ import postStore from "@/store/postStore.js";
 import {useParams} from "react-router-dom";
 import EmojiPicker from "emoji-picker-react";
 import toast from "react-hot-toast";
-import VerifiedBadge from "@/Component/VerifyBadge/VerifyBadge.jsx";
+import VerifiedBadge from "@/Component/utility/VerifyBadge.jsx";
 
 import {useNavigate} from "react-router-dom";
 
@@ -79,11 +79,11 @@ const SinglePostPreview = () => {
         let add = Like + 1
 
         if (res && (isLike === true)) {
-            update_Single_Post_data(id, { isLike: false, like:like})
+            update_Single_Post_data(id, { isLike: false, likes:like})
 
         }
         if (res && (isLike ===false)) {
-            update_Single_Post_data(id, { isLike: true, like:add})
+            update_Single_Post_data(id, { isLike: true, likes:add})
 
         }
     }
@@ -378,7 +378,7 @@ const SinglePostPreview = () => {
                     <div className="px-4 py-5 flex flex-row justify-s items-center gap-5 ">
                         <div
                             onClick={
-                                () => likePostHandler(Single_Post_Data[0]._id, Single_Post_Data[0].isLike, Single_Post_Data[0].like)
+                                () => likePostHandler(Single_Post_Data[0]._id, Single_Post_Data[0].isLike, Single_Post_Data[0].likes)
                             }
 
                             className="flex flex-row gap-2 justify-start items-center"
@@ -405,7 +405,7 @@ const SinglePostPreview = () => {
                                     Single_Post_Data[0].isLike ? "text-sky-600" : "text-neutral-800"
                                 } `}
                             >
-                                {Single_Post_Data[0].like} Like
+                                {Single_Post_Data[0].likes} Like
                             </h1>
                         </div>
                         <div className="flex flex-row gap-2 justify-start items-center">
@@ -426,17 +426,24 @@ const SinglePostPreview = () => {
                             </h1>
                         </div>
                         <div
-                            onClick={
-                                () => postSaveHandler(Single_Post_Data[0]._id, Single_Post_Data[0].isSave, Single_Post_Data[0].postSave)
-                            }
+
                             className="flex flex-row flex-grow gap-2 justify-end items-center"
                         >
                             {
                                 savePostLoader.status ? <div className="loader-dark"></div> :
-                                    <IoBookmark className="text-neutral-900 text-lg"/>
+                                    <IoBookmark
+                                        onClick={
+                                            () => postSaveHandler(Single_Post_Data[0]._id, Single_Post_Data[0].isSave, Single_Post_Data[0].postSave)
+                                        }
+                                        className="text-neutral-900 text-lg"/>
                             }
 
-                            <h1 className="text-base font-medium text-neutral-900">
+                            <h1
+                                onClick={
+                                    () => postSaveHandler(Single_Post_Data[0]._id, Single_Post_Data[0].isSave, Single_Post_Data[0].postSave)
+                                }
+                                className="text-base font-medium text-neutral-900"
+                            >
                                 {Single_Post_Data[0].postSave} Save
                             </h1>
                         </div>

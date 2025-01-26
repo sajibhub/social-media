@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useState } from "react";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
-import VerifiedBadge from "../VerifyBadge/VerifyBadge";
+import VerifiedBadge from "../utility/VerifyBadge.jsx";
 
 const SearchResultComponent = () => {
   const navigate = useNavigate();

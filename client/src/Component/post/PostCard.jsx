@@ -10,7 +10,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import { BsThreeDotsVertical } from "react-icons/bs";
-import VerifiedBadge from "../VerifyBadge/VerifyBadge";
+import VerifiedBadge from "../utility/VerifyBadge.jsx";
+import DynamicText from "@/Component/utility/DynamicText.jsx";
+
 
 const PostCard = () => {
   let hostname = window.location.origin;
@@ -243,6 +245,7 @@ const PostCard = () => {
     return (
       <>
         <DeleteConfirmationModal />
+
         {my_post_data.map((items, i) => {
           return (
             <motion.div
@@ -364,7 +367,13 @@ const PostCard = () => {
                 )}
               </div>
               <h4 className=" px-3 mb-2  text-base font-medium text-neutral-700">
-                {items.images !== null && items.caption}
+                {items.images !== null && items.caption !== "" && (
+                    <DynamicText
+                        text={items.caption}
+                        Length={110}
+                        TestStyle={"text-lg"}
+                    />
+                )}
               </h4>
 
               <div className="px-3  overflow-hidden w-full h-[320px] flex flex-row justify-center items-center">
@@ -381,9 +390,15 @@ const PostCard = () => {
                   })
                 ) : (
                   <div className="h-full w-full flex flex-row justify-center items-center bg-gray-100">
-                    <h4 className=" px-3 mb-2  text-xl  font-semibold text-neutral-800">
-                      {items.caption}
-                    </h4>
+                    <div className="max-w-full max-h-full overflow-y-auto scroll-bar-hidden p-5">
+                      <DynamicText
+                          text={items.caption}
+                          Length={280}
+                          Align={"flex flex-col "}
+                          TestStyle={"text-2xl font-semibold"}
+
+                      />
+                    </div>
                   </div>
                 )}
               </div>
@@ -442,7 +457,6 @@ const PostCard = () => {
                 </div>
 
                 <div
-                    onClick={() => postSaveHandler(items._id, items.isSave , items.postSave)}
                     className="flex flex-row flex-grow gap-2 justify-end items-center"
                 >
                   {savePostLoader.status && savePostLoader.id === items._id ? (
@@ -450,16 +464,21 @@ const PostCard = () => {
                   ) : (
                     <>
                       {items.isSave ? (
-                        <IoBookmark className="text-neutral-800 text-lg" />
+                        <IoBookmark
+                            onClick={() => postSaveHandler(items._id, items.isSave , items.postSave)}
+                            className="text-neutral-800 text-lg" />
                       ) : (
-                        <FaRegBookmark />
+                        <FaRegBookmark
+                            onClick={() => postSaveHandler(items._id, items.isSave , items.postSave)}
+                        />
                       )}
                     </>
                   )}
 
                   <h1
+                      onClick={() => postSaveHandler(items._id, items.isSave , items.postSave)}
                     className="text-base font-medium text-neutral-800
-                          "
+                    "
                   >
                     {items.postSave} Save
                   </h1>
