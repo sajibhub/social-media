@@ -96,7 +96,7 @@ const SearchResultComponent = () => {
                       : "bg-sky-500 text-white hover:bg-sky-600"
                   }`}
                 >
-                  {user.isFollowing ? "Unfollow" : "Follow"}
+                  Unfollow
                 </button>
               )}
             </motion.div>

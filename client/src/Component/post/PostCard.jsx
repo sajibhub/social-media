@@ -13,6 +13,7 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import VerifiedBadge from "../VerifyBadge/VerifyBadge";
 
 const PostCard = () => {
+  let hostname = window.location.origin;
   const { user } = useParams();
   const path = window.location.pathname;
   const navigate = useNavigate();
@@ -26,15 +27,20 @@ const PostCard = () => {
     removeCommentList,
     newsFeedReq,
     savePostReq,
-    savePostListReq,
     update_my_post_data,
     clear_my_post_data,
   } = postStore();
+
   const { myProfileData, flowReq } = authorStore();
   const [openMenuId, setOpenMenuId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
   const [loader, setLoader] = useState({
+    status: false,
+    id: null,
+  });
+
+  const [DeletePostLoader, setDeletePostLoader] = useState({
     status: false,
     id: null,
   });
@@ -59,10 +65,10 @@ const PostCard = () => {
     }
   };
 
-  const followHandel = async (id) => {
+  const followHandel = async (id ,i) => {
     setFollowLoader({
       status: true,
-      id: id,
+      id: i,
     });
     let res = await flowReq(id);
     setFollowLoader({
@@ -77,18 +83,17 @@ const PostCard = () => {
     }
   };
 
-  const postSaveHandler = async (id) => {
+  const postSaveHandler = async (id ,isSave ,postSave) => {
     setSavePostLoader({
       status: true,
       id: id,
     });
     const res = await savePostReq(id);
     if (res) {
-      await newsFeedReq();
+      isSave ?  update_my_post_data(id, { isSave: false, postSave: postSave - 1 }) :update_my_post_data(id, { isSave: true, postSave: postSave + 1 })
+
     }
-    if (path === "/save-post") {
-      await savePostListReq();
-    }
+
     setSavePostLoader({
       status: false,
       id: null,
@@ -111,19 +116,22 @@ const PostCard = () => {
     let like = Like - 1;
     let add = Like + 1;
 
-    if (res && isLike === true) {
-      update_my_post_data(id, { isLike: false, like: like });
+    if(res){
+      if (isLike === true) {
+        update_my_post_data(id, { isLike: false, likes: like });
+      }
+      if (isLike === false) {
+        update_my_post_data(id, { isLike: true, likes: add });
+      }
     }
-    if (res && isLike === false) {
-      update_my_post_data(id, { isLike: true, like: add });
-    }
+
   };
 
   const handleDelete = async () => {
     if (postToDelete) {
-      setLoader({ status: true, id: postToDelete._id });
+      setDeletePostLoader({ status: true, id: postToDelete._id });
       const res = await deletePostReq(postToDelete._id);
-      setLoader({ status: false, id: null });
+      setDeletePostLoader({ status: false, id: null });
       setIsModalOpen(false);
 
       if (res) {
@@ -144,8 +152,27 @@ const PostCard = () => {
     setPostToDelete(post);
     setIsModalOpen(true);
   };
+
   const toggleMenu = (id) => {
     setOpenMenuId((prevId) => (prevId === id ? null : id));
+  };
+
+  const handleShare = async (id) => {
+    const url = hostname + "/post/" + id
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'KAM_DEE',
+          text: 'Mr.CEO_and_Founder_Of_UVIOM .',
+          url: url ,
+        });
+
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      alert('Sharing is not supported in this browser.');
+    }
   };
 
   const DeleteConfirmationModal = () => {
@@ -158,7 +185,7 @@ const PostCard = () => {
             Are you sure you want to delete this post?
           </h3>
           <p className="text-neutral-600 mb-6">This action cannot be undone.</p>
-          <div className="flex justify-around gap-4">
+          <div className="flex justify-center gap-5">
             <button
               onClick={() => setIsModalOpen(false)}
               className="px-6 py-2 bg-gray-200 text-neutral-800 rounded-lg transition duration-200 ease-in-out hover:bg-gray-300 focus:outline-none"
@@ -167,12 +194,12 @@ const PostCard = () => {
             </button>
             <button
               onClick={handleDelete}
-              disabled={loader.status}
+              disabled={DeletePostLoader.status}
               className="px-6 py-2 bg-red-600 text-white rounded-lg transition duration-200 ease-in-out hover:bg-red-700 focus:outline-none"
             >
-              {loader.status ? (
+              {DeletePostLoader.status ? (
                 <span className="animate-pulse">
-                  <LoadingButtonFit text="Loading..." />
+                  <div className="loader"></div>
                 </span>
               ) : (
                 "Delete"
@@ -236,6 +263,7 @@ const PostCard = () => {
                     overflow-hidden flex flex-row justify-center items-center shadow"
                 >
                   <img
+                      className="min-h-full min-w-full"
                     onClick={() =>
                       goToProfile(items.myPost, items.user.username)
                     }
@@ -310,13 +338,13 @@ const PostCard = () => {
                 {items.myPost !== true && (
                   <>
                     {followLoader.status &&
-                    followLoader.id === items.user._id ? (
+                    followLoader.id === i ? (
                       <LoadingButtonFit />
                     ) : (
                       <>
                         {items.isFollowing === true ? (
                           <button
-                            onClick={() => followHandel(items.user._id)}
+                            onClick={() => followHandel(items.user._id ,i)}
                             className="text-sm font-medium text-sky-500
                                       "
                           >
@@ -324,7 +352,7 @@ const PostCard = () => {
                           </button>
                         ) : (
                           <button
-                            onClick={() => followHandel(items.user._id)}
+                            onClick={() => followHandel(items.user._id, i)}
                             className="text-sm font-medium text-neutral-800 hover:text-sky-500"
                           >
                             Follow
@@ -363,7 +391,7 @@ const PostCard = () => {
               <div className="px-4 py-5 flex flex-row justify-s items-center gap-5">
                 <div
                   onClick={() =>
-                    likePostHandler(items._id, items.isLike, items.like)
+                    likePostHandler(items._id, items.isLike, items.likes)
                   }
                   className="flex flex-row gap-2 justify-start items-center"
                 >
@@ -384,7 +412,7 @@ const PostCard = () => {
                       items.isLike ? "text-sky-600" : "text-neutral-800"
                     } `}
                   >
-                    {items.like} Like
+                    {items.likes} Like
                   </h1>
                 </div>
                 <div
@@ -401,14 +429,22 @@ const PostCard = () => {
                   </h1>
                 </div>
 
-                <div className="flex flex-row gap-2 justify-start items-center">
+                <div
+                    onClick={
+                      ()=>handleShare(items._id)
+                    }
+                    className="flex flex-row gap-2 justify-start items-center"
+                >
                   <FaShare className="text-neutral-900 text-lg" />
                   <h1 className="text-base font-medium text-neutral-900 hidden md:block">
-                    {items.view} Share
+                    {/*{items.view} Share*/} Share
                   </h1>
                 </div>
 
-                <div className="flex flex-row flex-grow gap-2 justify-end items-center">
+                <div
+                    onClick={() => postSaveHandler(items._id, items.isSave , items.postSave)}
+                    className="flex flex-row flex-grow gap-2 justify-end items-center"
+                >
                   {savePostLoader.status && savePostLoader.id === items._id ? (
                     <div className="loader-dark"></div>
                   ) : (
@@ -422,7 +458,6 @@ const PostCard = () => {
                   )}
 
                   <h1
-                    onClick={() => postSaveHandler(items._id)}
                     className="text-base font-medium text-neutral-800
                           "
                   >

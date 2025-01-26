@@ -1,72 +1,62 @@
-import SignIn from "../Component/author/SignIn.jsx";
-import uiManage from "../store/uiManage.js";
-import SignUp from "../Component/author/SignUp.jsx";
-import {useEffect} from "react";
 
-import {useNavigate} from "react-router-dom";
-import authorStore from "@/store/authorStore.js";
+import SignIn from "../Component/author/SignIn.jsx";
+import SignUp from "../Component/author/SignUp.jsx";
 import OtpRequestPopup from "@/popup/OtpRequestPopup.jsx";
 import PasswordPopup from "@/popup/PasswordPopup.jsx";
+import uiManage from "../store/uiManage.js";
+import authorStore from "@/store/authorStore.js";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const AuthorPage = () => {
     const navigate = useNavigate();
-    const {author, setAuthor ,SendOpt ,Password} = uiManage()
-    const {readProfileReq} = authorStore()
+    const { author, setAuthor, SendOpt, Password } = uiManage();
+    const { readProfileReq } = authorStore();
 
     useEffect(() => {
-
-        (
-
-            async ()=>{
-                let res = await readProfileReq("me")
-                if(res){
-                    navigate('/')
-                }
+        (async () => {
+            const res = await readProfileReq("me");
+            if (res) {
+                navigate("/");
             }
-        )()
-
+        })();
     }, []);
-
 
     return (
         <>
-            {
-                SendOpt !== null &&  <OtpRequestPopup />
-            }
+            {SendOpt !== null && <OtpRequestPopup />}
+            {Password !== null && <PasswordPopup />}
 
-            {
-                Password !== null &&  <PasswordPopup />
-            }
-
-
-            <div className="grid grid-cols-3 grid-rows-none overflow-y-auto  h-screen">
-
-                <div
-                    className="
-                    relative col-span-3 lg:col-span-1 h-full  flex flex-col justify-center items-center
-                    "
-                >
+            <div className="grid grid-cols-3 h-screen overflow-y-auto">
+                {/* Left Panel */}
+                <div className="relative col-span-3 lg:col-span-1 flex flex-col justify-center items-center h-full">
                     <img
-                        className="
-                        min-h-full min-w-full
-                        "
-                        src="/image/login_photo.jpg" alt="photo"
+                        className="min-h-full min-w-full object-cover"
+                        src="/image/login_photo.jpg"
+                        alt="Login Visual"
                     />
-                    <div className="h-full w-full absolute top-0 left-0 bg-sky-50 bg-opacity-10"></div>
+                    <div className="absolute inset-0 bg-sky-50 bg-opacity-10"></div>
 
-                    <div className="absolute bottom-0 lg:bottom-auto lg:right-0 w-full lg:w-[130px] flex flex-row lg:flex-col ">
-                        <button onClick={()=>setAuthor("signIn")} className={author==="signIn"? "author-tab-active" :"author-tab" }>Sign In</button>
-                        <button onClick={()=>setAuthor("signUp")} className={author==="signUp"? "author-tab-active" :"author-tab" }>Sign Up</button>
+                    <div className="absolute bottom-0 lg:bottom-auto lg:right-0 w-full lg:w-[130px] flex flex-row lg:flex-col">
+                        <button
+                            onClick={() => setAuthor("signIn")}
+                            className={`author-tab ${author === "signIn" ? "author-tab-active" : ""}`}
+                        >
+                            Sign In
+                        </button>
+                        <button
+                            onClick={() => setAuthor("signUp")}
+                            className={`author-tab ${author === "signUp" ? "author-tab-active" : ""}`}
+                        >
+                            Sign Up
+                        </button>
                     </div>
                 </div>
 
-                <div className="col-span-3 lg:col-span-2 w-full h-full relative ">
-                    {
-                        author === "signIn" &&  <SignIn />
-                    }
-                    {
-                        author === "signUp" &&  <SignUp />
-                    }
+                {/* Right Panel */}
+                <div className="col-span-3 lg:col-span-2 w-full h-full ">
+                    {author === "signIn" && <SignIn />}
+                    {author === "signUp" && <SignUp />}
                 </div>
             </div>
         </>

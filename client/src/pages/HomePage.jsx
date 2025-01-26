@@ -22,9 +22,10 @@ const HomePage = () => {
                 clear_my_post_data()
                 clear_suggestUser()
 
-                await suggestUserReq()
-                await newsFeedReq()
                 let res = await readProfileReq("me")
+                await newsFeedReq()
+                await suggestUserReq()
+
                 if(res !== true){
                     navigate('/author')
                 }

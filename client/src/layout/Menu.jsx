@@ -23,8 +23,7 @@ const Menu = () => {
         { icon: <IoMdNotifications />, label: "Notification", route: "/notification" },
         { icon: <RiMessage3Fill />, label: "Message", route: "#" },
         { icon: <FaBookmark />, label: "Save Post", route: "/save-post" },
-        { icon: <FaUsers />, label: "Community", route: "#" },
-        { icon: <RiStickyNoteAddFill />, label: "Add Post", route: "#" },
+        { icon: <RiStickyNoteAddFill />, label: "Add Post", route: "/add-post" },
         { icon: <FaUser />, label: "Profile", route: `/profile/${userName}` }
     ];
 
@@ -66,6 +65,9 @@ const Menu = () => {
                             scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
                         }}
                         className="menu mb-3"
+                        onClick={
+                            ()=>navigate("/setting")
+                        }
                     >
                         <IoSettingsSharp className="text-xl font-medium" />
                         <h3 className="text-lg font-medium">Setting</h3>

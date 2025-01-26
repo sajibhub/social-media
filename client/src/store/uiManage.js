@@ -18,7 +18,6 @@ const uiManage = create((set) => ({
 
 
 
-
 }))
 
 export default uiManage ;

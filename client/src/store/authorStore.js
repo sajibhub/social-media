@@ -237,6 +237,15 @@ const authorStore = create((set) => ({
     clear_followersList : ()=>{
         set({followersList : null})
     },
+
+    update_followersList : (id, updatedFields) => {
+        set((state) => ({
+            followersList: state. followersList.map((item) =>
+                item._id === id ? { ...item, ...updatedFields } : item
+            ),
+        }));
+    },
+
     followersReq : async (data)=>{
         try{
             const res =  await axios.get(follower_list_api + data, {withCredentials: true})

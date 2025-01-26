@@ -260,16 +260,32 @@ export const Profile = async (req, res) => {
       {
         $addFields: {
           followers: {
-            $size: "$followers",
+            $cond: [
+              { $gte: [{ $size: "$followers" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$followers" }, 1000] } }, "k"] },
+              { $toString: { $size: "$followers" } }
+            ]
           },
           following: {
-            $size: "$following",
+            $cond: [
+              { $gte: [{ $size: "$following" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$following" }, 1000] } }, "k"] },
+              { $toString: { $size: "$following" } }
+            ]
           },
           postLike: {
-            $size: "$likedPosts",
+            $cond: [
+              { $gte: [{ $size: "$likedPosts" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$likedPosts" }, 1000] } }, "k"] },
+              { $toString: { $size: "$likedPosts" } }
+            ]
           },
           postSave: {
-            $size: "$postSave",
+            $cond: [
+              { $gte: [{ $size: "$postSave" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$postSave" }, 1000] } }, "k"] },
+              { $toString: { $size: "$postSave" } }
+            ]
           },
           myProfile: {
             $cond: {
@@ -359,7 +375,6 @@ export const Profile = async (req, res) => {
   }
 };
 
-
 export const ProfilePicUpdate = async (req, res) => {
   try {
     const upload = multer({ storage }).fields([
@@ -421,12 +436,21 @@ export const ProfileInfoUpdate = async (req, res) => {
       currentAddress,
       oldPassword,
       newPassword,
+      facebook,
+      linkedin,
+      fiver,
+      github,
+
     } = req.body;
 
     if (
       !fullName &&
       !username &&
       !bio &&
+      !facebook &&
+      !linkedin &&
+      !fiver &&
+      !github &&
       currentAddress &&
       !newPassword &&
       !oldPassword
@@ -497,6 +521,10 @@ export const ProfileInfoUpdate = async (req, res) => {
         bio,
         currentAddress,
         password: user.password,
+        fiver,
+        facebook,
+        linkedin,
+        github,
       },
       { new: true }
     );
@@ -750,12 +778,11 @@ export const GetFollowers = async (req, res) => {
       { $unwind: "$follower" },
       {
         $addFields: {
-          isFollowing: { $in: [id, "$followers",] }
+          isFollowing: { $in: [id, "$follower.followers"] }
         }
       },
       {
         $project: {
-          _id: 0,
           _id: "$follower._id",
           fullName: "$follower.fullName",
           username: "$follower.username",
@@ -898,7 +925,7 @@ export const GetSavePost = async (req, res) => {
               },
               else: {
                 $dateToString: {
-                  format: "%H:%M:%S %Y-%m-%d",
+                  format: "%d-%b-%Y",
                   date: "$savedPosts.createdAt",
                   timezone: "Asia/Dhaka",
                 },
@@ -925,12 +952,36 @@ export const GetSavePost = async (req, res) => {
           caption: "$savedPosts.caption",
           images: "$savedPosts.images",
           time: 1,
-          like: { $size: "$savedPosts.likes" },
-          comment: { $size: "$savedPosts.comments" },
-          view: { $size: "$savedPosts.view" },
+          likes: {
+            $cond: [
+              { $gte: [{ $size: "$savedPosts.likes" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$savedPosts.likes" }, 1000] } }, "k"] },
+              { $toString: { $size: "$savedPosts.likes" } }
+            ]
+          },
+          comments: {
+            $cond: [
+              { $gte: [{ $size: "$savedPosts.comments" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$savedPosts.comments" }, 1000] } }, "k"] },
+              { $toString: { $size: "$savedPosts.comments" } }
+            ]
+          },
+          views: {
+            $cond: [
+              { $gte: [{ $size: "$savedPosts.view" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$savedPosts.view" }, 1000] } }, "k"] },
+              { $toString: { $size: "$savedPosts.view" } }
+            ]
+          },
+          postSave: {
+            $cond: [
+              { $gte: [{ $size: "$savedPosts.postSave" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$savedPosts.postSave" }, 1000] } }, "k"] },
+              { $toString: { $size: "$savedPosts.postSave" } }
+            ]
+          },
           isLike: 1,
           myPost: 1,
-          postSave: { $size: "$savedPosts.postSave" },
           isFollowing: 1,
           isSave: 1,
         }

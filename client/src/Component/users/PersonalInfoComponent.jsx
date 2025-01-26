@@ -4,7 +4,8 @@ import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 
 const PersonalInfoComponent = () => {
-  const { user } = useParams();
+  const  {user}  = useParams();
+  let myUser = localStorage.getItem("userName");
 
   const {
     myProfileData,
@@ -17,18 +18,35 @@ const PersonalInfoComponent = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  let myUser = myProfileData.username;
+
 
   const handleProfileUpdate = async () => {
     setLoading(true);
-    const reqData = {
-      username: myProfileData.username,
-      fullName: myProfileData.fullName,
-      email: myProfileData.email,
-      phoneNumber: myProfileData.phoneNumber,
-      bio: myProfileData.bio,
-      currentAddress: myProfileData.currentAddress,
-    };
+
+    let reqData = ""
+
+    if(myProfileData.username ===  profileData.username){
+       reqData = {
+        fullName: myProfileData.fullName,
+        email: myProfileData.email,
+        phoneNumber: myProfileData.phoneNumber,
+        bio: myProfileData.bio,
+        currentAddress: myProfileData.currentAddress,
+      };
+
+    }
+
+    else {
+       reqData = {
+        username: myProfileData.username,
+        fullName: myProfileData.fullName,
+        email: myProfileData.email,
+        phoneNumber: myProfileData.phoneNumber,
+        bio: myProfileData.bio,
+        currentAddress: myProfileData.currentAddress,
+      };
+    }
+
     const res = await updateProfileReq(reqData);
     setIsEditing(false);
     setLoading(false);

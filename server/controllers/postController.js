@@ -142,7 +142,7 @@ export const PostRead = async (req, res) => {
               },
               else: {
                 $dateToString: {
-                  format: "%H:%M:%S %Y-%m-%d",
+                  format: "%d-%b-%Y",
                   date: "$createdAt",
                   timezone: "Asia/Dhaka",
                 },
@@ -173,12 +173,36 @@ export const PostRead = async (req, res) => {
           caption: 1,
           images: 1,
           time: 1,
-          like: { $size: "$likes" },
-          comment: { $size: "$comments" },
-          view: { $size: "$view" },
+          likes: {
+            $cond: [
+              { $gte: [{ $size: "$likes" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$likes" }, 1000] } }, "k"] },
+              { $toString: { $size: "$likes" } }
+            ]
+          },
+          comment: {
+            $cond: [
+              { $gte: [{ $size: "$comments" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$comments" }, 1000] } }, "k"] },
+              { $toString: { $size: "$comments" } }
+            ]
+          },
+          view: {
+            $cond: [
+              { $gte: [{ $size: "$view" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$view" }, 1000] } }, "k"] },
+              { $toString: { $size: "$view" } }
+            ]
+          },
+          postSave: {
+            $cond: [
+              { $gte: [{ $size: "$postSave" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$postSave" }, 1000] } }, "k"] },
+              { $toString: { $size: "$postSave" } }
+            ]
+          },
           isLike: 1,
           myPost: 1,
-          postSave: { $size: "$postSave" },
           isFollowing: 1,
           isSave: 1,
         },
@@ -272,7 +296,6 @@ export const PostDelete = async (req, res) => {
     return res.status(500).json({ message: "An error occurred while processing your request.", error: error.message });
   }
 };
-
 
 export const PostLike = async (req, res) => {
   try {
@@ -869,7 +892,7 @@ export const SinglePost = async (req, res) => {
               },
               else: {
                 $dateToString: {
-                  format: "%H:%M:%S %Y-%m-%d",
+                  format: "%d-%b-%Y",
                   date: "$createdAt",
                   timezone: "Asia/Dhaka",
                 },
@@ -900,12 +923,36 @@ export const SinglePost = async (req, res) => {
           caption: 1,
           images: 1,
           time: 1,
-          like: { $size: ["$likes"] },
-          comment: { $size: ["$comments"] },
-          view: { $size: ["$view"] },
+          likes: {
+            $cond: [
+              { $gte: [{ $size: "$likes" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$likes" }, 1000] } }, "k"] },
+              { $toString: { $size: "$likes" } }
+            ]
+          },
+          comment: {
+            $cond: [
+              { $gte: [{ $size: "$comments" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$comments" }, 1000] } }, "k"] },
+              { $toString: { $size: "$comments" } }
+            ]
+          },
+          view: {
+            $cond: [
+              { $gte: [{ $size: "$view" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$view" }, 1000] } }, "k"] },
+              { $toString: { $size: "$view" } }
+            ]
+          },
+          postSave: {
+            $cond: [
+              { $gte: [{ $size: "$postSave" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$postSave" }, 1000] } }, "k"] },
+              { $toString: { $size: "$postSave" } }
+            ]
+          },
           isLike: 1,
           myPost: 1,
-          postSave: { $size: ["$postSave"] },
           isFollowing: 1,
           isSave: 1,
         },

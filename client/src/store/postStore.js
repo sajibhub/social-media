@@ -182,10 +182,11 @@ const postStore  = create((set) => ({
 
     updateComment : async (data)=>{
         const PostId = data.id
+        const commentId = data.commentId
         const comment = {
             comment: data.comment
         }
-        const commentId = data.commentId
+
 
         let api = Post_Comment_Update_api + PostId + "/" + commentId;
         

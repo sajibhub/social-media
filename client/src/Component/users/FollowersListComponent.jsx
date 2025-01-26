@@ -1,13 +1,12 @@
 import { motion } from "framer-motion";
 import authorStore from "@/store/authorStore.js";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useState } from "react";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import VerifiedBadge from "../VerifyBadge/VerifyBadge";
 
 const SearchResultComponent = () => {
-  const { url } = useParams();
   const navigate = useNavigate();
   const [followLoader, setFollowLoader] = useState({
     status: false,
@@ -17,16 +16,14 @@ const SearchResultComponent = () => {
   const {
     followersList,
     flowReq,
-    readProfileReq,
-    followingListReq,
-    myProfileData,
+    update_followersList
   } = authorStore();
 
   const goToProfile = (user) => {
     navigate("/profile/" + user);
   };
 
-  const followHandel = async (id) => {
+  const followHandel = async (id ,isFollowing) => {
     setFollowLoader({
       status: true,
       id: id,
@@ -37,16 +34,24 @@ const SearchResultComponent = () => {
       id: null,
     });
     if (res) {
-      toast.success("Following Successful");
+      if(isFollowing === true) {
+        update_followersList(id ,{isFollowing : false});
+      }
+      if(isFollowing === false) {
+        update_followersList(id ,{isFollowing : true});
+      }
+
+      toast.success("Action Successful");
     } else {
-      toast.error("Following Fail");
+      toast.error("Action Fail");
     }
   };
+
 
   if (followersList === null) {
     return (
       <div className="mt-4 px-3">
-        {[1, 1, 1, 1, 1, 1, 1].map((i) => {
+        {[1,1,1, ].map((i) => {
           return (
             <motion.div
               key={i}
@@ -63,7 +68,9 @@ const SearchResultComponent = () => {
         })}
       </div>
     );
-  } else {
+  }
+
+  else {
     return (
       <div className="px-3">
         {followersList.map((user, i) => {
@@ -110,11 +117,12 @@ const SearchResultComponent = () => {
               {followLoader.id === user._id ? (
                 <LoadingButtonFit />
               ) : (
+
                 <button
-                  onClick={() => followHandel(user._id)}
+                  onClick={() => followHandel(user._id , user.isFollowing)}
                   className={`text-sm font-semibold py-2 px-6 rounded-full transition-colors duration-300 transform ${
                     user.isFollowing
-                      ? "bg-red-600 text-white hover:bg-red-700 hover:scale-105"
+                      ? "bg-red-500 text-white hover:bg-red-700 hover:scale-105"
                       : "bg-sky-600 text-white hover:bg-sky-700 hover:scale-105"
                   }`}
                 >

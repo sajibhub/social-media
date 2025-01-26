@@ -16,6 +16,7 @@ const UserInfo = () => {
   const [loader, setLoader] = useState(false);
   const navigate = useNavigate();
   const { user } = useParams();
+  let myUser = localStorage.getItem("userName");
   const { profileData, flowReq, readProfileReq } = authorStore();
   const { set_profile_tab, profile_tab, set_edit_profile_Ui_Control } =
     uiManage();
@@ -71,7 +72,9 @@ const UserInfo = () => {
         </div>
       </div>
     );
-  } else {
+  }
+
+  else {
     return (
       <div className=" rounded  border border-gray-200 mb-6">
         <div className="h-[200px] w-full overflow-hidden flex flex-row justify-between items-center shadow ">
@@ -102,7 +105,7 @@ const UserInfo = () => {
             )}
           </h1>
 
-          {user === profileData.username ? (
+          {user ===  myUser ? (
             <button
               onClick={() => set_edit_profile_Ui_Control(true)}
               className="

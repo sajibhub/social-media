@@ -85,7 +85,7 @@ export const NewsFeed = async (req, res) => {
               },
               else: {
                 $dateToString: {
-                  format: "%H:%M:%S %d-%m-%Y",
+                  format: "%d-%b-%Y",
                   date: "$createdAt",
                   timezone: "Asia/Dhaka",
                 },
@@ -139,12 +139,36 @@ export const NewsFeed = async (req, res) => {
           caption: 1,
           images: 1,
           time: 1,
-          like: { $size: "$likes" },
-          comment: { $size: "$comments" },
-          view: { $size: "$view" },
+          likes: {
+            $cond: [
+              { $gte: [{ $size: "$likes" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$likes" }, 1000] } }, "k"] },
+              { $toString: { $size: "$likes" } }
+            ]
+          },
+          comment: {
+            $cond: [
+              { $gte: [{ $size: "$comments" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$comments" }, 1000] } }, "k"] },
+              { $toString: { $size: "$comments" } }
+            ]
+          },
+          view: {
+            $cond: [
+              { $gte: [{ $size: "$view" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$view" }, 1000] } }, "k"] },
+              { $toString: { $size: "$view" } }
+            ]
+          },
+          postSave: {
+            $cond: [
+              { $gte: [{ $size: "$postSave" }, 1000] },
+              { $concat: [{ $toString: { $divide: [{ $size: "$postSave" }, 1000] } }, "k"] },
+              { $toString: { $size: "$postSave" } }
+            ]
+          },
           isLike: 1,
           myPost: 1,
-          postSave: { $size: "$postSave" },
           isFollowing: 1,
           isSave: 1,
           rank: 1,
@@ -179,7 +203,7 @@ export const SuggestUser = async (req, res) => {
       {
         $match: {
           _id: { $ne: id },
-          following: { $not: { $in: [id] } }
+          followers: { $not: { $in: [id] } }
         }
       },
       {
