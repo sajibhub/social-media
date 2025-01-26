@@ -173,34 +173,10 @@ export const PostRead = async (req, res) => {
           caption: 1,
           images: 1,
           time: 1,
-          likes: {
-            $cond: [
-              { $gte: [{ $size: "$likes" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$likes" }, 1000] } }, "k"] },
-              { $toString: { $size: "$likes" } }
-            ]
-          },
-          comment: {
-            $cond: [
-              { $gte: [{ $size: "$comments" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$comments" }, 1000] } }, "k"] },
-              { $toString: { $size: "$comments" } }
-            ]
-          },
-          view: {
-            $cond: [
-              { $gte: [{ $size: "$view" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$view" }, 1000] } }, "k"] },
-              { $toString: { $size: "$view" } }
-            ]
-          },
-          postSave: {
-            $cond: [
-              { $gte: [{ $size: "$postSave" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$postSave" }, 1000] } }, "k"] },
-              { $toString: { $size: "$postSave" } }
-            ]
-          },
+          likes: { $size: "$likes" },
+          comment: { $size: "$comments" },
+          view: { $size: "$view" },
+          postSave: { $size: "$postSave" },
           isLike: 1,
           myPost: 1,
           isFollowing: 1,
@@ -923,34 +899,10 @@ export const SinglePost = async (req, res) => {
           caption: 1,
           images: 1,
           time: 1,
-          likes: {
-            $cond: [
-              { $gte: [{ $size: "$likes" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$likes" }, 1000] } }, "k"] },
-              { $toString: { $size: "$likes" } }
-            ]
-          },
-          comment: {
-            $cond: [
-              { $gte: [{ $size: "$comments" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$comments" }, 1000] } }, "k"] },
-              { $toString: { $size: "$comments" } }
-            ]
-          },
-          view: {
-            $cond: [
-              { $gte: [{ $size: "$view" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$view" }, 1000] } }, "k"] },
-              { $toString: { $size: "$view" } }
-            ]
-          },
-          postSave: {
-            $cond: [
-              { $gte: [{ $size: "$postSave" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$postSave" }, 1000] } }, "k"] },
-              { $toString: { $size: "$postSave" } }
-            ]
-          },
+          likes: { $size: "$likes" },
+          comment: { $size: "$comments" },
+          view: { $size: "$view" },
+          postSave: { $size: "$postSave" },
           isLike: 1,
           myPost: 1,
           isFollowing: 1,

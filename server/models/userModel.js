@@ -105,7 +105,11 @@ const UserSchema = mongoose.Schema(
       type: String,
       default: null,
     },
-    currentAddress: {
+    profession: {
+      type: String,
+      default: "Explorer"
+    },
+    location: {
       type: String,
       default: "",
     },

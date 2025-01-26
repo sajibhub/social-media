@@ -18,6 +18,7 @@ import Post from "../models/postModel.js";
 
 const phoneRegex = /^(?:\+88|0088)?(01[3-9]\d{8})$/;
 const usernameRegex = /^[a-zA-Z0-9]+$/;
+const FullNameRegex = /^[a-zA-Z\s]+$/;
 
 export const SignUp = async (req, res) => {
   try {
@@ -37,35 +38,64 @@ export const SignUp = async (req, res) => {
 
     if (!usernameRegex.test(username)) {
       return res.status(400).json({
-        message: "Username should contain only alphanumeric characters.",
+        message: "Username must be alphanumeric."
+      });
+    }
+    if (!FullNameRegex.test(fullName)) {
+      return res.status(400).json({
+        message: "Full name can only include letters and spaces."
       });
     }
 
     if (username == "me") {
       return res.status(400).json({
-        message: "Username can't be 'me'. Please choose a different one.",
+        message: "Username can't be 'me'. Please select another."
       });
     }
 
     if (!validator.isEmail(email)) {
       return res.status(400).json({
-        message: "Invalid email address. Please check the format!",
+        message: "Invalid email. Please check the format."
       });
     }
 
     if (phone) {
       if (!phoneRegex.test(phone)) {
         return res.status(400).json({
-          message: "Invalid phone number. Use a valid Bangladeshi number.",
+          message: "Invalid phone number. Please use a valid Bangladeshi number."
         });
       }
+    }
+
+    if (username.length < 20) {
+      return res.status(422).json({
+        message: "Username must be at least 20 characters."
+      });
+    }
+
+    if (fullName.length < 40) {
+      return res.status(422).json({
+        message: "Full name must be at least 40 characters."
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long."
+      });
+    }
+
+    if (!validator.isStrongPassword(password)) {
+      return res.status(400).json({
+        message: "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character."
+      });
     }
 
     const userNameExists = await User.findOne({ username });
 
     if (userNameExists) {
       return res.status(400).json({
-        message: "Username already exists. Please choose a different one.",
+        message: "Username already taken. Please choose another."
       });
     }
 
@@ -74,31 +104,20 @@ export const SignUp = async (req, res) => {
     });
 
     if (userExists) {
-      if (userExists.email == email) {
+      if (userExists.email === email) {
         return res.status(400).json({
-          message: "User already exists with this email.",
+          message: "An account with this email already exists."
         });
       }
 
-      if (userExists.phone == phone) {
+      if (userExists.phone === phone) {
         return res.status(400).json({
-          message: "User already exists with this phone number.",
+          message: "An account with this phone number already exists."
         });
       }
     }
 
-    if (password < 6) {
-      return res.status(400).json({
-        message: "Password must be at least 6 characters long.",
-      });
-    }
 
-    if (!validator.isStrongPassword(password)) {
-      return res.status(400).json({
-        message:
-          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
-      });
-    }
 
     const demoProfile = `https://avatar.iran.liara.run/username?username=${fullName.replaceAll(
       " ",
@@ -119,7 +138,7 @@ export const SignUp = async (req, res) => {
 
     if (!userCreate) {
       return res.status(400).json({
-        message: "Account creation failed. Check your info and try again.",
+        message: "Account creation failed. Please try again."
       });
     }
 
@@ -138,7 +157,7 @@ export const SignUp = async (req, res) => {
       .replaceAll("/", "-");
     Mail(email, "New Account Create", NewAccount(fullName, email, phone, date));
     return res.status(201).json({
-      message: "Congratulations! Your account has been successfully created!",
+      message: "Congratulations! Your account has been created successfully!"
     });
   } catch (error) {
     console.log(error);
@@ -258,34 +277,26 @@ export const Profile = async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "notifications",
+          localField: "_id",
+          foreignField: "userId",
+          as: "notifications",
+        },
+      },
+      {
         $addFields: {
           followers: {
-            $cond: [
-              { $gte: [{ $size: "$followers" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$followers" }, 1000] } }, "k"] },
-              { $toString: { $size: "$followers" } }
-            ]
+            $size: "$followers"
           },
           following: {
-            $cond: [
-              { $gte: [{ $size: "$following" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$following" }, 1000] } }, "k"] },
-              { $toString: { $size: "$following" } }
-            ]
+            $size: "$following"
           },
           postLike: {
-            $cond: [
-              { $gte: [{ $size: "$likedPosts" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$likedPosts" }, 1000] } }, "k"] },
-              { $toString: { $size: "$likedPosts" } }
-            ]
+            $size: "$likedPosts"
           },
           postSave: {
-            $cond: [
-              { $gte: [{ $size: "$postSave" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$postSave" }, 1000] } }, "k"] },
-              { $toString: { $size: "$postSave" } }
-            ]
+            $size: "$postSave"
           },
           myProfile: {
             $cond: {
@@ -305,6 +316,15 @@ export const Profile = async (req, res) => {
                 },
               },
               else: "$$REMOVE",
+            },
+          },
+          notification: {
+            $size: {
+              $filter: {
+                input: "$notifications",
+                as: "notification",
+                cond: { $eq: ["$$notification.isRead", false] },
+              },
             },
           },
         },
@@ -352,7 +372,8 @@ export const Profile = async (req, res) => {
           },
           bio: 1,
           verify: 1,
-          currentAddress: 1,
+          location: 1,
+          profession: 1,
           mediaLink: 1,
           followers: 1,
           following: 1,
@@ -360,6 +381,7 @@ export const Profile = async (req, res) => {
           postSave: 1,
           myProfile: 1,
           isFollowing: 1,
+          notification: 1
         },
       },
     ]);
@@ -433,14 +455,14 @@ export const ProfileInfoUpdate = async (req, res) => {
       fullName,
       username,
       bio,
-      currentAddress,
+      location,
       oldPassword,
       newPassword,
+      profession,
       facebook,
       linkedin,
       fiver,
       github,
-
     } = req.body;
 
     if (
@@ -451,7 +473,8 @@ export const ProfileInfoUpdate = async (req, res) => {
       !linkedin &&
       !fiver &&
       !github &&
-      currentAddress &&
+      location &&
+      profession &&
       !newPassword &&
       !oldPassword
     ) {
@@ -462,26 +485,33 @@ export const ProfileInfoUpdate = async (req, res) => {
 
     const user = await User.findById(req.headers.id);
 
+    if (!usernameRegex.test(username)) {
+      return res.status(400).json({
+        message: "Username must be alphanumeric."
+      });
+    }
+    if (!FullNameRegex.test(fullName)) {
+      return res.status(400).json({
+        message: "Full name can only include letters and spaces."
+      });
+    }
     if (username) {
-      if (!usernameRegex.test(username)) {
-        return res.status(400).json({
-          message: "Username should contain only alphanumeric characters.",
-        });
-      }
       const usernameFind = await User.findOne({ username: { $ne: user.username } }).select({
         _id: 0,
         username: 1,
       });
+
       if (usernameFind) {
         return res.status(400).json({
           message: "Username is already taken.",
         });
       }
     }
+
     if (oldPassword || newPassword) {
       if (!oldPassword || !newPassword) {
         return res.status(400).json({
-          message: "Both old and new passwords must be provided.",
+          message: "Both old and new passwords are required."
         });
       }
 
@@ -497,16 +527,27 @@ export const ProfileInfoUpdate = async (req, res) => {
         });
       }
 
+      if (username.length < 20) {
+        return res.status(422).json({
+          message: "Username must be at least 20 characters."
+        });
+      }
+
+      if (fullName.length < 40) {
+        return res.status(422).json({
+          message: "Full name must be at least 40 characters."
+        });
+      }
+
       if (!validator.isStrongPassword(password)) {
         return res.status(400).json({
-          message:
-            "Password should contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
+          message: "Password must have an uppercase letter, lowercase letter, number, and special character."
         });
       }
 
       if (await bcrypt.compare(newPassword, user.password)) {
         return res.status(400).json({
-          message: "New password should not be the same as the old password.",
+          message: "New password can't be the same as the old one."
         });
       }
 
@@ -519,12 +560,15 @@ export const ProfileInfoUpdate = async (req, res) => {
         fullName,
         username,
         bio,
-        currentAddress,
+        location,
         password: user.password,
-        fiver,
-        facebook,
-        linkedin,
-        github,
+        mediaLink: {
+          fiver,
+          facebook,
+          linkedin,
+          github,
+        },
+        profession,
       },
       { new: true }
     );
@@ -952,34 +996,10 @@ export const GetSavePost = async (req, res) => {
           caption: "$savedPosts.caption",
           images: "$savedPosts.images",
           time: 1,
-          likes: {
-            $cond: [
-              { $gte: [{ $size: "$savedPosts.likes" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$savedPosts.likes" }, 1000] } }, "k"] },
-              { $toString: { $size: "$savedPosts.likes" } }
-            ]
-          },
-          comments: {
-            $cond: [
-              { $gte: [{ $size: "$savedPosts.comments" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$savedPosts.comments" }, 1000] } }, "k"] },
-              { $toString: { $size: "$savedPosts.comments" } }
-            ]
-          },
-          views: {
-            $cond: [
-              { $gte: [{ $size: "$savedPosts.view" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$savedPosts.view" }, 1000] } }, "k"] },
-              { $toString: { $size: "$savedPosts.view" } }
-            ]
-          },
-          postSave: {
-            $cond: [
-              { $gte: [{ $size: "$savedPosts.postSave" }, 1000] },
-              { $concat: [{ $toString: { $divide: [{ $size: "$savedPosts.postSave" }, 1000] } }, "k"] },
-              { $toString: { $size: "$savedPosts.postSave" } }
-            ]
-          },
+          likes: { $size: "$savedPosts.likes" },
+          comment: { $size: "$savedPosts.comments" },
+          view: { $size: "$savedPosts.view" },
+          postSave: { $size: "$savedPosts.postSave" },
           isLike: 1,
           myPost: 1,
           isFollowing: 1,
