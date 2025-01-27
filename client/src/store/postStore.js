@@ -1,5 +1,6 @@
 import {create} from "zustand";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 
 
@@ -57,8 +58,8 @@ const postStore  = create((set) => ({
             return true
         }
         catch {
-            return false;
 
+            return false;
         }
     },
 

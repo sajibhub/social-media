@@ -10,30 +10,26 @@ import FollowersListComponent from "@/Component/users/FollowersListComponent.jsx
 import FollowingListComponent from "@/Component/users/FollowingListComponent.jsx";
 import PersonalInfoComponent from "../Component/users/PersonalInfoComponent";
 import ImageGallery from "@/Component/users/ImageGallery.jsx";
+import SocialMediaComponent from "@/Component/users/SocialMediaComponent.jsx";
+import ChangePasswordComponent from "@/Component/users/ChangePasswordComponent.jsx";
 
 
 
 const ProfilePage = () => {
     const {user} = useParams();
     const {myPostReq, clear_my_post_data} = postStore()
-    const {readProfileReq , followersReq ,followingListReq, imageGalleryReq , clear_profileData ,clear_followersList,clear_followingList, clear_imageGallery }= authorStore()
+    const {readProfileReq , clear_profileData , }= authorStore()
     const {profile_tab} = uiManage()
 
 
     useEffect(() => {
         (
             async ()=>{
-                clear_my_post_data()
                 clear_profileData()
-                clear_followersList()
-                clear_followingList()
-                clear_imageGallery()
-
+                clear_my_post_data()
                 await readProfileReq(user)
                 await myPostReq(user);
-                await followersReq(user);
-                await followingListReq(user);
-                await imageGalleryReq(user)
+
             }
         )()
     }, [user]);
@@ -57,8 +53,17 @@ const ProfilePage = () => {
             }
 
             {
-                profile_tab === "about" && <PersonalInfoComponent />
+                profile_tab === "about" && (
+                    <>
+                        <PersonalInfoComponent />
+                        <SocialMediaComponent />
+                        <ChangePasswordComponent />
+
+                        <div className="py-6"></div>
+                    </>
+                )
             }
+
 
         </Layout>
     );

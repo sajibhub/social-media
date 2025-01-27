@@ -16,7 +16,13 @@ const DynamicText = ({ text , Length , Align,TestStyle }) => {
                 onClick={() => setIsExpanded(!isExpanded)}
                 className={`mt-1 text-sky-500 underline hover:text-sky-700  `}
             >
-                {isExpanded ? "See Less" : "See More"}
+                {text.length > Length && (
+                    <>
+                        {
+                            isExpanded ? "See Less" : "See More"
+                        }
+                    </>
+                )}
             </button>
         </div>
     );

@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import authorStore from "@/store/authorStore.js";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
 
 const SearchResultComponent = () => {
@@ -11,8 +11,18 @@ const SearchResultComponent = () => {
   const navigate = useNavigate();
   const [followLoader, setFollowLoader] = useState({ status: false, id: null });
 
-  const { followingList, flowReq, followingListReq, readProfileReq } =
+  const { followingList, flowReq, followingListReq, readProfileReq ,clear_followingList, } =
     authorStore();
+
+  useEffect(() => {
+    (
+        async () => {
+          clear_followingList()
+          await followingListReq(user);
+        }
+    )()
+  },[])
+
 
   const goToProfile = (username) => {
     navigate(`/profile/${username}`);

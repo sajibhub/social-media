@@ -67,7 +67,7 @@ const PostCard = () => {
     }
   };
 
-  const followHandel = async (id ,i) => {
+  const followHandel = async (id, i) => {
     setFollowLoader({
       status: true,
       id: i,
@@ -85,14 +85,14 @@ const PostCard = () => {
     }
   };
 
-  const postSaveHandler = async (id ,isSave ,postSave) => {
+  const postSaveHandler = async (id, isSave, postSave) => {
     setSavePostLoader({
       status: true,
       id: id,
     });
     const res = await savePostReq(id);
     if (res) {
-      isSave ?  update_my_post_data(id, { isSave: false, postSave: postSave - 1 }) :update_my_post_data(id, { isSave: true, postSave: postSave + 1 })
+      isSave ? update_my_post_data(id, { isSave: false, postSave: postSave - 1 }) : update_my_post_data(id, { isSave: true, postSave: postSave + 1 })
 
     }
 
@@ -118,7 +118,7 @@ const PostCard = () => {
     let like = Like - 1;
     let add = Like + 1;
 
-    if(res){
+    if (res) {
       if (isLike === true) {
         update_my_post_data(id, { isLike: false, likes: like });
       }
@@ -166,7 +166,7 @@ const PostCard = () => {
         await navigator.share({
           title: 'KAM_DEE',
           text: 'Mr.CEO_and_Founder_Of_UVIOM .',
-          url: url ,
+          url: url,
         });
 
       } catch (error) {
@@ -247,6 +247,8 @@ const PostCard = () => {
         <DeleteConfirmationModal />
 
         {my_post_data.map((items, i) => {
+          console.log(items)
+
           return (
             <motion.div
               key={i}
@@ -266,7 +268,7 @@ const PostCard = () => {
                     overflow-hidden flex flex-row justify-center items-center shadow"
                 >
                   <img
-                      className="min-h-full min-w-full"
+                    className="min-h-full min-w-full"
                     onClick={() =>
                       goToProfile(items.myPost, items.user.username)
                     }
@@ -341,13 +343,13 @@ const PostCard = () => {
                 {items.myPost !== true && (
                   <>
                     {followLoader.status &&
-                    followLoader.id === i ? (
+                      followLoader.id === i ? (
                       <LoadingButtonFit />
                     ) : (
                       <>
                         {items.isFollowing === true ? (
                           <button
-                            onClick={() => followHandel(items.user._id ,i)}
+                            onClick={() => followHandel(items.user._id, i)}
                             className="text-sm font-medium text-sky-500
                                       "
                           >
@@ -366,13 +368,13 @@ const PostCard = () => {
                   </>
                 )}
               </div>
-              <h4 className=" px-3 mb-2  text-base font-medium text-neutral-700">
+              <h4 className=" px-3 mb-2    text-base font-medium text-neutral-700">
                 {items.images !== null && items.caption !== "" && (
-                    <DynamicText
-                        text={items.caption}
-                        Length={110}
-                        TestStyle={"text-lg"}
-                    />
+                  <DynamicText
+                    text={items.caption}
+                    Length={110}
+                    TestStyle={"text-lg font-normal text-neutral-700 leading-[120%]"}
+                  />
                 )}
               </h4>
 
@@ -392,18 +394,25 @@ const PostCard = () => {
                   <div className="h-full w-full flex flex-row justify-center items-center bg-gray-100">
                     <div className="max-w-full max-h-full overflow-y-auto scroll-bar-hidden p-5">
                       <DynamicText
-                          text={items.caption}
-                          Length={280}
-                          Align={"flex flex-col "}
-                          TestStyle={"text-2xl font-semibold"}
+                        text={items.caption}
+                        Length={280}
+                        Align={"flex flex-col "}
+                        TestStyle={"text-2xl font-semibold"}
 
                       />
                     </div>
                   </div>
                 )}
               </div>
+              <div className="px-4 flex pt-2 pb-1 border">
+                <img
+                  className="h-[25px] w-[25px] rounded-full"
+                  src={items.liked.profile}
+                  alt="profile image"
+                />
+              </div>
+              <div className="px-4  py-2 flex flex-row justify-s items-center gap-5">
 
-              <div className="px-4 py-5 flex flex-row justify-s items-center gap-5">
                 <div
                   onClick={() =>
                     likePostHandler(items._id, items.isLike, items.likes)
@@ -416,16 +425,14 @@ const PostCard = () => {
 
                   {loader.id !== items._id && (
                     <AiFillLike
-                      className={`${
-                        items.isLike ? "text-sky-600" : "text-neutral-800"
-                      } text-lg`}
+                      className={`${items.isLike ? "text-sky-600" : "text-neutral-800"
+                        } text-lg`}
                     />
                   )}
 
                   <h1
-                    className={`text-base font-medium hidden md:block ${
-                      items.isLike ? "text-sky-600" : "text-neutral-800"
-                    } `}
+                    className={`text-base font-medium hidden md:block ${items.isLike ? "text-sky-600" : "text-neutral-800"
+                      } `}
                   >
                     {items.likes} Like
                   </h1>
@@ -445,10 +452,10 @@ const PostCard = () => {
                 </div>
 
                 <div
-                    onClick={
-                      ()=>handleShare(items._id)
-                    }
-                    className="flex flex-row gap-2 justify-start items-center"
+                  onClick={
+                    () => handleShare(items._id)
+                  }
+                  className="flex flex-row gap-2 justify-start items-center"
                 >
                   <FaShare className="text-neutral-900 text-lg" />
                   <h1 className="text-base font-medium text-neutral-900 hidden md:block">
@@ -457,7 +464,7 @@ const PostCard = () => {
                 </div>
 
                 <div
-                    className="flex flex-row flex-grow gap-2 justify-end items-center"
+                  className="flex flex-row flex-grow gap-2 justify-end items-center"
                 >
                   {savePostLoader.status && savePostLoader.id === items._id ? (
                     <div className="loader-dark"></div>
@@ -465,18 +472,18 @@ const PostCard = () => {
                     <>
                       {items.isSave ? (
                         <IoBookmark
-                            onClick={() => postSaveHandler(items._id, items.isSave , items.postSave)}
-                            className="text-neutral-800 text-lg" />
+                          onClick={() => postSaveHandler(items._id, items.isSave, items.postSave)}
+                          className="text-neutral-800 text-lg" />
                       ) : (
                         <FaRegBookmark
-                            onClick={() => postSaveHandler(items._id, items.isSave , items.postSave)}
+                          onClick={() => postSaveHandler(items._id, items.isSave, items.postSave)}
                         />
                       )}
                     </>
                   )}
 
                   <h1
-                      onClick={() => postSaveHandler(items._id, items.isSave , items.postSave)}
+                    onClick={() => postSaveHandler(items._id, items.isSave, items.postSave)}
                     className="text-base font-medium text-neutral-800
                     "
                   >

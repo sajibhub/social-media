@@ -147,7 +147,7 @@ const AddPost = () => {
                   <div className="w-full h-full bg-gray-300 animate-pulse rounded-full"/>
               ) : (
                   <img
-                      src={myProfileData?.profile}
+                      src={myProfileData.profile}
                       alt="profile"
                       className="w-full h-full object-cover"
                   />

@@ -1,7 +1,19 @@
 import authorStore from "@/store/authorStore.js";
+import {useEffect} from "react";
+import {useParams} from "react-router-dom";
 
 const ImageGallery = () => {
-  const { imageGallery } = authorStore();
+    const {user} = useParams();
+  const { imageGallery ,clear_imageGallery ,imageGalleryReq } = authorStore();
+
+  useEffect(() => {
+      (
+          async () => {
+              clear_imageGallery()
+              await imageGalleryReq(user)
+          }
+      )()
+  },[])
 
   if (imageGallery === null) {
     return (

@@ -1,23 +1,33 @@
 import { motion } from "framer-motion";
 import authorStore from "@/store/authorStore.js";
-import { useNavigate } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import toast from "react-hot-toast";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
 
 const SearchResultComponent = () => {
+  const {user} = useParams();
   const navigate = useNavigate();
   const [followLoader, setFollowLoader] = useState({
     status: false,
     id: null,
   });
-
+  const {clear_followersList, followersReq } =authorStore()
   const {
     followersList,
     flowReq,
     update_followersList
   } = authorStore();
+
+  useEffect(() => {
+    (
+        async () => {
+          clear_followersList()
+          await followersReq(user);
+        }
+    )()
+  }, []);
 
   const goToProfile = (user) => {
     navigate("/profile/" + user);
@@ -45,10 +55,10 @@ const SearchResultComponent = () => {
     } else {
       toast.error("Action Fail");
     }
-  };
+  }
 
 
-  if (followersList === null) {
+  if (followersList == null) {
     return (
       <div className="mt-4 px-3">
         {[1,1,1, ].map((i) => {
@@ -73,6 +83,7 @@ const SearchResultComponent = () => {
   else {
     return (
       <div className="px-3">
+
         {followersList.map((user, i) => {
           return (
             <motion.div
@@ -83,11 +94,13 @@ const SearchResultComponent = () => {
                 duration: 0.3,
                 scale: { type: "spring", stiffness: 300 },
               }}
-              className="cursor-pointer flex flex-row justify-start items-center gap-4 p-4 border rounded-lg shadow-lg mb-2 bg-white hover:shadow-xl transition-shadow"
+              className="cursor-pointer flex flex-row justify-start items-center gap-4 p-4 border
+              ounded-lg shadow-lg mb-2 bg-white hover:shadow-xl transition-shadow"
             >
               <div
                 onClick={() => goToProfile(user.username)}
-                className="h-[50px] w-[50px] flex items-center justify-center rounded-full overflow-hidden border-2 border-gray-200"
+                className="h-[50px] w-[50px] flex items-center justify-center rounded-full overflow-hidden border-2
+                border-gray-200"
               >
                 <img
                   src={user.profile}

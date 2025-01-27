@@ -1,157 +1,332 @@
 import { useState } from "react";
-import { FaFacebook,  FaLinkedin } from "react-icons/fa";
-import { TbBrandFiverr } from "react-icons/tb";
-import { FaGitAlt } from "react-icons/fa";
-import authorStore from "../../store/authorStore";
-
-
+import {FaFacebook, FaLinkedin, FaGithub, FaFacebookF, FaGit, FaLinkedinIn} from "react-icons/fa";
+import authorStore from "@/store/authorStore.js";
+import toast from "react-hot-toast";
+import {TbBrandFiverr} from "react-icons/tb";
 
 const SocialMediaComponent = () => {
-
-  const {myProfileData} = authorStore()
-
-  const [isEditing, setIsEditing] = useState(false);
+  const {myProfileData ,updateProfileReq} = authorStore()
 
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setLinks((prevLinks) => ({ ...prevLinks, [name]: value }));
+  const [editing, setEditing] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const [editData ,setEditData ] = useState();
+
+  const toggleEdit = (platform ,url) => {
+    setEditData(url)
+    setEditing(platform);
   };
 
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
+  const visit = (url)=>{
+    window.open(url);
+  }
+
+  const handleProfileUpdate = async (icon) => {
+    setLoading(true);
+
+    let reqData = ""
+
+    if(icon === "facebook"){
+      reqData = {
+        facebook: editData,
+
+      };
+    }
+
+    if(icon === "linkedin"){
+      reqData = {
+        linkedin: editData,
+
+      };
+    }
+
+    if(icon === "fiver"){
+      reqData = {
+        fiver: editData,
+
+      };
+    }
+
+    if(icon === "github"){
+      reqData = {
+        github: editData,
+
+      };
+    }
+
+
+
+    const res = await updateProfileReq(reqData);
+    setLoading(false);
+    setEditData("")
+    if (res) {
+      toggleEdit(false)
+      toast.success("Profile Updated Successfully");
+    } else {
+      toast.error("Profile Update Failed");
+    }
   };
 
-  return (
-    <div className="p-5 " >
-      <h2 className="text-2xl font-semibold text-gray-700 mb-4 text-center mt-5 ">
-        Social Media Links
-      </h2>
 
-      {/* Social Media Links */}
-      <div className="flex gap-6 justify-center mb-6">
-        <a
-          href={links.facebook}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 text-3xl hover:text-blue-800"
-        >
-          <FaFacebook />
-        </a>
-
-        <a
-          href={links.linkedin}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-700 text-3xl hover:text-blue-900"
-        >
-          <FaLinkedin />
-        </a>
-
-        <a
-          href={links.twitter}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-400 text-3xl hover:text-blue-600"
-        >
-          <TbBrandFiverr />
-        </a>
-        <a
-          href={links.instagram}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-pink-500 text-3xl hover:text-pink-700"
-        >
-          <FaGitAlt />
-        </a>
-        
-      </div>
-
-      {/* Edit Links */}
-      {isEditing && (
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
-              Facebook URL:
-            </label>
-            <input
-              type="text"
-              name="facebook"
-              value={myProfileData.mediaLink["facebook"]}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md text-gray-700"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
-              Linkedin URL:
-            </label>
-            <input
-              type="text"
-              name="linkedin"
-              value={myProfileData.mediaLink["linkedin"]}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md text-gray-700"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
-              fiver URL:
-            </label>
-            <input
-              type="text"
-              name="fiver"
-              value={myProfileData.mediaLink["fiver"]}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md text-gray-700"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
-              GitHub URL:
-            </label>
-            <input
-              type="text"
-              name="github"
-              value={myProfileData.mediaLink["github"]}
-              onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-md text-gray-700"
-            />
+  if(myProfileData == null){
+    return (
+        <div className="px-8">
+          <h2 className="text-xl mt-8 font-semibold mb-4 text-center">Manage Social Media Links</h2>
+          <div className="space-y-4 pt-2">
+            <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300">
+              <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
+              <div className="flex-grow h-4 bg-gray-200 rounded"></div>
+              <div className="h-8 w-20 bg-gray-200 rounded"></div>
+              <div className="h-8 w-20 bg-gray-200 rounded"></div>
+            </div>
+            <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300">
+              <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
+              <div className="flex-grow h-4 bg-gray-200 rounded"></div>
+              <div className="h-8 w-20 bg-gray-200 rounded"></div>
+              <div className="h-8 w-20 bg-gray-200 rounded"></div>
+            </div>
+            <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300">
+              <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
+              <div className="flex-grow h-4 bg-gray-200 rounded"></div>
+              <div className="h-8 w-20 bg-gray-200 rounded"></div>
+              <div className="h-8 w-20 bg-gray-200 rounded"></div>
+            </div>
           </div>
         </div>
-      )}
+    )
 
-      {/* Buttons */}
-      <div className="mt-6 flex justify-center gap-4">
-        {isEditing ? (
-          <>
-            <button
-              onClick={handleEditToggle}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+  }
+
+  else {
+    return (
+        <div className="px-8 border-b pb-8">
+          <h2 className="text-xl mt-8 font-semibold mb-4 text-center">Manage Social Media Links</h2>
+          <div className="space-y-4 pt-2 ">
+
+            <div
+                className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
             >
-              Save
-            </button>
-            <button
-              onClick={() => setIsEditing(false)}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+              <FaFacebookF className="text-2xl text-sky-500"/>
+
+              {editing === "facebook" ? (
+                  <input
+                      type="text"
+                      value={editData}
+                      onChange={(e) => setEditData(e.target.value)}
+                      className="flex-grow bg-transparent outline-none text-sm placeholder-gray-400 border-b-2 border-gray-300 focus:border-blue-500"
+                  />
+              ) : (
+                  <span className="flex-grow text-sm text-gray-700">
+                     {myProfileData.mediaLink?.facebook || "Add Facebook Link"}
+                     </span>
+              )}
+
+              {editing === "facebook" ? (
+                  <button
+                      onClick={() => handleProfileUpdate("facebook")}
+                      className="px-3 py-1 text-sm rounded-md bg-green-500 text-white hover:bg-green-600"
+                  >
+                    {
+                      loading ? <div className="loader"></div> : "Save"
+                    }
+
+                  </button>
+              ) : (
+                  <>
+                    <a
+                        onClick={
+                          () => visit(myProfileData.mediaLink?.facebook)
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`px-3 py-1 text-sm rounded-md ${
+                            myProfileData.mediaLink?.facebook !== null
+                                ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        }`}
+                    >
+                      Visit
+                    </a>
+                    <button
+                        onClick={() => toggleEdit("facebook", myProfileData.mediaLink?.facebook)}
+                        className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
+                    >
+                      Edit
+                    </button>
+                  </>
+              )}
+            </div>
+
+            <div
+                className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
             >
-              Cancel
-            </button>
-          </>
-        ) : (
-          <button
-            onClick={handleEditToggle}
-            className="px-4 py-2  text-blue-500 rounded-md font-medium text-lg"
-          >
-            Edit Links
-          </button>
-        )}
-      </div>
-    </div>
-  );
+              <FaLinkedinIn className="text-2xl text-sky-500"/>
+
+              {editing === "linkdin" ? (
+                  <input
+                      type="text"
+                      value={editData}
+                      onChange={(e) => setEditData(e.target.value)}
+                      className="flex-grow bg-transparent outline-none text-sm placeholder-gray-400 border-b-2 border-gray-300 focus:border-blue-500"
+                  />
+              ) : (
+                  <span className="flex-grow text-sm text-gray-700">
+                     {myProfileData.mediaLink?.linkedin || "Add Facebook Link"}
+                     </span>
+              )}
+
+              {editing === "linkdin" ? (
+                  <button
+                      onClick={() => handleProfileUpdate("linkedin")}
+                      className="px-3 py-1 text-sm rounded-md bg-green-500 text-white hover:bg-green-600"
+                  >
+                    {
+                      loading ? <div className="loader"></div> : "Save"
+                    }
+
+                  </button>
+              ) : (
+                  <>
+                    <a
+                        onClick={
+                          () => visit(myProfileData.mediaLink?.linkedin)
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`px-3 py-1 text-sm rounded-md ${
+                            myProfileData.linkedin?.linkedin !== null
+                                ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        }`}
+                    >
+                      Visit
+                    </a>
+                    <button
+                        onClick={() => toggleEdit("linkdin", myProfileData.mediaLink?.linkedin)}
+                        className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
+                    >
+                      Edit
+                    </button>
+                  </>
+              )}
+            </div>
+
+            <div
+                className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
+            >
+              <TbBrandFiverr className="text-2xl text-sky-500"/>
+
+              {editing === "fiver" ? (
+                  <input
+                      type="text"
+                      value={editData}
+                      onChange={(e) => setEditData(e.target.value)}
+                      className="flex-grow bg-transparent outline-none text-sm placeholder-gray-400 border-b-2 border-gray-300 focus:border-blue-500"
+                  />
+              ) : (
+                  <span className="flex-grow text-sm text-gray-700">
+                     {myProfileData.mediaLink?.fiver || "Add Facebook Link"}
+                     </span>
+              )}
+
+              {editing === "fiver" ? (
+                  <button
+                      onClick={() => handleProfileUpdate("fiver")}
+                      className="px-3 py-1 text-sm rounded-md bg-green-500 text-white hover:bg-green-600"
+                  >
+                    {
+                      loading ? <div className="loader"></div> : "Save"
+                    }
+
+                  </button>
+              ) : (
+                  <>
+                    <a
+                        onClick={
+                          () => visit(myProfileData.mediaLink?.fiver)
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`px-3 py-1 text-sm rounded-md ${
+                            myProfileData.mediaLink?.fiver !== null
+                                ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        }`}
+                    >
+                      Visit
+                    </a>
+                    <button
+                        onClick={() => toggleEdit("fiver", myProfileData.mediaLink?.fiver)}
+                        className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
+                    >
+                      Edit
+                    </button>
+                  </>
+              )}
+            </div>
+
+            <div
+                className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
+            >
+              <FaGit className="text-2xl text-sky-500"/>
+
+              {editing === "github" ? (
+                  <input
+                      type="text"
+                      value={editData}
+                      onChange={(e) => setEditData(e.target.value)}
+                      className="flex-grow bg-transparent outline-none text-sm placeholder-gray-400 border-b-2 border-gray-300 focus:border-blue-500"
+                  />
+              ) : (
+                  <span className="flex-grow text-sm text-gray-700">
+                     {myProfileData.mediaLink?.github || "Add Facebook Link"}
+                     </span>
+              )}
+
+              {editing === "github" ? (
+                  <button
+                      onClick={() => handleProfileUpdate("github")}
+                      className="px-3 py-1 text-sm rounded-md bg-green-500 text-white hover:bg-green-600"
+                  >
+                    {
+                      loading ? <div className="loader"></div> : "Save"
+                    }
+
+                  </button>
+              ) : (
+                  <>
+                    <a
+                        onClick={
+                          () => visit(myProfileData.mediaLink?.github)
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`px-3 py-1 text-sm rounded-md ${
+                            myProfileData.mediaLink?.github !== null
+                                ? "bg-blue-500 text-white hover:bg-blue-600 cursor-pointer"
+                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        }`}
+                    >
+                      Visit
+                    </a>
+                    <button
+                        onClick={() => toggleEdit("github", myProfileData.mediaLink?.github)}
+                        className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
+                    >
+                      Edit
+                    </button>
+                  </>
+              )}
+            </div>
+
+
+          </div>
+        </div>
+    );
+  }
+
+
 };
 
 export default SocialMediaComponent;

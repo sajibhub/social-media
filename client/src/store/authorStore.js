@@ -1,8 +1,5 @@
 import {create} from "zustand";
 import axios from "axios";
-import OtpRequestPopup from "@/popup/OtpRequestPopup.jsx";
-
-
 
 const Base_url = "https://matrix-media.up.railway.app/api/v1/"
 const Sign_up_api = Base_url + "user/auth/signup"
@@ -125,7 +122,6 @@ const authorStore = create((set) => ({
     },
 
     updateProfileReq : async (data)=>{
-        console.log(data)
         try {
             await axios.put(Profile_info_update_api, data , {withCredentials:true});
             return true

@@ -87,7 +87,7 @@ const ProfileSummaryComponent = () => {
                         📍 {myProfileData.location || "San Francisco, USA"}
                       </p>
                       <p className="text-sm text-gray-700">
-                        👥 {myProfileData.connections || "500+"} Connections
+                        👥 {myProfileData.followers || 0} Followers
                       </p>
                     </div>
 

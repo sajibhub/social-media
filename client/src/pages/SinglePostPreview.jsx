@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import VerifiedBadge from "@/Component/utility/VerifyBadge.jsx";
 
 import {useNavigate} from "react-router-dom";
+import DynamicText from "@/Component/utility/DynamicText.jsx";
 
 const SinglePostPreview = () => {
     const getUrl = window.location.href
@@ -315,7 +316,8 @@ const SinglePostPreview = () => {
                     <div className="flex flex-row ms-3 me-5 gap-3 justify-start items-center">
                         <div
                             className=" flex-shrink-0  h-[40px] w-[40px] rounded-full
-                    overflow-hidden flex flex-row justify-center items-center shadow"
+                                     overflow-hidden flex flex-row justify-center items-center shadow
+                            "
                         >
                             <img
                                 className="min-h-full min-w-full"
@@ -350,21 +352,31 @@ const SinglePostPreview = () => {
 
 
                     {
-                        Single_Post_Data[0].images !== null && (
-                            <h4 className="px-3 mb-2 text-base font-medium text-neutral-700">
-                                {Single_Post_Data[0].caption}
-                            </h4>
+                        Single_Post_Data[0].images !== null && Single_Post_Data[0].caption !== "" && (
+                                <DynamicText
+                                    text={Single_Post_Data[0].caption}
+                                    Length={125}
+                                    TestStyle={"text-lg font-normal text-neutral-700 leading-[120%]"}
+                                    Align={"pb-3"}
+                                />
                         )
                     }
 
+
                     <div
-                        className="px-3 overflow-hidden w-full h-[320px] flex flex-row justify-center items-center bg-gray-50"
+                        className="px-3  overflow-hidden w-full h-[320px] flex flex-row justify-center items-center bg-gray-50"
                     >
                         {
                             Single_Post_Data[0].images === null ? (
-                                <h4 className="px-3 mb-2 text-base font-medium text-neutral-700">
-                                    {Single_Post_Data[0].caption}
-                                </h4>
+                                <div className="max-w-full max-h-full overflow-y-auto scroll-bar-hidden p-5">
+                                    <DynamicText
+                                        text={Single_Post_Data[0].caption}
+                                        Length={280}
+                                        Align={"flex flex-col "}
+                                        TestStyle={"text-2xl font-semibold"}
+
+                                    />
+                                </div>
                             ) : (
                                 <img
                                     src={Single_Post_Data[0].images}

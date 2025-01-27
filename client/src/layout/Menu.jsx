@@ -84,14 +84,26 @@ const Menu = () => {
                         className="menu mb-3"
                         onClick={async () => {
                             setSignOutLoading(true);
-                            const res = await SignOutReq();
-                            setSignOutLoading(false);
-                            if (res) {
-                                navigate("/author");
-                                toast.success("Sign Out Successfully");
-                            } else {
-                                toast.error('Sign Out Fail');
+
+                            const parmetion =  confirm("Are you ready to sign out?");
+
+                            if (parmetion) {
+                                const res = await SignOutReq();
+
+                                localStorage.clear();
+                                setSignOutLoading(false);
+                                if (res) {
+                                    navigate("/author");
+                                    toast.success("Sign Out Successfully");
+                                } else {
+                                    toast.error('Sign Out Fail');
+                                }
                             }
+                            else{
+                                toast.error("Thanks for not signing out.");
+                                setSignOutLoading(false);
+                            }
+
                         }}
                     >
                         {signOutLoading ? <div className="loader-dark"></div> : <FaSignOutAlt className="text-xl font-medium " />}

@@ -31,7 +31,8 @@ const PersonalInfoComponent = () => {
         email: myProfileData.email,
         phoneNumber: myProfileData.phoneNumber,
         bio: myProfileData.bio,
-        currentAddress: myProfileData.currentAddress,
+         location: myProfileData.location,
+         profession: myProfileData.profession,
       };
 
     }
@@ -43,7 +44,7 @@ const PersonalInfoComponent = () => {
         email: myProfileData.email,
         phoneNumber: myProfileData.phoneNumber,
         bio: myProfileData.bio,
-        currentAddress: myProfileData.currentAddress,
+        location: myProfileData.location,
       };
     }
 
@@ -85,9 +86,9 @@ const PersonalInfoComponent = () => {
     );
   } else {
     return (
-      <div className="bg-gray-100 py-8 px-4">
+      <div className=" pb-3 ">
         {/* Personal Info Form */}
-        <div className="bg-white shadow-lg rounded-xl p-8 max-w-3xl mx-auto">
+        <div className="bg-white border-b p-8 max-w-3xl mx-auto">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">
             Personal Information
           </h2>
@@ -158,6 +159,24 @@ const PersonalInfoComponent = () => {
               )}
             </div>
 
+            {/* profession */}
+            <div className="flex justify-between items-center">
+              <label className="text-gray-700 font-medium w-1/3">Profession:</label>
+              {isEditing ? (
+                <input
+                  type="email"
+                  name="email"
+                  value={myProfileData.profession}
+                  onChange={(e) => updateProfileData("profession", e.target.value)}
+                  className="w-2/3 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
+                />
+              ) : (
+                <p className="w-2/3 text-gray-600">
+                  {myUser === user ? myProfileData?.profession : profileData?.profession}
+                </p>
+              )}
+            </div>
+
             {/* Phone */}
             <div className="flex justify-between items-center">
               <label className="text-gray-700 font-medium w-1/3">Phone:</label>
@@ -203,17 +222,17 @@ const PersonalInfoComponent = () => {
                 <input
                   type="text"
                   name="address"
-                  value={myProfileData.currentAddress}
+                  value={myProfileData.location}
                   onChange={(e) =>
-                    updateProfileData("currentAddress", e.target.value)
+                    updateProfileData("location", e.target.value)
                   }
                   className="w-2/3 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
                 />
               ) : (
                 <p className="w-2/3 text-gray-600">
                   {myUser === user
-                    ? myProfileData?.currentAddress
-                    : profileData?.currentAddress}
+                    ? myProfileData?.location
+                    : profileData?.location}
                 </p>
               )}
             </div>
@@ -225,14 +244,14 @@ const PersonalInfoComponent = () => {
               {isEditing ? (
                 <button
                   onClick={handleProfileUpdate}
-                  className="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition ease-in-out duration-300"
+                  className="px-4 py-2 text-sm bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition ease-in-out duration-300"
                 >
                   {loading ? <div className="loader"></div> : "Save Changes"}
                 </button>
               ) : (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition ease-in-out duration-300"
+                  className="px-4 py-2 text-base bg-sky-500 text-white rounded-lg hover:bg-sky-600 transition ease-in-out duration-300"
                 >
                   Edit Profile
                 </button>
@@ -240,7 +259,7 @@ const PersonalInfoComponent = () => {
               {isEditing && (
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition ease-in-out duration-300"
+                  className="px-4 py-2 bg-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-400 transition ease-in-out duration-300"
                 >
                   Cancel
                 </button>

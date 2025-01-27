@@ -5,13 +5,13 @@ import PostCard from "@/Component/post/PostCard.jsx";
 
 
 const SavePostPage = () => {
-    const {savePostListReq ,} = postStore()
-
+    const {savePostListReq ,clear_my_post_data} = postStore()
 
     useEffect(() => {
         (
             async ()=>{
-               await savePostListReq()
+                clear_my_post_data()
+                 await savePostListReq()
             }
         )()
     }, []);
