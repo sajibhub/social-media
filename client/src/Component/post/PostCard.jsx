@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { AiFillDelete, AiFillLike } from "react-icons/ai";
-import { FaCommentDots, FaRegBookmark, FaShare } from "react-icons/fa";
+import { FaCommentDots, FaLink, FaMapMarkedAlt, FaRegBookmark, FaShare } from "react-icons/fa";
 import { IoBookmark } from "react-icons/io5";
 import postStore from "@/store/postStore.js";
 import { RiEdit2Fill } from "react-icons/ri";
@@ -12,6 +12,7 @@ import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
 import DynamicText from "@/Component/utility/DynamicText.jsx";
+
 
 
 const PostCard = () => {
@@ -37,6 +38,7 @@ const PostCard = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
+  
   const [loader, setLoader] = useState({
     status: false,
     id: null,
@@ -56,6 +58,7 @@ const PostCard = () => {
     status: false,
     id: null,
   });
+
 
   const goToProfile = (isPost, user) => {
     if (isPost) {
@@ -159,6 +162,9 @@ const PostCard = () => {
     setOpenMenuId((prevId) => (prevId === id ? null : id));
   };
 
+  
+
+
   const handleShare = async (id) => {
     const url = hostname + "/post/" + id
     if (navigator.share) {
@@ -247,8 +253,6 @@ const PostCard = () => {
         <DeleteConfirmationModal />
 
         {my_post_data.map((items, i) => {
-          console.log(items)
-
           return (
             <motion.div
               key={i}
@@ -295,50 +299,6 @@ const PostCard = () => {
                   </p>
                 </div>
 
-                <div className="relative inline-block text-left">
-                  {items.myPost ? (
-                    <button
-                      onClick={() => toggleMenu(items._id)}
-                      className="text-neutral-800 hover:text-sky-500"
-                    >
-                      <BsThreeDotsVertical className="text-lg font-semibold" />
-                    </button>
-                  ) : (
-                    ""
-                  )}
-
-                  {openMenuId === items._id && (
-                    <div
-                      className="absolute right-0 z-10 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                      role="menu"
-                      aria-orientation="vertical"
-                      aria-labelledby="menu-button"
-                    >
-                      <div className="py-1">
-                        <button
-                          onClick={() => {
-                            setUpdatePostData("id", items._id);
-                            setUpdatePostData("caption", items.caption);
-                            setOpenMenuId(null);
-                          }}
-                          className="text-sm flex items-center w-full px-4 py-2 text-neutral-800 hover:bg-sky-100 hover:text-sky-500"
-                        >
-                          <RiEdit2Fill className="mr-2 text-lg" /> Edit Post
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            openDeleteModal(items);
-                            setOpenMenuId(null);
-                          }}
-                          className="text-sm flex items-center w-full px-4 py-2 text-neutral-800 hover:bg-sky-100 hover:text-red-500"
-                        >
-                          <AiFillDelete className="mr-2 text-lg" /> Delete Post
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
 
                 {items.myPost !== true && (
                   <>
@@ -367,8 +327,85 @@ const PostCard = () => {
                     )}
                   </>
                 )}
+                <div className="relative inline-block">
+
+                  {openMenuId === items._id && (
+                    <div
+                      className="absolute right-0 z-100 mt-2 w-56 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-200 ease-in-out transform scale-95 hover:scale-100"
+                      role="menu"
+                      aria-orientation="vertical"
+                      aria-labelledby="menu-button"
+                    >
+                      <div className="py-2">
+                        {items.myPost &&
+                          <>
+                            <button
+                              onClick={() => {
+                                setUpdatePostData("id", items._id);
+                                setUpdatePostData("caption", items.caption);
+                                setOpenMenuId(null);
+                              }}
+                              className="flex items-center w-full px-4 py-2 text-sm text-neutral-800 hover:bg-sky-50 hover:text-sky-500 rounded-md transition duration-200 ease-in-out"
+                            >
+                              <RiEdit2Fill className="mr-2 text-lg" /> Edit Post
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                openDeleteModal(items);
+                                setOpenMenuId(null);
+                              }}
+                              className="flex items-center w-full px-4 py-2 text-sm text-neutral-800 hover:bg-red-50 hover:text-red-500 rounded-md transition duration-200 ease-in-out"
+                            >
+                              <AiFillDelete className="mr-2 text-lg" /> Delete Post
+                            </button>
+
+                            <hr className="my-2" />
+                          </>}
+
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(window.location.hostname + "/post/" + items._id);
+                            setOpenMenuId(null);
+                          }}
+                          className="flex items-center w-full px-4 py-2 text-sm text-neutral-800 hover:bg-sky-50 hover:text-sky-500 rounded-md transition duration-200 ease-in-out"
+                        >
+                          <FaLink className="mr-2 text-lg" /> Copy Link
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            handleShare(items._id)
+                          }}
+                          className="flex items-center w-full px-4 py-2 text-sm text-neutral-800 hover:bg-sky-50 hover:text-sky-500 rounded-md transition duration-200 ease-in-out"
+                        >
+                          <FaShare className="mr-2 text-lg" /> Share
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setOpenMenuId(null);
+                            postSaveHandler(items._id, items.isSave, items.postSave)
+                          }}
+                          className="flex items-center w-full px-4 py-2 text-sm text-neutral-800 hover:bg-sky-50 hover:text-sky-500 rounded-md transition duration-200 ease-in-out"
+                        >
+                          {items.isSave ? <IoBookmark className="mr-2 text-lg" /> : <FaRegBookmark className="mr-2 text-lg" />} Save
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => toggleMenu(items._id)}
+                  className="text-neutral-800 hover:text-sky-500"
+                >
+                  <BsThreeDotsVertical className="text-lg font-semibold" />
+                </button>
               </div>
-              <h4 className=" px-3 mb-2    text-base font-medium text-neutral-700">
+
+
+              <h4 className=" px-3 mb-2  text-base font-medium text-neutral-700">
                 {items.images !== null && items.caption !== "" && (
                   <DynamicText
                     text={items.caption}
@@ -404,15 +441,7 @@ const PostCard = () => {
                   </div>
                 )}
               </div>
-              <div className="px-4 flex pt-2 pb-1 border">
-                <img
-                  className="h-[25px] w-[25px] rounded-full"
-                  src={items.liked.profile}
-                  alt="profile image"
-                />
-              </div>
-              <div className="px-4  py-2 flex flex-row justify-s items-center gap-5">
-
+              <div className="px-4 py-5 flex flex-row justify-s items-center gap-5">
                 <div
                   onClick={() =>
                     likePostHandler(items._id, items.isLike, items.likes)
@@ -437,6 +466,7 @@ const PostCard = () => {
                     {items.likes} Like
                   </h1>
                 </div>
+
                 <div
                   onClick={() => {
                     setCommentPostData("id", items._id);
@@ -494,6 +524,7 @@ const PostCard = () => {
             </motion.div>
           );
         })}
+        
       </>
     );
   }

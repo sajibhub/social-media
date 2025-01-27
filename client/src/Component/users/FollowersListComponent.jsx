@@ -1,19 +1,19 @@
 import { motion } from "framer-motion";
 import authorStore from "@/store/authorStore.js";
-import {useNavigate, useParams} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
 
 const SearchResultComponent = () => {
-  const {user} = useParams();
+  const { user } = useParams();
   const navigate = useNavigate();
   const [followLoader, setFollowLoader] = useState({
     status: false,
     id: null,
   });
-  const {clear_followersList, followersReq } =authorStore()
+  const { clear_followersList, followersReq } = authorStore()
   const {
     followersList,
     flowReq,
@@ -22,10 +22,10 @@ const SearchResultComponent = () => {
 
   useEffect(() => {
     (
-        async () => {
-          clear_followersList()
-          await followersReq(user);
-        }
+      async () => {
+        clear_followersList()
+        await followersReq(user);
+      }
     )()
   }, []);
 
@@ -33,7 +33,7 @@ const SearchResultComponent = () => {
     navigate("/profile/" + user);
   };
 
-  const followHandel = async (id ,isFollowing) => {
+  const followHandel = async (id, isFollowing) => {
     setFollowLoader({
       status: true,
       id: id,
@@ -44,11 +44,11 @@ const SearchResultComponent = () => {
       id: null,
     });
     if (res) {
-      if(isFollowing === true) {
-        update_followersList(id ,{isFollowing : false});
+      if (isFollowing === true) {
+        update_followersList(id, { isFollowing: false });
       }
-      if(isFollowing === false) {
-        update_followersList(id ,{isFollowing : true});
+      if (isFollowing === false) {
+        update_followersList(id, { isFollowing: true });
       }
 
       toast.success("Action Successful");
@@ -58,33 +58,25 @@ const SearchResultComponent = () => {
   }
 
 
-  if (followersList == null) {
-    return (
-      <div className="mt-4 px-3">
-        {[1,1,1, ].map((i) => {
-          return (
-            <motion.div
-              key={i}
-              className="flex items-center gap-4 p-4 border rounded-lg shadow-md animate-pulse bg-white"
-            >
-              <div className="h-12 w-12 bg-gray-300 rounded-full"></div>
-              <div className="flex flex-col flex-grow space-y-2">
-                <div className="h-4 w-1/3 bg-gray-300 rounded"></div>
-                <div className="h-4 w-1/4 bg-gray-300 rounded"></div>
-              </div>
-              <div className="h-8 w-24 bg-gray-300 rounded-full"></div>
-            </motion.div>
-          );
-        })}
+  const skeletonLoader = Array.from({ length: 7 }).map((_, index) => (
+    <motion.div
+      key={index}
+      className="flex items-center gap-4 p-4 border rounded-lg shadow-md animate-pulse bg-white"
+    >
+      <div className="h-12 w-12 bg-gray-300 rounded-full"></div>
+      <div className="flex flex-col flex-grow space-y-2">
+        <div className="h-4 w-1/3 bg-gray-300 rounded"></div>
+        <div className="h-4 w-1/4 bg-gray-300 rounded"></div>
       </div>
-    );
-  }
+      <div className="h-8 w-24 bg-gray-300 rounded-full"></div>
+    </motion.div>
+  ));
 
-  else {
-    return (
-      <div className="px-3">
+  return (
+    <div className="px-3">
+      {followersList == null ? skeletonLoader :
 
-        {followersList.map((user, i) => {
+        followersList.map((user, i) => {
           return (
             <motion.div
               key={i}
@@ -132,22 +124,23 @@ const SearchResultComponent = () => {
               ) : (
 
                 <button
-                  onClick={() => followHandel(user._id , user.isFollowing)}
-                  className={`text-sm font-semibold py-2 px-6 rounded-full transition-colors duration-300 transform ${
-                    user.isFollowing
-                      ? "bg-red-500 text-white hover:bg-red-700 hover:scale-105"
-                      : "bg-sky-600 text-white hover:bg-sky-700 hover:scale-105"
-                  }`}
+                  onClick={() => followHandel(user._id, user.isFollowing)}
+                  className={`text-sm font-semibold py-2 px-6 rounded-full transition-colors duration-300 transform ${user.isFollowing
+                    ? "bg-red-500 text-white hover:bg-red-700 hover:scale-105"
+                    : "bg-sky-600 text-white hover:bg-sky-700 hover:scale-105"
+                    }`}
                 >
                   {user.isFollowing ? "Unfollow" : "Follow"}
                 </button>
               )}
             </motion.div>
           );
-        })}
-      </div>
-    );
-  }
+        })
+
+      }
+    </div>
+  );
+
 };
 
 export default SearchResultComponent;

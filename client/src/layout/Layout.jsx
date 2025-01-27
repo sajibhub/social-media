@@ -7,6 +7,7 @@ import UpdatePostPopup from "@/popup/UpdatePostPopup.jsx";
 import UpdateProfilePopup from "../popup/UpdateProfilePopup.jsx";
 import uiManage from "../store/uiManage.js";
 import AddPostPopup from "@/pages/AddPostPage.jsx";
+import ActiveStoryComponent from "@/Component/story/ActiveStoryComponent.jsx";
 
 
 

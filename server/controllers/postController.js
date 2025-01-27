@@ -834,6 +834,14 @@ export const SinglePost = async (req, res) => {
         $sort: { createdAt: -1 },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        }
+      },
+      {
         $unwind: "$user",
       },
       {
@@ -915,10 +923,10 @@ export const SinglePost = async (req, res) => {
             },
           },
           isSave: { $in: [id, "$postSave"] },
-          
+
         },
       },
-    
+
       {
         $project: {
           _id: 1,
@@ -939,12 +947,12 @@ export const SinglePost = async (req, res) => {
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
-          
+
         },
       },
     ]);
 
-    res.status(200).json(findPost);
+    return res.status(200).json(findPost);
   } catch (error) {
     res.status(500).json({
       message: "An error occurred while processing your request.",

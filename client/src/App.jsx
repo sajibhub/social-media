@@ -11,6 +11,7 @@ import NotFound from "./Component/NotFound/NotFound";
 import SinglePostPreview from "@/pages/SinglePostPreview"
 import AddPostPopup from "@/pages/AddPostPage.jsx";
 import SettingPage from "@/pages/SettingPage.jsx";
+import StoryPage from "@/pages/StoryPage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -60,6 +61,10 @@ const router = createBrowserRouter([
     element: <SettingPage />
   },
 
+  {
+    path: "/story",
+    element: <StoryPage />
+  },
   {
     path: "*",
     element: <NotFound />,

@@ -1,60 +1,85 @@
-
-import {IoIosSend} from "react-icons/io";
-import {AiFillLike} from "react-icons/ai";
-
+import {motion} from "framer-motion";
+import {useRef} from "react";
+import {MdKeyboardDoubleArrowRight, MdOutlineKeyboardDoubleArrowLeft} from "react-icons/md";
 
 const ActiveStoryComponent = () => {
+
+    const scrollRef = useRef(null);
+
+    const scroll = (direction) => {
+        if (direction === "left") {
+            scrollRef.current.scrollBy({ left: -200, behavior: "smooth" });
+        } else {
+            scrollRef.current.scrollBy({ left: 200, behavior: "smooth" });
+        }
+
+    };
+
+
+
+
     return (
-        <div className="h-full border-x relative ">
-            <div className="flex flex-col justify-between h-full">
-                <div className="flex flex-row mx-3 gap-3 justify-center items-center pt-3">
-                    <div
-                        className=" flex-shrink-0  h-[35px] w-[35px] rounded-full overflow-hidden flex flex-row justify-center items-center">
-                        <img
-                            src="/image/profile.jpg"
-                            alt="profile image"
-                            className="min-w-full min-h-full"
-                        />
-                    </div>
-                    <div className="mb-2 flex-grow">
-                        <h2 className="text-sm font-medium text-neutral-800">
-                            Imran Hossen
-                        </h2>
-                        <p className="text-sm text-neutral-600 ">
-                            Front-end Developer
-                        </p>
-                    </div>
+        <div className="active top-0 left-0 w-screen h-screen z-[9999999999] bg-white">
 
-                    <button className="text-sm font-medium text-neutral-800 hover:text-sky-500">
-                        Follow
-                    </button>
-                </div>
+            <motion.button
+                whileHover={{opacity: 1, scale: 1.2}}
+                animate={{opacity: 1, scale: 1}}
+                transition={{
+                    duration: 0.3,
+                    scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
+                }}
+                className="
+                    absolute left-0 top-0 bg-blur bg-opacity-35
+                       h-full bg-white px-3 z-[300]
+                    "
+                onClick={() => scroll("left")}
+            >
+                <MdOutlineKeyboardDoubleArrowLeft className="text-neutral-700 text-2xl font-bold" />
+            </motion.button>
+            <motion.button
+                whileHover={{opacity: 1, scale: 1.2}}
+                animate={{opacity: 1, scale: 1}}
+                transition={{
+                    duration: 0.3,
+                    scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
+                }}
+                className="
+                    absolute right-0 top-0 bg-blur bg-opacity-35
+                       h-full bg-white px-3 z-[300]
+                    "
+                onClick={() => scroll("")}
+            >
+                <MdKeyboardDoubleArrowRight className="text-neutral-700 text-2xl font-bold" />
+            </motion.button>
 
-                <div
-                    className=" px-3 py-3  bottom-0 flex items-center gap-3
-                    w-full
+
+            <div
+                ref={scrollRef}
+                className="  scroll-bar-hidden  h-screen  flex flex-row gap-4 overflow-y-auto cursor-pointer
+
                 "
-                >
-                    <input
-                        className=" px-3 py-1 border border-sky-20 rounded-full flex-grow bg-transparent"
-                    />
-                    <button>
-                        <AiFillLike className="text-xl text-neutral-700"/>
-                    </button>
+            >
 
-                    <button>
-                        <IoIosSend className="text-2xl text-neutral-700"/>
-                    </button>
+                {
+                    Array.from(Array(20).keys()).map((_, i) => (
+                        <div
+                            className=" flex-shrink-0 h-full overflow-hidden flex justify-center items-center"
+                        >
+                            <div
+                                className="
+                                    overflow-hidden rounded flex flex-row justify-center items-center h-[600px] bg-red-50 w-[450px]
+                                     "
+                            >
+                                <img src="/image/profile.jpg" alt="profile" className="min-w-full min-h-full"/>
+                            </div>
+                        </div>
+                    ))
+                }
 
-                </div>
             </div>
-
-            <div className="p-5  bg-red-500 absolute z-[-1] h-full w-full top-0">
-
-            </div>
-
         </div>
     );
 };
 
 export default ActiveStoryComponent;
+

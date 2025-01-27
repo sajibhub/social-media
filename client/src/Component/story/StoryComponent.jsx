@@ -1,7 +1,7 @@
-
 import {motion} from "framer-motion";
 import {useRef} from "react";
 import {MdKeyboardDoubleArrowRight, MdOutlineKeyboardDoubleArrowLeft} from "react-icons/md";
+
 
 const StoryComponent = () => {
 
@@ -17,8 +17,11 @@ const StoryComponent = () => {
     };
 
 
+
+
     return (
         <div className="relative px-10 max-w-[680px] mx-auto">
+
 
             <motion.button
                 whileHover={{opacity: 1, scale: 1.2}}
@@ -72,9 +75,9 @@ const StoryComponent = () => {
                         >
                             <div
                                 className="
-                        h-[55px] w-[55px] rounded-full overflow-hidden flex flex-row justify-center items-center
-                        border-[3px] border-sky-500 mx-auto
-                        "
+                                     h-[55px] w-[55px] rounded-full overflow-hidden flex flex-row justify-center items-center
+                                     border-[3px] border-sky-500 mx-auto
+                                     "
                             >
                                 <img src="/image/profile.jpg" alt="profile" className="min-w-full min-h-full"/>
                             </div>
