@@ -78,19 +78,19 @@ const UserSchema = mongoose.Schema(
     mediaLink: {
       facebook: {
         type: String,
-        default: "",
+        default: null,
       },
       linkedin: {
         type: String,
-        default: "",
+        default: null,
       },
       fiver: {
         type: String,
-        default: "",
+        default: null,
       },
       github: {
         type: String,
-        default: "",
+        default: null,
       },
     },
     status: {

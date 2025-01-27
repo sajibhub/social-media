@@ -7,22 +7,24 @@ const storySchema = mongoose.Schema(
       ref: "user",
       required: true,
     },
-    media: {
+    image: {
       type: String,
-      required: true,
+    },
+    text: {
+      type: String,
     },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
-        required: true,
+        default: []
       },
     ],
     views: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
-        required: true,
+        default: []
       },
     ],
   },

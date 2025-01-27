@@ -9,9 +9,8 @@ import Notification from "../models/notificationModel.js";
 
 
 export const PostCreate = (req, res) => {
-  const { id } = req.headers;
-
   try {
+    const { id } = req.headers;
     const upload = multer({ storage });
     upload.single("image")(req, res, async (err) => {
       if (err) {
@@ -77,6 +76,20 @@ export const PostRead = async (req, res) => {
           as: "user",
         },
       },
+      {
+        $addFields: {
+          userId: id,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "myProfile",
+        }
+      },
+      { $unwind: "$myProfile" },
       {
         $unwind: "$user",
       },
@@ -159,8 +172,31 @@ export const PostRead = async (req, res) => {
             },
           },
           isSave: { $in: [id, "$postSave"] },
+          liked: {
+            $first: {
+              $concatArrays: [
+                {
+                  $filter: {
+                    input: "$likes",
+                    as: "like",
+                    cond: { $in: ["$$like", "$myProfile.following"] },
+                  },
+                },
+                [{ $arrayElemAt: ["$likes", -1] }],
+              ],
+            },
+          },
         },
       },
+      {
+        $lookup: {
+          from: "users",
+          localField: "liked",
+          foreignField: "_id",
+          as: "liked",
+        }
+      },
+      { $unwind: "$liked" },
       {
         $project: {
           _id: 1,
@@ -181,14 +217,18 @@ export const PostRead = async (req, res) => {
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
+          liked: {
+            _id: 1,
+            username: 1,
+            fullName: 1,
+            profile: 1,
+          },
         },
       },
     ]);
 
     return res.status(200).json({ post });
-    return res.status(200).json({
-      post,
-    });
+
   } catch (error) {
     console.error(error);
     return res.status(500).json({
@@ -206,6 +246,12 @@ export const PostUpdate = async (req, res) => {
     const postId = new mongoose.Types.ObjectId(req.params.postId);
     const { id } = req.headers;
     const { caption } = req.body;
+
+    if (!postId) {
+      return res.status(400).json({
+        message: "Post ID is required"
+      })
+    }
 
     const findPost = await Post.findById(postId).select({ userId: 1 });
     if (findPost?.userId.toString() != id.toString()) {
@@ -243,13 +289,19 @@ export const PostDelete = async (req, res) => {
     const postId = new mongoose.Types.ObjectId(req.params.postId);
     const { id } = req.headers;
 
+    if (!postId) {
+      return res.status(400).json({
+        message: "Post ID is required"
+      })
+    }
+
     const findPost = await Post.findById(postId).select({ userId: 1, likes: 1, postSave: 1 });
     if (!findPost) {
       return res.status(404).json({ message: "Post not found." });
     }
 
     if (findPost.userId.toString() !== id.toString()) {
-      return res.status(403).json({ message: "Post update access denied" });
+      return res.status(403).json({ message: "Post deleted access denied" });
     }
 
     await User.updateMany(
@@ -282,6 +334,12 @@ export const PostLike = async (req, res) => {
     const postId = new mongoose.Types.ObjectId(req.params.postId);
     const { id } = req.headers;
 
+    if (!postId) {
+      return res.status(400).json({
+        message: "Post ID is required"
+      })
+    }
+
     const findPost = await Post.findById(postId);
 
     if (!findPost) {
@@ -289,7 +347,7 @@ export const PostLike = async (req, res) => {
         message: "Post not found.",
       });
     }
-    if (findPost.likes.toString().includes(id.toString())) {
+    if (findPost.likes.includes(id)) {
       const updatedPost = await Post.findByIdAndUpdate(
         postId,
         { $pull: { likes: id } },
@@ -332,6 +390,12 @@ export const PostLikeRead = async (req, res) => {
     }
 
     const postId = new mongoose.Types.ObjectId(req.params.postId);
+
+    if (!postId) {
+      return res.status(400).json({
+        message: "Post ID is required"
+      })
+    }
 
     const findPost = await Post.findById(postId);
     if (!findPost) {
@@ -385,6 +449,12 @@ export const PostComment = async (req, res) => {
     const { id } = req.headers;
     const { comment } = req.body;
 
+    if (!postId) {
+      return res.status(400).json({
+        message: "Post ID is required"
+      })
+    }
+
     if (!comment) {
       return res.status(400).json({
         message: "Please provide a comment.",
@@ -429,6 +499,12 @@ export const PostCommentView = async (req, res) => {
 
     const postId = new mongoose.Types.ObjectId(req.params.postId);
     const { id } = req.headers;
+
+    if (!postId) {
+      return res.status(400).json({
+        message: "Post ID is required"
+      })
+    }
 
     const findPost = await Post.findById(postId);
     if (!findPost) {
@@ -780,8 +856,10 @@ export const SinglePost = async (req, res) => {
     }
 
     const postId = new mongoose.Types.ObjectId(req.params.postId);
+    if (!postId) {
+      return res.status(400).json({ message: "Please provide a post ID." });
+    }
     const post = await Post.findById(postId);
-
     if (!post) {
       return res.status(404).json({ message: "Post not found." });
     }
@@ -803,6 +881,19 @@ export const SinglePost = async (req, res) => {
           as: "user",
         },
       },
+      {
+        $addFields: {
+          userId: id,
+        },
+      }, {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "myProfile",
+        }
+      },
+      { $unwind: "$myProfile" },
       {
         $unwind: "$user",
       },
@@ -885,8 +976,31 @@ export const SinglePost = async (req, res) => {
             },
           },
           isSave: { $in: [id, "$postSave"] },
+          liked: {
+            $first: {
+              $concatArrays: [
+                {
+                  $filter: {
+                    input: "$likes",
+                    as: "like",
+                    cond: { $in: ["$$like", "$myProfile.following"] },
+                  },
+                },
+                [{ $arrayElemAt: ["$likes", -1] }],
+              ],
+            },
+          },
         },
       },
+      {
+        $lookup: {
+          from: "users",
+          localField: "liked",
+          foreignField: "_id",
+          as: "liked",
+        }
+      },
+      { $unwind: "$liked" },
       {
         $project: {
           _id: 1,
@@ -907,6 +1021,12 @@ export const SinglePost = async (req, res) => {
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
+          liked: {
+            _id: 1,
+            username: 1,
+            fullName: 1,
+            profile: 1,
+          },
         },
       },
     ]);

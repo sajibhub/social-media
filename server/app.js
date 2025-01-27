@@ -15,6 +15,7 @@ import UserAgentMiddleware from "./middleware/userAgent.js";
 import userRouter from "./router/userRouter.js";
 import postRouter from "./router/postRouter.js";
 import Notification from "./router/notificationRouter.js";
+import Story from "./router/storyRouter.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
@@ -60,7 +61,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 app.use(UserAgentMiddleware);
 
-app.use("/api/v1", userRouter, postRouter, Notification);
+app.use("/api/v1", userRouter, postRouter, Notification,Story);
 
 
 io.on("connection", (socket) => {

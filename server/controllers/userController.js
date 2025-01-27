@@ -909,6 +909,20 @@ export const GetSavePost = async (req, res) => {
 
       {
         $addFields: {
+          userId: id,
+        },
+      }, {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "myProfile",
+        }
+      },
+      { $unwind: "$myProfile" },
+
+      {
+        $addFields: {
           time: {
             $cond: {
               if: {
@@ -986,9 +1000,31 @@ export const GetSavePost = async (req, res) => {
             },
           },
           isSave: { $in: [id, "$savedPosts.postSave",] },
+          liked: {
+            $first: {
+              $concatArrays: [
+                {
+                  $filter: {
+                    input: "$likes",
+                    as: "like",
+                    cond: { $in: ["$$like", "$myProfile.following"] },
+                  },
+                },
+                [{ $arrayElemAt: ["$likes", -1] }],
+              ],
+            },
+          },
         }
       },
-
+      {
+        $lookup: {
+          from: "users",
+          localField: "liked",
+          foreignField: "_id",
+          as: "liked",
+        }
+      },
+      { $unwind: "$liked" },
       {
         $project: {
           _id: "$savedPosts._id",
@@ -1004,6 +1040,12 @@ export const GetSavePost = async (req, res) => {
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
+          liked: {
+            _id: 1,
+            username: 1,
+            fullName: 1,
+            profile: 1,
+          },
         }
       }
     ]);
