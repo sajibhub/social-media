@@ -19,7 +19,7 @@ const SavePostPage = () => {
     return (
         <Layout>
             <div className="w-full border-b-2 sticky top-0 bg-blur bg-white bg-opacity-20 z-[999999]">
-                <h1 className=" text-center text-2xl font-medium text-neutral-700 py-3">Save Post</h1>
+                <h1 className=" text-center text-xl font-medium text-neutral-700 py-3">Save Post</h1>
             </div>
             <PostCard />
 

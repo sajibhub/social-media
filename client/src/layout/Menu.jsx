@@ -4,114 +4,114 @@ import { FaBookmark, FaSearch, FaSignOutAlt, FaUser, FaUsers } from "react-icons
 import { RiMessage3Fill, RiStickyNoteAddFill } from "react-icons/ri";
 import { IoSettingsSharp } from "react-icons/io5";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import NotificationBadge from "@/Component/utility/NotificationBadge";
 
 const Menu = () => {
-    let userName = localStorage.getItem('userName');
+    const { myProfileData } = authorStore()
+    let userName = localStorage.getItem("userName");
     const { SignOutReq } = authorStore();
     const navigate = useNavigate();
-    const pathname = window.location.pathname;
+    const pathname = useLocation()
 
     const [signOutLoading, setSignOutLoading] = useState(false);
 
     const menuItems = [
-        { icon: <TiHome />, label: "Home", route: "/" },
-        { icon: <FaSearch />, label: "Search", route: "/search" },
-        { icon: <IoMdNotifications />, label: "Notification", route: "/notification" },
-        { icon: <RiMessage3Fill />, label: "Message", route: "#" },
-        { icon: <FaBookmark />, label: "Save Post", route: "/save-post" },
-        { icon: <RiStickyNoteAddFill />, label: "Add Post", route: "/add-post" },
-        { icon: <FaUser />, label: "Profile", route: `/profile/${userName}` }
+        { icon: <TiHome className="text-2xl" />, label: "Home", route: "/" },
+        { icon: <FaSearch className="text-2xl" />, label: "Search", route: "/search" },
+        {
+            icon: (
+                <div className="relative">
+                    <IoMdNotifications className="text-2xl" />
+                    <NotificationBadge count={myProfileData?.notification} />
+                </div>
+            ),
+            label: "Notification",
+            route: "/notification",
+        },
+        { icon: <RiMessage3Fill className="text-2xl" />, label: "Messages", route: { pathname } },
+        { icon: <FaBookmark className="text-2xl" />, label: "Saved Posts", route: "/save-post" },
+        { icon: <RiStickyNoteAddFill className="text-2xl" />, label: "Add Post", route: "/add-post" },
+        { icon: <FaUser className="text-2xl" />, label: "Profile", route: `/profile/${userName}` },
     ];
 
     return (
-        <>
-            <div className="px-3 scroll-bar-hidden">
-                <img src="/image/logo.png" alt="logo" className="h-[160px] block mx-auto mt-10" />
-                <div className="py-3 w-fit mx-auto">
-                    {menuItems.map((item, index) => {
-                        const isActive = pathname === item.route;
-                        return (
-                            <motion.div
-                                key={index}
-                                whileHover={{ opacity: 1, scale: 1.1 }}
-                                initial={{ opacity: 0, scale: 0 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{
-                                    duration: 0.3,
-                                    scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
-                                }}
-                                className={isActive ? "menu-active mb-3 text-blue-500" : "menu mb-3"}
-                                onClick={() => item.route === "#" ? null : navigate(item.route)}
-                            >
+        <div className="max-lg:w-[250px] xl:w-72 h-screen px-5 py-8 bg-white shadow-md fixed top-0 max-lg:left-0  min-lg:left-20 z-50 transition-all duration-300 ease-in-out">
+            <img
+                src="/image/logo.png"
+                alt="logo"
+                className="h-14 w-auto mb-8 mx-auto cursor-pointer"
+                onClick={() => navigate("/")}
+            />
+
+            {/* Menu Items */}
+            <div className="space-y-6">
+                {menuItems.map((item, index) => {
+                    const isActive = pathname === item.route;
+                    return (
+                        <motion.div
+                            key={index}
+                            whileHover={{ scale: 1.05 }}
+                            className={`flex items-center space-x-4 px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer ${isActive ? "bg-blue-100 text-blue-500" : "hover:bg-gray-100"
+                                }`}
+                            onClick={() => navigate(item.route)}
+                        >
+                            <div className={`icon ${isActive ? "text-blue-500" : "text-gray-600"}`}>
                                 {item.icon}
-                                <h3 className="text-lg font-medium">{item.label}</h3>
-                            </motion.div>
-                        );
-                    })}
-
-                    <hr className="my-5 mb-5 border-b-2 border-gray-100" />
-
-                    {/* Settings and Sign Out at the bottom */}
-                    <motion.div
-                        whileHover={{ opacity: 1, scale: 1.1 }}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{
-                            duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
-                        }}
-                        className="menu mb-3"
-                        onClick={
-                            ()=>navigate("/setting")
-                        }
-                    >
-                        <IoSettingsSharp className="text-xl font-medium" />
-                        <h3 className="text-lg font-medium">Setting</h3>
-                    </motion.div>
-
-                    <motion.div
-                        whileHover={{ opacity: 1, scale: 1.1 }}
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{
-                            duration: 0.3,
-                            scale: { type: "spring", visualDuration: 0.3, bounce: 0.5 },
-                        }}
-                        className="menu mb-3"
-                        onClick={async () => {
-                            setSignOutLoading(true);
-
-                            const parmetion =  confirm("Are you ready to sign out?");
-
-                            if (parmetion) {
-                                const res = await SignOutReq();
-
-                                localStorage.clear();
-                                setSignOutLoading(false);
-                                if (res) {
-                                    navigate("/author");
-                                    toast.success("Sign Out Successfully");
-                                } else {
-                                    toast.error('Sign Out Fail');
-                                }
-                            }
-                            else{
-                                toast.error("Thanks for not signing out.");
-                                setSignOutLoading(false);
-                            }
-
-                        }}
-                    >
-                        {signOutLoading ? <div className="loader-dark"></div> : <FaSignOutAlt className="text-xl font-medium " />}
-                        <h3 className="text-lg font-medium">Sign Out</h3>
-                    </motion.div>
-                </div>
+                            </div>
+                            <span className="text-lg font-medium">{item.label}</span>
+                        </motion.div>
+                    );
+                })}
             </div>
-        </>
+
+            {/* Divider */}
+            <hr className="my-8 border-gray-200" />
+
+            {/* Settings */}
+            <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="flex items-center space-x-4 px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer hover:bg-gray-100"
+                onClick={() => navigate("/setting")}
+            >
+                <IoSettingsSharp className="text-2xl text-gray-600" />
+                <span className="text-lg font-medium">Settings</span>
+            </motion.div>
+
+            {/* Sign Out */}
+            <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="flex items-center space-x-4 px-4 py-3 mt-5 rounded-xl transition-all duration-300 cursor-pointer hover:bg-red-100"
+                onClick={async () => {
+                    setSignOutLoading(true);
+                    const confirmSignOut = confirm("Are you sure you want to sign out?");
+                    if (confirmSignOut) {
+                        const res = await SignOutReq();
+                        localStorage.clear();
+                        setSignOutLoading(false);
+                        if (res) {
+                            navigate("/author");
+                            toast.success("Signed Out Successfully");
+                        } else {
+                            toast.error("Sign Out Failed");
+                        }
+                    } else {
+                        toast.error("Sign Out Cancelled");
+                        setSignOutLoading(false);
+                    }
+                }}
+            >
+                {signOutLoading ? (
+                    <div className="loader-dark"></div>
+                ) : (
+                    <FaSignOutAlt className="text-2xl text-red-500" />
+                )}
+                <span className="text-lg font-medium text-gray-600">Sign Out</span>
+            </motion.div>
+        </div>
     );
 };
 

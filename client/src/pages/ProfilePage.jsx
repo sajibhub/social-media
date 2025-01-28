@@ -17,6 +17,7 @@ import ChangePasswordComponent from "@/Component/users/ChangePasswordComponent.j
 
 const ProfilePage = () => {
     const {user} = useParams();
+    let userName = localStorage.getItem('userName');
     const {myPostReq, clear_my_post_data} = postStore()
     const {readProfileReq , clear_profileData , }= authorStore()
     const {profile_tab} = uiManage()
@@ -57,9 +58,11 @@ const ProfilePage = () => {
                     <>
                         <PersonalInfoComponent />
                         <SocialMediaComponent />
-                        <ChangePasswordComponent />
 
-                        <div className="py-6"></div>
+                        {
+                            user === userName &&  <ChangePasswordComponent />
+                        }
+                        <div className="py-6 lg:py-3"></div>
                     </>
                 )
             }

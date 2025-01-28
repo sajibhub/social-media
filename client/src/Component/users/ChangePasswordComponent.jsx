@@ -52,8 +52,8 @@ const ChangePasswordComponent = () => {
     };
 
     return (
-        <div className=" p-8">
-            <h2 className="text-xl font-semibold text-center text-gray-700 mb-6">
+        <div className="p-4 lg:p-8">
+            <h2 className="text-xl font-semibold text-center text-gray-700  mb-3 lg:mb-6">
                 Change Password
             </h2>
             <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -159,6 +159,8 @@ const ChangePasswordComponent = () => {
 
                 </button>
             </form>
+
+            <div className="py-[28px] lg:py-0"></div>
         </div>
     );
 };

@@ -37,7 +37,7 @@ const PasswordPopup = () => {
     };
 
     return (
-        <div className="fixed top-0 left-0 h-screen w-screen z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed top-0 left-0 h-screen w-screen z-50 flex items-center justify-center bg-sky-50 bg-opacity-90 px-5">
             <div className="relative bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
                 {/* Close Button */}
                 <button

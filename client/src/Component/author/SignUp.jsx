@@ -1,4 +1,3 @@
-
 import uiManage from "../../store/uiManage.js";
 import toast from "react-hot-toast";
 import { useState } from "react";
@@ -26,11 +25,15 @@ const SignUp = () => {
 
     return (
         <div className="flex items-center justify-center lg:min-h-screen">
-            <div className="w-full max-w-[650px] bg-white rounded-lg shadow-sm p-8">
-                <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-6">
+            <div className="w-full max-w-[650px] bg-white rounded-lg shadow-lg p-8">
+                {/* Title */}
+                <h2 className="text-3xl lg:text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 mb-6 animate-pulse">
                     Sign Up
                 </h2>
+                
+                {/* Form */}
                 <form onSubmit={handleSubmit}>
+                    {/* Username Input */}
                     <div className="mb-4">
                         <label
                             htmlFor="username"
@@ -49,6 +52,8 @@ const SignUp = () => {
                             required
                         />
                     </div>
+
+                    {/* Full Name Input */}
                     <div className="mb-4">
                         <label
                             htmlFor="fullName"
@@ -67,6 +72,8 @@ const SignUp = () => {
                             required
                         />
                     </div>
+
+                    {/* Email Input */}
                     <div className="mb-4">
                         <label
                             htmlFor="email"
@@ -85,6 +92,8 @@ const SignUp = () => {
                             required
                         />
                     </div>
+
+                    {/* Phone Input */}
                     <div className="mb-4">
                         <label
                             htmlFor="phone"
@@ -103,6 +112,8 @@ const SignUp = () => {
                             required
                         />
                     </div>
+
+                    {/* Password Input */}
                     <div className="mb-4 relative">
                         <label
                             htmlFor="password"
@@ -131,6 +142,7 @@ const SignUp = () => {
                         </div>
                     </div>
 
+                    {/* Submit Button */}
                     {loading ? (
                         <button
                             type="submit"
@@ -147,6 +159,8 @@ const SignUp = () => {
                         </button>
                     )}
                 </form>
+
+                {/* Footer */}
                 <p className="text-center text-sm text-gray-600 mt-6">
                     Already have an account?{" "}
                     <a
@@ -162,4 +176,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-

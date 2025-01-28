@@ -28,7 +28,7 @@ const OtpRequestPopup = () => {
   };
 
   return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-sky-50 bg-opacity-90 flex items-center justify-center z-50 px-5 ">
         <div className="relative bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
           {/* Close Button */}
           <button

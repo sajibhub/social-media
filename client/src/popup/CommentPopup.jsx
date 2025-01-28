@@ -52,7 +52,6 @@ const CommentPopup = () => {
     }
     let newCommentPostData = commentPostData.comment + emojiData.emoji;
     setCommentPostData("comment", newCommentPostData);
-    setShowPicker(false);
   };
 
   const handleImageUpload = (event) => {
@@ -250,7 +249,8 @@ const CommentPopup = () => {
         </div>
 
         {showPicker && (
-          <div className=" absolute top-0 right-0 z-30">
+          <div onMouseLeave={() => setShowPicker(false)}
+            className=" absolute top-0 right-0 z-30">
             <EmojiPicker className="ms-auto" onEmojiClick={handleEmojiClick} />
           </div>
         )}

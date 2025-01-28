@@ -38,7 +38,7 @@ const PostCard = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState(null);
-  
+
   const [loader, setLoader] = useState({
     status: false,
     id: null,
@@ -162,7 +162,7 @@ const PostCard = () => {
     setOpenMenuId((prevId) => (prevId === id ? null : id));
   };
 
-  
+
 
 
   const handleShare = async (id) => {
@@ -432,9 +432,9 @@ const PostCard = () => {
                     <div className="max-w-full max-h-full overflow-y-auto scroll-bar-hidden p-5">
                       <DynamicText
                         text={items.caption}
-                        Length={280}
+                        Length={270}
                         Align={"flex flex-col "}
-                        TestStyle={"text-2xl font-semibold"}
+                        TestStyle={"text-xl lg:text-2xl font-medium lg:font-semibold"}
 
                       />
                     </div>
@@ -460,10 +460,10 @@ const PostCard = () => {
                   )}
 
                   <h1
-                    className={`text-base font-medium hidden md:block ${items.isLike ? "text-sky-600" : "text-neutral-800"
-                      } `}
+                    className={`text-base font-medium flex items-center gap-1  ${items.isLike ? "text-sky-600" : "text-neutral-800"}`}
                   >
-                    {items.likes} Like
+                    {items.likes}
+                    <span className="hidden md:block">{items.isLike ? "Liked" : "Like"}</span>
                   </h1>
                 </div>
 
@@ -476,8 +476,13 @@ const PostCard = () => {
                         "
                 >
                   <FaCommentDots className="text-neutral-900 text-lg" />
-                  <h1 className="text-base font-medium text-neutral-900 hidden md:block">
-                    {items.comment} Comment
+                  
+
+                  <h1
+                    className={`text-base font-medium flex items-center gap-1  ${items.comment ? "text-sky-600" : "text-neutral-800"}`}
+                  >
+                    {items.comment}
+                    <span className="hidden md:block">comments</span>
                   </h1>
                 </div>
 
@@ -524,7 +529,7 @@ const PostCard = () => {
             </motion.div>
           );
         })}
-        
+        <div className="py-[50px] md:py-0"></div>
       </>
     );
   }

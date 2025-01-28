@@ -30,8 +30,8 @@ const ImageGallery = () => {
     );
   } else {
     return (
-      <div className="p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className=" px-4  lg:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-4">
           {imageGallery?.map((img, index) => (
             <div
               key={index}
@@ -45,6 +45,8 @@ const ImageGallery = () => {
             </div>
           ))}
         </div>
+
+          <div className="py-[46px] lg:py-0"></div>
       </div>
     );
   }

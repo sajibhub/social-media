@@ -86,8 +86,8 @@ const UserInfo = () => {
         </div>
         <div
           className="
-                    h-[100px] w-[100px] rounded-full overflow-hidden flex flex-row
-                     justify-between items-center mx-[25px] mt-[-50px] shadow
+                    h-[80px] w-[80px] lg:h-[100px] lg:w-[100px] rounded-full overflow-hidden flex flex-row
+                     justify-between items-center mx-[25px] mt-[-40px] lg:mt-[-50px] shadow
                      "
         >
           <img
@@ -109,10 +109,10 @@ const UserInfo = () => {
             <button
               onClick={() => set_edit_profile_Ui_Control(true)}
               className="
-                                             absolute top-0 right-0
-                                             text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
-                                             rounded-full hover:text-sky-500 hover:border-sky-500
-                                "
+                         absolute top-[-67px] lg:top-0 right-0 bg-white
+                         text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
+                         rounded-full hover:text-sky-500 hover:border-sky-500
+                        "
             >
               Edit Profile
             </button>
@@ -130,16 +130,16 @@ const UserInfo = () => {
                 setLoader(false);
               }}
               className={`
-                                            absolute top-0 right-0
-                                            ${
-                                              !loader &&
-                                              "text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500 rounded-full hover:text-sky-500 hover:border-sky-500"
-                                            }
-                                            ${
-                                              profileData.isFollowing &&
-                                              "bg-sky-500 text-white border-sky-500 hover:bg-transparent"
-                                            }
-                                             `}
+                         absolute top-0 right-0
+                         ${
+                            !loader &&
+                            "text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500 rounded-full hover:text-sky-500 hover:border-sky-500"
+                          }
+                         ${
+                           profileData.isFollowing &&
+                           "bg-sky-500 text-white border-sky-500 hover:bg-transparent"
+                         }
+                         `}
             >
               {loader && <LoadingButtonFit />}
               {loader === false &&
@@ -198,7 +198,7 @@ const UserInfo = () => {
               </p>
             </div>
 
-            <div className="flex flex-row justify-end items-center gap-4 flex-grow ">
+            <div className="flex flex-row justify-center lg:justify-end items-center gap-4 flex-grow ">
               {profileData.mediaLink?.facebook !== "" && (
                 <FaSquareFacebook
                   className="font-lg text-neutral-800 cursor-pointer"
@@ -227,46 +227,49 @@ const UserInfo = () => {
           </div>
         </div>
 
-        <div className="flex flex-row gap-3 ">
+        <div className="flex flex-row gap-3 w-full overflow-x-auto scroll-bar-hidden ">
           <button
             onClick={() => set_profile_tab("my-post")}
-            className={
-              profile_tab === "my-post" ? "profile-tab-active" : "profile-tab"
-            }
+            className={` 
+            flex-shrink-0
+            ${profile_tab === "my-post" ? "profile-tab-active" : "profile-tab"}
+            `}
           >
             My Post
           </button>
           <button
             onClick={() => set_profile_tab("post-photo")}
-            className={
-              profile_tab === "post-photo"
-                ? "profile-tab-active"
-                : "profile-tab"
-            }
+            className={` 
+            flex-shrink-0
+            ${profile_tab === "post-photo" ? "profile-tab-active" : "profile-tab"}
+            `}
           >
             Photo
           </button>
           <button
             onClick={() => set_profile_tab("followers")}
-            className={
-              profile_tab === "followers" ? "profile-tab-active" : "profile-tab"
-            }
+            className={` 
+            flex-shrink-0
+            ${profile_tab === "followers" ? "profile-tab-active" : "profile-tab"}
+            `}
           >
             Followers
           </button>
           <button
             onClick={() => set_profile_tab("following")}
-            className={
-              profile_tab === "following" ? "profile-tab-active" : "profile-tab"
-            }
+            className={` 
+            flex-shrink-0
+            ${profile_tab === "following" ? "profile-tab-active" : "profile-tab"}
+            `}
           >
             Following
           </button>
           <button
             onClick={() => set_profile_tab("about")}
-            className={
-              profile_tab === "about" ? "profile-tab-active" : "profile-tab"
-            }
+            className={` 
+            flex-shrink-0
+            ${profile_tab === "about" ? "profile-tab-active" : "profile-tab"}
+            `}
           >
             About
           </button>

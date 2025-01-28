@@ -69,48 +69,52 @@ const SearchResultComponent = () => {
                 duration: 0.3,
                 scale: { type: "spring", stiffness: 300 },
               }}
-              className="cursor-pointer flex flex-row justify-start items-center gap-4 p-4 border rounded-lg shadow-lg mb-2 bg-white hover:shadow-xl transition-shadow"
+              className="cursor-pointer flex flex-col items-end lg:flex-row justify-start lg:items-center gap-4 p-4 border rounded-lg shadow-lg mb-2 bg-white hover:shadow-xl transition-shadow"
             >
-              <div
-                onClick={() => goToProfile(user.username)}
-                className="h-[50px] w-[50px] flex items-center justify-center rounded-full overflow-hidden border-2 border-gray-200"
-              >
-                <img
-                  src={user.profile}
-                  alt={`${user.fullName} profile`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="flex-grow cursor-pointer">
-                <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-1">
-                  <span
+              <div className="flex justify-start items-center gap-3 w-full">
+                <div
                     onClick={() => goToProfile(user.username)}
-                    className="cursor-pointer hover:underline"
+                    className="h-[50px] w-[50px] flex items-center justify-center rounded-full overflow-hidden border-2 border-gray-200"
+                >
+                  <img
+                      src={user.profile}
+                      alt={`${user.fullName} profile`}
+                      className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="flex-grow cursor-pointer">
+                  <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-1">
+                  <span
+                      onClick={() => goToProfile(user.username)}
+                      className="cursor-pointer hover:underline"
                   >
                     {user.fullName}
                   </span>
-                  {user.verify && <VerifiedBadge isVerified={user.verify} />}
-                </h2>
-                <p className="text-sm text-gray-600">@{user.username}</p>
+                    {user.verify && <VerifiedBadge isVerified={user.verify}/>}
+                  </h2>
+                  <p className="text-sm text-gray-600">@{user.username}</p>
+                </div>
               </div>
 
               {followLoader.id === user._id ? (
-                <div className="loader-dark w-8 h-8"></div>
+                  <div className="loader-dark w-8 h-8"></div>
               ) : (
-                <button
-                  onClick={() => followHandler(user._id)}
-                  className={`text-sm font-medium py-2 px-6 rounded-full transition-all ${
-                    user.isFollowing
-                      ? "bg-red-500 text-white hover:bg-red-600"
-                      : "bg-sky-500 text-white hover:bg-sky-600"
-                  }`}
-                >
-                  Unfollow
-                </button>
+                  <button
+                      onClick={() => followHandler(user._id)}
+                      className={`text-sm font-medium py-2 px-6 rounded-full transition-all ${
+                          user.isFollowing
+                              ? "bg-sky-500 text-white hover:bg-sky-600"
+                              : "bg-red-500 text-white hover:bg-red-600" 
+                      }`}
+                  >
+                    Unfollow
+                  </button>
               )}
             </motion.div>
           ))}
+
+      <div className="py-[45px]"></div>
     </div>
   );
 };

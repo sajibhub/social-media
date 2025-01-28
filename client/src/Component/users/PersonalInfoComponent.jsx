@@ -88,7 +88,7 @@ const PersonalInfoComponent = () => {
     return (
       <div className=" pb-3 ">
         {/* Personal Info Form */}
-        <div className="bg-white border-b p-8 max-w-3xl mx-auto">
+        <div className="bg-white border-b p-4 lg:p-8 max-w-3xl mx-auto">
           <h2 className="text-2xl font-semibold text-gray-800 mb-6">
             Personal Information
           </h2>
@@ -196,18 +196,18 @@ const PersonalInfoComponent = () => {
             </div>
 
             {/* Bio */}
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col lg:flex-row items-start  justify-between lg:items-center ">
               <label className="text-gray-700 font-medium w-1/3">Bio:</label>
               {isEditing ? (
                 <textarea
                   name="bio"
                   value={myProfileData.bio}
                   onChange={(e) => updateProfileData("bio", e.target.value)}
-                  className="w-2/3 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
+                  className="w-full mt-2 lg:mt-0 lg:w-2/3 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:ring-2 focus:ring-sky-500 focus:outline-none transition"
                   rows="4"
                 />
               ) : (
-                <p className="w-2/3 text-gray-600">
+                <p className=" w-full lg:w-2/3 text-gray-600">
                   {myUser === user ? myProfileData?.bio : profileData?.bio}
                 </p>
               )}

@@ -29,7 +29,6 @@ const UpdatePostPopup = () => {
     const handleEmojiClick = (emojiData) => {
         let newText = updatePostData.caption + emojiData.emoji;
         setUpdatePostData("caption", newText);
-        setShowPicker(false);
     };
 
     const updatePost = async () => {

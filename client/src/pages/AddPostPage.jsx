@@ -93,7 +93,7 @@ const AddPost = () => {
         >
 
             <div
-                className="max-w-[650px] bg-white shadow-lg border  rounded-md mx-auto w-full  absolute top-[50%] left-[50%] translate-y-[-50%] translate-x-[-50%] p-5 "
+                className="max-w-[650px] bg-white shadow-lg border  rounded-md  w-full  absolute top-[50%] left-[50%] translate-y-[-50%] translate-x-[-50%] p-5 "
             >
 
                 {showPicker && (

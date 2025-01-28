@@ -3,12 +3,18 @@ import {FaFacebook, FaLinkedin, FaGithub, FaFacebookF, FaGit, FaLinkedinIn} from
 import authorStore from "@/store/authorStore.js";
 import toast from "react-hot-toast";
 import {TbBrandFiverr} from "react-icons/tb";
+import {useParams} from "react-router-dom";
 
 const SocialMediaComponent = () => {
+  const {user} = useParams();
+  let userName = localStorage.getItem('userName');
+
   const {myProfileData ,updateProfileReq} = authorStore()
 
 
   const [editing, setEditing] = useState(null);
+
+
   const [loading, setLoading] = useState(false);
 
   const [editData ,setEditData ] = useState();
@@ -100,12 +106,12 @@ const SocialMediaComponent = () => {
 
   else {
     return (
-        <div className="px-8 border-b pb-8">
-          <h2 className="text-xl mt-8 font-semibold mb-4 text-center">Manage Social Media Links</h2>
+        <div className="px-4 lg:px-8 border-b pb-8">
+          <h2 className="text-xl mt-4 lg:mt-8 font-semibold mb-4 text-center">Manage Social Media Links</h2>
           <div className="space-y-4 pt-2 ">
 
             <div
-                className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
+                className="flex items-center gap-4 bg-gray-50  p-4 rounded-md shadow-sm border border-gray-300"
             >
               <FaFacebookF className="text-2xl text-sky-500"/>
 
@@ -148,12 +154,16 @@ const SocialMediaComponent = () => {
                     >
                       Visit
                     </a>
-                    <button
-                        onClick={() => toggleEdit("facebook", myProfileData.mediaLink?.facebook)}
-                        className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
-                    >
-                      Edit
-                    </button>
+                    {
+                      user === userName && (
+                            <button
+                                onClick={() => toggleEdit("facebook", myProfileData.mediaLink?.facebook)}
+                                className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
+                            >
+                              Edit
+                            </button>
+                        )
+                    }
                   </>
               )}
             </div>
@@ -202,12 +212,18 @@ const SocialMediaComponent = () => {
                     >
                       Visit
                     </a>
-                    <button
-                        onClick={() => toggleEdit("linkdin", myProfileData.mediaLink?.linkedin)}
-                        className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
-                    >
-                      Edit
-                    </button>
+
+                    {
+                      user === userName && (
+                            <button
+                                onClick={() => toggleEdit("linkdin", myProfileData.mediaLink?.linkedin)}
+                                className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
+                            >
+                              Edit
+                            </button>
+                        )
+                    }
+
                   </>
               )}
             </div>
@@ -256,12 +272,16 @@ const SocialMediaComponent = () => {
                     >
                       Visit
                     </a>
-                    <button
-                        onClick={() => toggleEdit("fiver", myProfileData.mediaLink?.fiver)}
-                        className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
-                    >
-                      Edit
-                    </button>
+                    {
+                      user === userName && (
+                            <button
+                                onClick={() => toggleEdit("fiver", myProfileData.mediaLink?.fiver)}
+                                className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
+                            >
+                              Edit
+                            </button>
+                        )
+                    }
                   </>
               )}
             </div>
@@ -310,12 +330,16 @@ const SocialMediaComponent = () => {
                     >
                       Visit
                     </a>
-                    <button
-                        onClick={() => toggleEdit("github", myProfileData.mediaLink?.github)}
-                        className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
-                    >
-                      Edit
-                    </button>
+                    {
+                      user === userName && (
+                            <button
+                                onClick={() => toggleEdit("github", myProfileData.mediaLink?.github)}
+                                className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
+                            >
+                              Edit
+                            </button>
+                        )
+                    }
                   </>
               )}
             </div>

@@ -2,8 +2,8 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { FaEllipsisH, FaTrashAlt } from "react-icons/fa";
-import { MdVerified } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import VerifiedBadge from "../Component/utility/VerifyBadge"
 
 const NotificationList = () => {
   const navigate = useNavigate();
@@ -176,9 +176,8 @@ const NotificationList = () => {
                 onClick={() => {
                   handleNotificationClick(notification);
                 }}
-                className={`flex items-center p-4 border-b last:border-b-0 ${
-                  notification.isRead ? "bg-white" : "bg-blue-100"
-                } ${notification.isRead ? "hover:bg-green-50" : ""} mb-2 -z-30`}
+                className={`flex items-center p-4 border-b last:border-b-0 ${notification.isRead ? "bg-white" : "bg-blue-100"
+                  } ${notification.isRead ? "hover:bg-green-50" : ""} mb-2 -z-30`}
               >
                 <img
                   src={notification.user.profile}
@@ -187,10 +186,11 @@ const NotificationList = () => {
                 />
                 <div className="ml-4 flex-1 ">
                   <div className="flex text-lg font-medium text-gray-800 items-center gap-1">
-                    {notification.user.fullName}{" "}
-                    {notification.user.verify && (
-                      <MdVerified className="text-blue-500" />
-                    )}
+                    <span className="cursor-pointer hover:underline">
+                      {notification.user.fullName}{" "}
+
+                    </span>
+                    <VerifiedBadge isVerified={notification.user.verify} />
                   </div>
                   <div className="text-sm text-gray-600">
                     {renderNotificationMessage(notification)}
