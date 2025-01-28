@@ -128,6 +128,17 @@ export const NewsFeed = async (req, res) => {
                   else: 0
                 }
               },
+              {
+                $multiply: [
+                  -2, 
+                  {
+                    $divide: [
+                      { $subtract: [new Date(), "$createdAt"] }, 
+                      1000 * 60 
+                    ]
+                  }
+                ]
+              }
             ],
           },
         },

@@ -8,7 +8,7 @@ const VerifiedBadge = ({ isVerified }) => {
       {isVerified && (
 
         <MdVerified
-          className="text-blue-500 duration-500 hover:text0 text-xl cursor-pointer"
+          className="text-blue-500 duration-500 hover:text-green-500 text-xl cursor-pointer"
           title="Verified ID"
         />
 

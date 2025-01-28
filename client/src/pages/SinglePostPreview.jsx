@@ -296,14 +296,14 @@ const SinglePostPreview = () => {
 
     else {
         return (
-            <>
+            <div className="overflow-y-auto">
                 <div className="w-full border-b-2 sticky top-0 bg-blur bg-white bg-opacity-20 z-[999999]">
                     <h1 className=" text-center text-xl font-medium text-neutral-700 py-4">Preview Post </h1>
                 </div>
 
                 <div
 
-                    className=" pt-3 px-4 m-2 mb-1 rounded shadow-lg  cursor-pointer border relative"
+                    className=" pt-3 lg:px-4 my-2 rounded shadow-lg  cursor-pointer border relative"
                 >
                     {showPicker && (
                         <div className=" absolute top-0 right-0 z-30"
@@ -353,12 +353,12 @@ const SinglePostPreview = () => {
 
                     {
                         Single_Post_Data[0].images !== null && Single_Post_Data[0].caption !== "" && (
-                                <DynamicText
-                                    text={Single_Post_Data[0].caption}
-                                    Length={125}
-                                    TestStyle={"text-lg font-normal text-neutral-700 leading-[120%]"}
-                                    Align={"pb-3"}
-                                />
+                            <DynamicText
+                                text={Single_Post_Data[0].caption}
+                                Length={125}
+                                TestStyle={"text-lg font-normal text-neutral-700 leading-[120%]"}
+                                Align={"pb-3"}
+                            />
                         )
                     }
 
@@ -413,22 +413,24 @@ const SinglePostPreview = () => {
                             }
 
                             <h1
-                                className={`text-base font-medium hidden md:block ${
+                                className={`text-base font-medium flex gap-1 items-center ${
                                     Single_Post_Data[0].isLike ? "text-sky-600" : "text-neutral-800"
                                 } `}
                             >
-                                {Single_Post_Data[0].likes} Like
+                                {Single_Post_Data[0].likes}
+                                <span className="hidden md:block">Like</span>
                             </h1>
                         </div>
                         <div className="flex flex-row gap-2 justify-start items-center">
                             <FaCommentDots className="text-neutral-900 text-lg"/>
                             <h1 className="text-base font-medium text-neutral-900">
-                                {Single_Post_Data[0].comment} Comments
+                                {Single_Post_Data[0].comment}
+                                <span className="hidden md:block">Comments</span>
                             </h1>
                         </div>
                         <div
                             onClick={
-                                ()=>handleShare()
+                                () => handleShare()
                             }
                             className="flex flex-row gap-2 justify-start items-center"
                         >
@@ -466,19 +468,20 @@ const SinglePostPreview = () => {
                 {/*comment Section*/}
                 <div
                     className="
-                      bg-white shadow-lg
-                         border rounded  mx-2 p-3
+                     shadow-lg
+                     border rounded  bg-white px-4
                 "
                 >
 
-                    <div className="scroll-bar-hidden overflow-y-auto h-full pb-[30px]">
+                    <div className="pb-[30px]">
                         {commentList?.map((items, index) => (<div
                             key={index}
-                            className="pt-3 pb-1 ps-2 pe-1 border-b mx-4"
+                            className="pt-3 pb-1  border-b my-4"
                         >
                             <div className="flex flex-row gap-3 justify-start items-start">
                                 <div
-                                    className="flex-shrink-0 h-[35px] w-[35px] rounded-full overflow-hidden flex justify-center items-center"
+                                    className="flex-shrink-0 h-[35px] w-[35px] rounded-full
+                                    overflow-hidden flex justify-center items-center"
                                 >
                                     <img
                                         src={items.user.profile}
@@ -538,7 +541,7 @@ const SinglePostPreview = () => {
                                                         </div>
                                                         <div
                                                             onClick={
-                                                                ()=> deleteCommentHandel(items._id)
+                                                                () => deleteCommentHandel(items._id)
                                                             }
                                                             className="flex items-center gap-3 py-2 px-4 hover:bg-sky-100"
 
@@ -567,17 +570,17 @@ const SinglePostPreview = () => {
                     </div>
 
                     <form
-                        className="px-5 py-3
-                          bg-white bg-opacity-80 bg-blur w-full+
+                        className="md:px-5 py-3
+                          bg-white bg-opacity-80 bg-blur w-full
 
                         "
 
-                        onSubmit={ commentId !== "" ?  updateHandel : commentHandler}
+                        onSubmit={commentId !== "" ? updateHandel : commentHandler}
 
                     >
                         <input
                             value={commentData}
-                            onChange={(e) =>setCommentData(e.target.value)}
+                            onChange={(e) => setCommentData(e.target.value)}
 
                             className="text-base text-neutral-800 flex-grow bg-transparent w-full"
                             placeholder="Type Comment"
@@ -600,16 +603,16 @@ const SinglePostPreview = () => {
                             "
                             >
                                 {
-                                    commentListLoader ? <div className="loader-dark my-1"></div> : <> {commentId === ""?"Comment" : "update" } </>
+                                    commentListLoader ? <div
+                                        className="loader my-1"></div> : <> {commentId === "" ? "Comment" : "update"} </>
                                 }
 
                             </button>
                         </div>
                     </form>
                 </div>
-
-
-            </>
+                <div className="py-[42px]"></div>
+            </div>
 
         )
 

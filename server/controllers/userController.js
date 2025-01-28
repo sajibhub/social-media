@@ -171,14 +171,6 @@ export const Login = async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    const { token } = req.cookies;
-    if (token) {
-      return res.status(400).json({
-        status: "login",
-        message: "Already logged in",
-      });
-    }
-
     if (!username || !password) {
       return res.status(403).json({
         message: "All fields are required",

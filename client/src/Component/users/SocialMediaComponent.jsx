@@ -9,7 +9,7 @@ const SocialMediaComponent = () => {
   const {user} = useParams();
   let userName = localStorage.getItem('userName');
 
-  const {myProfileData ,updateProfileReq} = authorStore()
+  const {myProfileData ,updateProfileReq ,  updateMediaLinkValue} = authorStore()
 
 
   const [editing, setEditing] = useState(null);
@@ -29,6 +29,8 @@ const SocialMediaComponent = () => {
   }
 
   const handleProfileUpdate = async (icon) => {
+    updateMediaLinkValue(icon,editData);
+
     setLoading(true);
 
     let reqData = ""
@@ -36,9 +38,10 @@ const SocialMediaComponent = () => {
     if(icon === "facebook"){
       reqData = {
         facebook: editData,
-
       };
     }
+
+
 
     if(icon === "linkedin"){
       reqData = {
@@ -60,7 +63,6 @@ const SocialMediaComponent = () => {
 
       };
     }
-
 
 
     const res = await updateProfileReq(reqData);
@@ -111,9 +113,9 @@ const SocialMediaComponent = () => {
           <div className="space-y-4 pt-2 ">
 
             <div
-                className="flex items-center gap-4 bg-gray-50  p-4 rounded-md shadow-sm border border-gray-300"
+                className="flex flex-wrap justify-center items-center gap-4 bg-gray-50  p-4 rounded-md shadow-sm border border-gray-300"
             >
-              <FaFacebookF className="text-2xl text-sky-500"/>
+              <FaFacebookF className="text-2xl flex-shrink-0 text-sky-500"/>
 
               {editing === "facebook" ? (
                   <input
@@ -139,7 +141,7 @@ const SocialMediaComponent = () => {
 
                   </button>
               ) : (
-                  <>
+                  <div className="flex gap-3">
                     <a
                         onClick={
                           () => visit(myProfileData.mediaLink?.facebook)
@@ -164,14 +166,14 @@ const SocialMediaComponent = () => {
                             </button>
                         )
                     }
-                  </>
+                  </div>
               )}
             </div>
 
             <div
-                className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
+                className="flex flex-wrap justify-center items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
             >
-              <FaLinkedinIn className="text-2xl text-sky-500"/>
+              <FaLinkedinIn className="text-2xl flex-shrink-0 text-sky-500"/>
 
               {editing === "linkdin" ? (
                   <input
@@ -197,7 +199,7 @@ const SocialMediaComponent = () => {
 
                   </button>
               ) : (
-                  <>
+                  <div className="flex gap-3">
                     <a
                         onClick={
                           () => visit(myProfileData.mediaLink?.linkedin)
@@ -224,14 +226,14 @@ const SocialMediaComponent = () => {
                         )
                     }
 
-                  </>
+                  </div>
               )}
             </div>
 
             <div
-                className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
+                className="flex flex-wrap justify-center items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
             >
-              <TbBrandFiverr className="text-2xl text-sky-500"/>
+              <TbBrandFiverr className="text-2xl flex-shrink-0 text-sky-500"/>
 
               {editing === "fiver" ? (
                   <input
@@ -257,7 +259,7 @@ const SocialMediaComponent = () => {
 
                   </button>
               ) : (
-                  <>
+                  <div className="flex gap-3">
                     <a
                         onClick={
                           () => visit(myProfileData.mediaLink?.fiver)
@@ -282,12 +284,12 @@ const SocialMediaComponent = () => {
                             </button>
                         )
                     }
-                  </>
+                  </div>
               )}
             </div>
 
             <div
-                className="flex items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
+                className="flex flex-wrap justify-center items-center gap-4 bg-gray-50 p-4 rounded-md shadow-sm border border-gray-300"
             >
               <FaGit className="text-2xl text-sky-500"/>
 
@@ -315,7 +317,7 @@ const SocialMediaComponent = () => {
 
                   </button>
               ) : (
-                  <>
+                  <div className="flex gap-3">
                     <a
                         onClick={
                           () => visit(myProfileData.mediaLink?.github)
@@ -340,7 +342,7 @@ const SocialMediaComponent = () => {
                             </button>
                         )
                     }
-                  </>
+                  </div>
               )}
             </div>
 

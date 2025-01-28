@@ -113,6 +113,18 @@ const authorStore = create((set) => ({
     },
 
     myProfileData: null,
+    updateMediaLinkValue: (key, value) => {
+        set((state) => ({
+            myProfileData: {
+                ...state.myProfileData,
+                mediaLink: {
+                    ...(state.myProfileData?.mediaLink || {}), // Ensure mediaLink is defined
+                    [key]: value, // Update only the specific key
+                },
+            },
+        }));
+    },
+
     updateProfileData: (name,value)=>{
         set((state)=>({
             myProfileData:{

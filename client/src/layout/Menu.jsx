@@ -39,7 +39,9 @@ const Menu = () => {
     ];
 
     return (
-        <div className="max-lg:w-[250px] xl:w-72 h-screen px-5 py-8 bg-white shadow-md fixed top-0 max-lg:left-0  min-lg:left-20 z-50 transition-all duration-300 ease-in-out">
+        <div className="max-lg:w-[250px] xl:w-72 h-screen px-5 py-8 bg-white  overflow-y-auto scroll-bar-hidden
+        fixed top-0 max-lg:left-0  min-lg:left-20 z-50 transition-all duration-300 ease-in-out"
+        >
             <img
                 src="/image/logo.png"
                 alt="logo"

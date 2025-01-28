@@ -21,6 +21,11 @@ const UserInfo = () => {
   const { set_profile_tab, profile_tab, set_edit_profile_Ui_Control } =
     uiManage();
 
+  const openNewWindow = (url) => {
+    let  newUrl = "https://" + url;
+    window.open(newUrl, "_blank", "noopener,noreferrer");
+  };
+
   if (profileData === null || profileData === undefined) {
     return (
       <div className="rounded border border-gray-200 mb-6 animate-pulse">
@@ -202,32 +207,32 @@ const UserInfo = () => {
               {profileData.mediaLink?.facebook !== "" && (
                 <FaSquareFacebook
                   className="font-lg text-neutral-800 cursor-pointer"
-                  onClick={() => navigate("/")}
+                  onClick={() => openNewWindow(profileData.mediaLink?.facebook) }
                 />
               )}
               {profileData.mediaLink?.linkedin !== "" && (
                 <IoLogoLinkedin
                   className="font-lg text-neutral-800 cursor-pointer"
-                  onClick={() => navigate("/")}
+                  onClick={() => openNewWindow(profileData.mediaLink?.linkedin) }
                 />
               )}
               {profileData.mediaLink?.github !== "" && (
                 <FaGithub
                   className="font-lg text-neutral-800 cursor-pointer"
-                  onClick={() => navigate("/")}
+                  onClick={() => openNewWindow(profileData.mediaLink?.github) }
                 />
               )}
               {profileData.mediaLink?.fiver !== "" && (
                 <TbBrandFiverr
                   className="font-lg text-neutral-800 cursor-pointer"
-                  onClick={() => navigate("/")}
+                  onClick={() => openNewWindow(profileData.mediaLink.fiver) }
                 />
               )}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-row gap-3 w-full overflow-x-auto scroll-bar-hidden ">
+        <div className="flex flex-row gap-3 w-full overflow-x-auto scroll-bar-hidden cursor-pointer ">
           <button
             onClick={() => set_profile_tab("my-post")}
             className={` 
