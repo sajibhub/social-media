@@ -563,10 +563,11 @@ export const ProfileInfoUpdate = async (req, res) => {
         location,
         password: user.password,
         mediaLink: {
-          fiver,
-          facebook,
-          linkedin,
-          github,
+          ...user.mediaLink,
+          ...(fiver ? { fiver } : {}), 
+          ...(github ? { github } : {}), 
+          ...(facebook ? { facebook } : {}), 
+          ...(linkedin ? { linkedin } : {}), 
         },
         profession,
       },
@@ -987,7 +988,7 @@ export const GetSavePost = async (req, res) => {
           isSave: { $in: [id, "$savedPosts.postSave",] },
         }
       },
-  
+
       {
         $project: {
           _id: "$savedPosts._id",
@@ -1003,7 +1004,7 @@ export const GetSavePost = async (req, res) => {
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
-          
+
         }
       }
     ]);
