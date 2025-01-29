@@ -19,7 +19,7 @@ const SignUp = () => {
             toast.success("Your account successfully created!");
             setAuthor("signIn");
         } else {
-            toast.error("Something went wrong");
+            toast.error(res.response.data.message);
         }
     };
 
