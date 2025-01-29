@@ -67,17 +67,18 @@ export const SignUp = async (req, res) => {
       }
     }
 
-    if (username.length < 20) {
+    if (username.length > 30) { 
       return res.status(422).json({
-        message: "Username must be at least 20 characters."
+        message: "Username cannot be longer than 30 characters."
       });
     }
+    
 
-    if (fullName.length < 40) {
+    if (fullName.length > 40) { 
       return res.status(422).json({
-        message: "Full name must be at least 40 characters."
+        message: "Full name cannot be longer than 40 characters."
       });
-    }
+    }    
 
     if (password.length < 6) {
       return res.status(400).json({
@@ -519,17 +520,17 @@ export const ProfileInfoUpdate = async (req, res) => {
         });
       }
 
-      if (username.length < 20) {
+      if (username.length > 30) { 
         return res.status(422).json({
-          message: "Username must be at least 20 characters."
+          message: "Username cannot be longer than 30 characters."
         });
-      }
+      }      
 
-      if (fullName.length < 40) {
+      if (fullName.length > 40) { 
         return res.status(422).json({
-          message: "Full name must be at least 40 characters."
+          message: "Full name cannot be longer than 40 characters."
         });
-      }
+      }      
 
       if (!validator.isStrongPassword(password)) {
         return res.status(400).json({
