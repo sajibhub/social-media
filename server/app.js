@@ -53,8 +53,6 @@ app.use(UserAgentMiddleware);
 
 app.use("/api/v1", userRouter, postRouter, Notification,Story);
 
-
-
 app.listen(PORT, () => {
   DATABASE();
   console.log(`Server Is Running On Port ${PORT}`);

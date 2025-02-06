@@ -3,6 +3,9 @@ import bcrypt from "bcrypt";
 import random from "r-password";
 import mongoose from "mongoose";
 import multer from "multer";
+import passport from "passport";
+import GoogleStrategy from "passport-google-oauth20";
+
 
 import User from "../models/userModel.js";
 import { Mail } from "../utils/mail.js";
@@ -67,18 +70,18 @@ export const SignUp = async (req, res) => {
       }
     }
 
-    if (username.length > 30) { 
+    if (username.length > 30) {
       return res.status(422).json({
         message: "Username cannot be longer than 30 characters."
       });
     }
-    
 
-    if (fullName.length > 40) { 
+
+    if (fullName.length > 40) {
       return res.status(422).json({
         message: "Full name cannot be longer than 40 characters."
       });
-    }    
+    }
 
     if (password.length < 6) {
       return res.status(400).json({
@@ -168,6 +171,78 @@ export const SignUp = async (req, res) => {
   }
 };
 
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: `${process.env.BACKEND_DOMAIN}/api/v1/user/auth/google/callback`, 
+},
+  async (token, tokenSecret, profile, done) => {
+    try {
+      const userGoogleIdFind = await User.findOne({ googleId: profile.id });
+
+      if (!userGoogleIdFind) {
+        const userEmailFind = await User.findOne({ email: profile.emails[0].value });
+
+        if (!userEmailFind) {
+          const demoProfile = `https://avatar.iran.liara.run/username?username=${profile.displayName.replaceAll(" ", "+")}`;
+
+          const userCreate = await User.create({
+            username: profile.emails[0].value.split("@")[0],
+            fullName: profile.displayName,
+            email: profile.emails[0].value,
+            googleId: profile.id,
+            profile: profile.photos ? profile.photos[0].value : demoProfile,
+            cover: demoProfile,
+            provider: "google",
+            visitorId: "",
+          });
+
+          return done(null, userCreate._id);
+        }
+        await User.findByIdAndUpdate(userEmailFind._id,{
+          provider: "google",
+          googleId: profile.id,
+        })
+        return done(null, userEmailFind._id);
+
+      }
+      await User.findByIdAndUpdate(userGoogleIdFind._id,{
+        provider: "google",
+        googleId: profile.id,
+      })
+      return done(null, userGoogleIdFind._id);
+
+
+    } catch (error) {
+      console.error("Error during Google authentication:", error);
+      return done(error, null);
+    }
+  }));
+
+export const googleRouter = (req, res, next) => {
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+  })(req, res, next);
+};
+
+export const googleRouterCallback = async (req, res) => {
+  passport.authenticate('google', { failureRedirect: '/', session: false }, async (err, user, info) => {
+    if (err || !user) {
+      return res.status(400).json({ message: 'Authentication failed', error: err || info });
+    }
+
+    try {
+      const token = await TokenAndCookie(user, res);
+      return res.redirect("https://matrix-media.vercel.app")
+    } catch (error) {
+      return res.status(500).json({
+        message: 'An error occurred while processing your request.',
+      });
+    }
+  })(req, res);
+};
+
+
 export const Login = async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -205,7 +280,7 @@ export const Login = async (req, res) => {
 
     await User.findByIdAndUpdate(
       findUser._id,
-      { lastLogin: new Date() },
+      { lastLogin: new Date(), profiver },
       { new: true }
     );
     return res.status(200).json({
@@ -520,17 +595,17 @@ export const ProfileInfoUpdate = async (req, res) => {
         });
       }
 
-      if (username.length > 30) { 
+      if (username.length > 30) {
         return res.status(422).json({
           message: "Username cannot be longer than 30 characters."
         });
-      }      
+      }
 
-      if (fullName.length > 40) { 
+      if (fullName.length > 40) {
         return res.status(422).json({
           message: "Full name cannot be longer than 40 characters."
         });
-      }      
+      }
 
       if (!validator.isStrongPassword(password)) {
         return res.status(400).json({
@@ -557,10 +632,10 @@ export const ProfileInfoUpdate = async (req, res) => {
         password: user.password,
         mediaLink: {
           ...user.mediaLink,
-          ...(fiver ? { fiver } : {}), 
-          ...(github ? { github } : {}), 
-          ...(facebook ? { facebook } : {}), 
-          ...(linkedin ? { linkedin } : {}), 
+          ...(fiver ? { fiver } : {}),
+          ...(github ? { github } : {}),
+          ...(facebook ? { facebook } : {}),
+          ...(linkedin ? { linkedin } : {}),
         },
         profession,
       },
