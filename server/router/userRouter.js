@@ -15,9 +15,8 @@ import {
   GetSavePost,
   SearchUser,
   GetImages,
-  googleRouter,
-  googleRouterCallback,
 } from "../controllers/userController.js";
+import { githubRouter, githubRouterCallback, googleRouter, googleRouterCallback } from "../controllers/providerLogin.js";
 import Authorized from "../middleware/authorized.js";
 
 const userRouter = express.Router();
@@ -25,6 +24,8 @@ const userRouter = express.Router();
 userRouter.post("/user/auth/signup", SignUp);
 userRouter.get('/user/auth/google', googleRouter);
 userRouter.get('/user/auth/google/callback', googleRouterCallback);
+userRouter.get('/user/auth/github', githubRouter);
+userRouter.get('/user/auth/github/callback', githubRouterCallback);
 userRouter.post("/user/auth/login", Login);
 userRouter.post("/user/auth/logout", Authorized, Logout);
 userRouter.get("/user/profile/:username", Authorized, Profile);
