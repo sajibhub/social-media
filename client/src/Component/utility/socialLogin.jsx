@@ -8,7 +8,7 @@ const SocialLogin = ({ redirectUrl = "/" }) => {
         const top = (window.innerHeight - height) / 2;
 
         const popup = window.open(
-            `http://matrix-media.up.railway.app/api/v1/user/auth/${provider}`,
+            `https://matrix-media.up.railway.app/api/v1/user/auth/${provider}`,
             `${provider} Login`,
             `width=${width},height=${height},top=${top},left=${left}`
         );
