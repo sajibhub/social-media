@@ -3,6 +3,7 @@ import uiManage from "../../store/uiManage.js";
 import authorStore from "@/store/authorStore.js";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import SocialLogin from "../utility/socialLogin.jsx";
 
 const SignIn = () => {
     const navigate = useNavigate();
@@ -61,6 +62,7 @@ const SignIn = () => {
     };
 
     const forgotPasswordHandler = () => setSendOpt(true);
+
 
     return (
         <div className="flex items-center justify-center lg:min-h-screen">
@@ -170,6 +172,7 @@ const SignIn = () => {
                         Sign up
                     </a>
                 </p>
+                <SocialLogin redirectUrl='/' />
             </div>
         </div>
     );

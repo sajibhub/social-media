@@ -16,16 +16,16 @@ import {
   SearchUser,
   GetImages,
 } from "../controllers/userController.js";
-import { githubRouter, githubRouterCallback, googleRouter, googleRouterCallback } from "../controllers/providerLogin.js";
-import Authorized from "../middleware/authorized.js";
+import { authRouter, authRouterCallback } from "../controllers/providerLogin.js";
+ import Authorized from "../middleware/authorized.js";
 
 const userRouter = express.Router();
 
 userRouter.post("/user/auth/signup", SignUp);
-userRouter.get('/user/auth/google', googleRouter);
-userRouter.get('/user/auth/google/callback', googleRouterCallback);
-userRouter.get('/user/auth/github', githubRouter);
-userRouter.get('/user/auth/github/callback', githubRouterCallback);
+userRouter.get('/user/auth/google', authRouter("google"));
+userRouter.get('/user/auth/google/callback', authRouterCallback("google"));
+userRouter.get('/user/auth/github', authRouter("github"));
+userRouter.get('/user/auth/github/callback', authRouterCallback("github"));
 userRouter.post("/user/auth/login", Login);
 userRouter.post("/user/auth/logout", Authorized, Logout);
 userRouter.get("/user/profile/:username", Authorized, Profile);

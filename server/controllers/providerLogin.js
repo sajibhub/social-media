@@ -1,123 +1,71 @@
 import passport from "passport";
-import GoogleStrategy from "passport-google-oauth20";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
-
-
 import TokenAndCookie from "../utils/TokenAndCookie.js";
 import User from "../models/userModel.js";
 
-//google auth login
-passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: `${process.env.BACKEND_DOMAIN}/api/v1/user/auth/google/callback`,
-},
-    async (token, tokenSecret, profile, done) => {
-        try {
-            let user = await User.findOne({ googleId: profile.id });
-
-            if (!user) {
-                user = await User.findOne({ email: profile.emails[0].value });
-
-                if (!user) {
-                    const demoProfile = `https://avatar.iran.liara.run/username?username=${profile.displayName.replaceAll(" ", "+")}`;
-
-                    user = await User.create({
-                        username: profile.emails[0].value.split("@")[0],
-                        fullName: profile.displayName,
-                        email: profile.emails[0].value,
-                        googleId: profile.id,
-                        profile: profile.photos ? profile.photos[0].value : demoProfile,
-                        cover: demoProfile,
-                        provider: "google",
-                    });
-                }
-                await User.findByIdAndUpdate(user._id, { provider: "google", googleId: profile.id });
-            }
-            return done(null, user._id);
-        } catch (error) {
-            console.error("Google authentication error:", error);
-            return done(error, null);
-        }
-    }))
-
-export const googleRouter = (req, res, next) => {
-    passport.authenticate('google', {
-        scope: ['profile', 'email'],
-    })(req, res, next);
+const providers = {
+    google: {
+        Strategy: GoogleStrategy,
+        clientID: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        callbackURL: `${process.env.BACKEND_DOMAIN}/api/v1/user/auth/google/callback`,
+        scope: ["profile", "email"],
+    },
+    github: {
+        Strategy: GitHubStrategy,
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        callbackURL: `${process.env.BACKEND_DOMAIN}/api/v1/user/auth/github/callback`,
+        scope: ["user:email"],
+    },
 };
 
-export const googleRouterCallback = async (req, res) => {
-    passport.authenticate('google', { failureRedirect: '/author', session: false }, async (err, user, info) => {
-        if (err || !user) {
-            return res.status(400).json({ message: 'Authentication failed', error: err || info });
-        }
+// Universal authentication handler
+const authHandler = async (provider, profile, done) => {
+    try {
+        let user = await User.findOne({ [`${provider}Id`]: profile.id }) ||
+            await User.findOne({ email: profile.emails?.[0]?.value });
 
-        try {
-            const token = await TokenAndCookie(user, res);
-            return res.redirect("https://sajib.xyz")
-        } catch (error) {
-            return res.status(500).json({
-                message: 'An error occurred while processing your request.',
+        if (!user) {
+            const demoProfile = `https://avatar.iran.liara.run/username?username=${profile.displayName || profile.username}`;
+            user = await User.create({
+                username: profile.username || profile.emails[0].value.split("@")[0],
+                fullName: profile.displayName || profile.username,
+                email: profile.emails?.[0]?.value || "",
+                [`${provider}Id`]: profile.id,
+                profile: profile.photos?.[0]?.value || demoProfile,
+                cover: demoProfile,
+                provider,
             });
         }
-    })(req, res);
+
+        await User.findByIdAndUpdate(user._id, { provider, [`${provider}Id`]: profile.id });
+        return done(null, user._id);
+    } catch (error) {
+        console.error(`${provider} authentication error:`, error);
+        return done(error, null);
+    }
 };
 
-//github auth login
-passport.use(
-    new GitHubStrategy(
-        {
-            clientID: process.env.GITHUB_CLIENT_ID,
-            clientSecret: process.env.GITHUB_CLIENT_SECRET,
-            callbackURL: `${process.env.BACKEND_DOMAIN}/api/v1/user/auth/github/callback`,
-            scope: ["user:email"],
-        },
-        async (accessToken, refreshToken, profile, done) => {
-            try {
-                let user = await User.findOne({ githubId: profile.id });
+// Initialize passport strategies dynamically
+Object.entries(providers).forEach(([provider, { Strategy, clientID, clientSecret, callbackURL, scope }]) => {
+    passport.use(new Strategy({ clientID, clientSecret, callbackURL, scope }, (token, tokenSecret, profile, done) => {
+        authHandler(provider, profile, done);
+    }));
+});
 
-                if (!user) {
-                    user = await User.findOne({ email: profile.emails?.[0]?.value });
-
-                    if (!user) {
-                        const demoProfile = `https://avatar.iran.liara.run/username?username=${profile.username}`;
-
-                        user = await User.create({
-                            username: profile.username,
-                            fullName: profile.displayName || profile.username, // Ensure we get full name
-                            email: profile.emails?.[0]?.value || "",
-                            githubId: profile.id,
-                            profile: profile.photos?.[0]?.value || demoProfile, // Avatar
-                            cover: demoProfile,
-                            provider: "github",
-                        });
-                    }
-                    await User.findByIdAndUpdate(user._id, { provider: "github", githubId: profile.id });
-                }
-
-                return done(null, user._id);
-            } catch (error) {
-                console.error("GitHub authentication error:", error);
-                return done(error, null);
-            }
-        }
-    )
-);
-
-export const githubRouter = (req, res, next) => {
-    passport.authenticate("github", { scope: ["user:email"] })(req, res, next);
-};
-
-export const githubRouterCallback = (req, res) => {
-    passport.authenticate("github", { failureRedirect: "/author", session: false }, async (err, user) => {
+// Universal authentication routes
+export const authRouter = (provider) => passport.authenticate(provider, { scope: providers[provider].scope });
+export const authRouterCallback = (provider) => async (req, res) => {
+    passport.authenticate(provider, { failureRedirect: "/author", session: false }, async (err, user) => {
         if (err || !user) {
             return res.status(400).json({ message: "Authentication failed", error: err });
         }
 
         try {
-            const token = TokenAndCookie(user, res);
-            return res.redirect(`https://sajib.xyz`);
+            await TokenAndCookie(user, res);
+            return res.redirect("https://matrix-media.vercel.app");
         } catch (error) {
             return res.status(500).json({ message: "Error processing authentication" });
         }

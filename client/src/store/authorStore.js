@@ -1,7 +1,7 @@
 import {create} from "zustand";
 import axios from "axios";
 
-const Base_url = "https://matrix-media.up.railway.app/api/v1/"
+const Base_url = "http://matrix-media.up.railway.app/api/v1/"
 const Sign_up_api = Base_url + "user/auth/signup"
 const Login_api = Base_url + "user/auth/login";
 const SignOut_api = Base_url + "user/auth/logout";
