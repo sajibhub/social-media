@@ -205,7 +205,7 @@ export const Login = async (req, res) => {
 
     await User.findByIdAndUpdate(
       findUser._id,
-      { lastLogin: new Date(), profiver },
+      { lastLogin: new Date(), provider: "email" },
       { new: true }
     );
     return res.status(200).json({
