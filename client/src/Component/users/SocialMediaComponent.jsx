@@ -1,5 +1,5 @@
 import { useState } from "react";
-import {FaFacebook, FaLinkedin, FaGithub, FaFacebookF, FaGit, FaLinkedinIn} from "react-icons/fa";
+import { FaFacebookF, FaGit, FaLinkedinIn} from "react-icons/fa";
 import authorStore from "@/store/authorStore.js";
 import toast from "react-hot-toast";
 import {TbBrandFiverr} from "react-icons/tb";
@@ -9,7 +9,7 @@ const SocialMediaComponent = () => {
   const {user} = useParams();
   let userName = localStorage.getItem('userName');
 
-  const {myProfileData ,updateProfileReq ,  updateMediaLinkValue} = authorStore()
+  const {myProfileData ,updateProfileReq ,  updateMediaLinkValue,  profileData} = authorStore()
 
 
   const [editing, setEditing] = useState(null);
@@ -77,7 +77,7 @@ const SocialMediaComponent = () => {
   };
 
 
-  if(myProfileData == null){
+  if(myProfileData == null || profileData == null){
     return (
         <div className="px-8">
           <h2 className="text-xl mt-8 font-semibold mb-4 text-center">Manage Social Media Links</h2>
@@ -113,7 +113,8 @@ const SocialMediaComponent = () => {
           <div className="space-y-4 pt-2 ">
 
             <div
-                className="flex flex-wrap justify-center items-center gap-4 bg-gray-50  p-4 rounded-md shadow-sm border border-gray-300"
+                className="flex flex-wrap justify-center items-center gap-4
+                bg-gray-50  p-4 rounded-md shadow-sm border border-gray-300"
             >
               <FaFacebookF className="text-2xl flex-shrink-0 text-sky-500"/>
 
@@ -122,12 +123,16 @@ const SocialMediaComponent = () => {
                       type="text"
                       value={editData}
                       onChange={(e) => setEditData(e.target.value)}
-                      className="flex-grow bg-transparent outline-none text-sm placeholder-gray-400 border-b-2 border-gray-300 focus:border-blue-500"
+                      className="flex-grow bg-transparent outline-none text-sm
+                      placeholder-gray-400 border-b-2 border-gray-300 focus:border-blue-500"
                   />
               ) : (
                   <span className="flex-grow text-sm text-gray-700">
-                     {myProfileData.mediaLink?.facebook || "Add Facebook Link"}
-                     </span>
+                    {
+                      userName === user ? myProfileData.mediaLink.facebook || "Add Facebook Link"
+                          : profileData.mediaLink?.facebook || "Facebook Link"
+                    }
+                  </span>
               )}
 
               {editing === "facebook" ? (
@@ -144,7 +149,16 @@ const SocialMediaComponent = () => {
                   <div className="flex gap-3">
                     <a
                         onClick={
-                          () => visit(myProfileData.mediaLink?.facebook)
+                          () => {
+                            let url = ""
+                            if(userName === user) {
+                              url = myProfileData.mediaLink.facebook
+                            }
+                            else {
+                              url = profileData.mediaLink.facebook
+                            }
+                            visit(url)
+                          }
                         }
                         target="_blank"
                         rel="noopener noreferrer"
@@ -160,7 +174,9 @@ const SocialMediaComponent = () => {
                       user === userName && (
                             <button
                                 onClick={() => toggleEdit("facebook", myProfileData.mediaLink?.facebook)}
-                                className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700 hover:bg-gray-700 hover:text-white"
+                                className="px-3 py-1 text-sm rounded-md bg-gray-300 text-neutral-700
+                                 hover:bg-gray-700 hover:text-white
+                                 "
                             >
                               Edit
                             </button>
@@ -184,8 +200,12 @@ const SocialMediaComponent = () => {
                   />
               ) : (
                   <span className="flex-grow text-sm text-gray-700">
-                     {myProfileData.mediaLink?.linkedin || "Add Facebook Link"}
-                     </span>
+                    {
+                      userName === user ? myProfileData.mediaLink?.linkedin || "Add linkedin Link"
+                          :
+                          profileData.mediaLink?.linkedin || "linkedin link"
+                    }
+                  </span>
               )}
 
               {editing === "linkdin" ? (
@@ -202,7 +222,16 @@ const SocialMediaComponent = () => {
                   <div className="flex gap-3">
                     <a
                         onClick={
-                          () => visit(myProfileData.mediaLink?.linkedin)
+                          () => {
+                            let url = ""
+                            if(userName === user) {
+                              url = myProfileData.mediaLink?.linkedin
+                            }
+                            else {
+                              url = profileData.mediaLink?.linkedin
+                            }
+                            visit(url)
+                          }
                         }
                         target="_blank"
                         rel="noopener noreferrer"
@@ -244,8 +273,11 @@ const SocialMediaComponent = () => {
                   />
               ) : (
                   <span className="flex-grow text-sm text-gray-700">
-                     {myProfileData.mediaLink?.fiver || "Add Facebook Link"}
-                     </span>
+                    {
+                      userName === user ? myProfileData.mediaLink.fiver|| "Add Fiver Link"
+                          : profileData.mediaLink.fiver || "Fiver Link"
+                    }
+                  </span>
               )}
 
               {editing === "fiver" ? (
@@ -262,8 +294,18 @@ const SocialMediaComponent = () => {
                   <div className="flex gap-3">
                     <a
                         onClick={
-                          () => visit(myProfileData.mediaLink?.fiver)
+                          () => {
+                            let url = ""
+                            if(userName === user) {
+                              url = myProfileData.mediaLink.fiver
+                            }
+                            else {
+                              url = profileData.mediaLink.fiver
+                            }
+                            visit(url)
+                          }
                         }
+
                         target="_blank"
                         rel="noopener noreferrer"
                         className={`px-3 py-1 text-sm rounded-md ${
@@ -302,8 +344,11 @@ const SocialMediaComponent = () => {
                   />
               ) : (
                   <span className="flex-grow text-sm text-gray-700">
-                     {myProfileData.mediaLink?.github || "Add Facebook Link"}
-                     </span>
+                    {
+                      userName === user ? myProfileData.mediaLink.github|| "Add github Link"
+                          : profileData.mediaLink?.github || "Github Link"
+                    }
+                  </span>
               )}
 
               {editing === "github" ? (
@@ -320,7 +365,16 @@ const SocialMediaComponent = () => {
                   <div className="flex gap-3">
                     <a
                         onClick={
-                          () => visit(myProfileData.mediaLink?.github)
+                          () => {
+                            let url = "";
+                            if(user === userName ){
+                              url = myProfileData.mediaLink.github
+                            }
+                            else {
+                              url = profileData.mediaLink?.github
+                            }
+                            visit(url)
+                          }
                         }
                         target="_blank"
                         rel="noopener noreferrer"

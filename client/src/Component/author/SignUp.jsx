@@ -4,7 +4,6 @@ import { useState } from "react";
 import authorStore from "@/store/authorStore.js";
 import SocialLogin from "../utility/socialLogin.jsx";
 
-
 const SignUp = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
@@ -17,7 +16,7 @@ const SignUp = () => {
         const res = await signUpReq(signUpFrom);
         setLoading(false);
 
-        if (res) {
+        if (res === 201) {
             toast.success("Your account successfully created!");
             setAuthor("signIn");
         } else {
@@ -32,7 +31,7 @@ const SignUp = () => {
                 <h2 className="text-3xl lg:text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 mb-6 animate-pulse">
                     Sign Up
                 </h2>
-
+                
                 {/* Form */}
                 <form onSubmit={handleSubmit}>
                     {/* Username Input */}
@@ -172,7 +171,7 @@ const SignUp = () => {
                         Sign in
                     </a>
                 </p>
-                <SocialLogin redirectUrl="/" />
+                <SocialLogin redirectUrl='/' />
             </div>
         </div>
     );

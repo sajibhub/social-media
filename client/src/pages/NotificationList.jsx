@@ -11,7 +11,7 @@ const NotificationList = () => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false); // For "Clear All" confirmation dialog
-  const url = "https://matrix-media.up.railway.app/api/v1";
+  const url = "https://matrix-social-media-backend.onrender.com/api/v1";
 
   const fetchNotifications = async () => {
     setLoading(true);

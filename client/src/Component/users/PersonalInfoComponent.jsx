@@ -59,7 +59,7 @@ const PersonalInfoComponent = () => {
     }
   };
 
-  if (profileData === null) {
+  if (profileData === null || myProfileData === null) {
     return (
       <div className="bg-gray-100 py-8 px-4">
         {/* Skeleton for Personal Info Form */}
@@ -84,7 +84,8 @@ const PersonalInfoComponent = () => {
         </div>
       </div>
     );
-  } else {
+  }
+  else {
     return (
       <div className=" pb-3 ">
         {/* Personal Info Form */}

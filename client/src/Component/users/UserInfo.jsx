@@ -4,7 +4,7 @@ import { IoCallSharp } from "react-icons/io5";
 import { FaSquareFacebook } from "react-icons/fa6";
 import { IoLogoLinkedin } from "react-icons/io";
 import { TbBrandFiverr } from "react-icons/tb";
-import { FaGithub } from "react-icons/fa";
+import {FaGithub, FaSignOutAlt} from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useState } from "react";
@@ -13,8 +13,10 @@ import uiManage from "@/store/uiManage.js";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
 
 const UserInfo = () => {
-  const [loader, setLoader] = useState(false);
+  const {SignOutReq} = authorStore()
   const navigate = useNavigate();
+  const [signOutLoading, setSignOutLoading] = useState(false);
+  const [loader, setLoader] = useState(false);
   const { user } = useParams();
   let myUser = localStorage.getItem("userName");
   const { profileData, flowReq, readProfileReq } = authorStore();
@@ -22,8 +24,7 @@ const UserInfo = () => {
     uiManage();
 
   const openNewWindow = (url) => {
-    let  newUrl = "https://" + url;
-    window.open(newUrl, "_blank", "noopener,noreferrer");
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   if (profileData === null || profileData === undefined) {
@@ -81,8 +82,8 @@ const UserInfo = () => {
 
   else {
     return (
-      <div className=" rounded  border border-gray-200 mb-6">
-        <div className="h-[200px] w-full overflow-hidden flex flex-row justify-between items-center shadow ">
+      <div className=" rounded  border border-gray-200 mb-6 ">
+        <div className="h-[200px] w-full overflow-hidden flex flex-row justify-between items-center shadow  ">
           <img
             src={profileData.cover}
             alt="Cover Photo"
@@ -102,7 +103,7 @@ const UserInfo = () => {
           />
         </div>
 
-        <div className="mx-[25px] pb-3 mt-3 relative">
+        <div className="mx-3 lg:mx-[25px] pb-3 mt-3 relative">
           <h1 className="text-2xl font-medium text-neutral-700 flex items-center gap-1">
             {profileData.fullName}
             {profileData.verify && (
@@ -111,29 +112,65 @@ const UserInfo = () => {
           </h1>
 
           {user ===  myUser ? (
-            <button
-              onClick={() => set_edit_profile_Ui_Control(true)}
-              className="
-                         absolute top-[-67px] lg:top-0 right-0 bg-white
+              <div className="absolute top-[-67px] lg:top-0 right-0 flex items-center">
+
+                <button
+                    onClick={() => set_edit_profile_Ui_Control(true)}
+                    className="
+                          bg-white
                          text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
+                         rounded-full hover:text-sky-500 hover:border-sky-500 me-2
+                        "
+                >
+                  Edit Profile
+                </button>
+
+                <button
+                    onClick={async () => {
+                      setSignOutLoading(true);
+                      const confirmSignOut = confirm("Are you sure you want to sign out?");
+                      if (confirmSignOut) {
+                        const res = await SignOutReq();
+                        localStorage.clear();
+                        setSignOutLoading(false);
+                        if (res) {
+                          navigate("/author");
+                          toast.success("Signed Out Successfully");
+                        } else {
+                          toast.error("Sign Out Failed");
+                        }
+                      } else {
+                        toast.error("Sign Out Cancelled");
+                        setSignOutLoading(false);
+                      }
+                    }}
+                    className="
+                         bg-white md:hidden flex items-center
+                         text-base font-medium text-neutral-700 py-1 px-3  shadow-md border-2 border-white h-[36px]
                          rounded-full hover:text-sky-500 hover:border-sky-500
                         "
-            >
-              Edit Profile
-            </button>
+                >
+                  {signOutLoading ? (
+                      <div className="loader-dark"></div>
+                  ) : (
+                      <span className="text-lg font-medium text-gray-600">Sign Out</span>
+                  )}
+
+                </button>
+              </div>
           ) : (
-            <button
-              onClick={async () => {
-                setLoader(true);
-                const res = await flowReq(profileData._id);
-                if (res) {
-                  await readProfileReq(user);
-                  toast.success("Work successfully !");
-                } else {
-                  toast.error("Work flow failed!");
-                }
-                setLoader(false);
-              }}
+              <button
+                  onClick={async () => {
+                    setLoader(true);
+                    const res = await flowReq(profileData._id);
+                    if (res) {
+                      await readProfileReq(user);
+                      toast.success("Work successfully !");
+                    } else {
+                      toast.error("Work flow failed!");
+                    }
+                    setLoader(false);
+                  }}
               className={`
                          absolute top-0 right-0
                          ${
@@ -148,7 +185,7 @@ const UserInfo = () => {
             >
               {loader && <LoadingButtonFit />}
               {loader === false &&
-                (profileData.isFollowing ? "Unfollow" : "Flow")}
+                (profileData.isFollowing ? "Unfollow" : "Follow")}
             </button>
           )}
 

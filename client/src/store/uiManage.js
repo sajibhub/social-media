@@ -16,6 +16,9 @@ const uiManage = create((set) => ({
     Password:null,
     setPassword : (e) => set({Password : e}),
 
+    createStory : false,
+    setCreateStory : (e) => set({createStory : e}),
+
 
 
 }))

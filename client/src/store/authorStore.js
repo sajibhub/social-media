@@ -36,11 +36,11 @@ const authorStore = create((set) => ({
     signUpReq : async (data)=>{
 
         try {
-            await  axios.post(Sign_up_api, data )
-            return true
+            const res =   await  axios.post(Sign_up_api, data )
+            return res.status
         }
-        catch {
-            return false
+        catch (error) {
+            return error;
         }
 
     },
@@ -147,7 +147,6 @@ const authorStore = create((set) => ({
         try {
             let res =  await axios.get(Read_Profile_api +user,  {withCredentials: true})
             set({profileData: res.data.profile[0]})
-
 
             let me =  await axios.get(Read_Profile_api +"me",  {withCredentials: true})
             set({myProfileData: me.data.profile[0]})

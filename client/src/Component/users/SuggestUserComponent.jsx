@@ -87,12 +87,11 @@ const SuggestUserComponent = () => {
               <div className="flex-grow">
                 <h2
                   onClick={() => goToProfile(user.username)}
-                  className="text-base font-semibold text-neutral-900 cursor-pointer flex gap-1 items-center"
+                  className="text-base font-semibold text-neutral-900 cursor-pointer hover:underline"
                 >
-                  <span className="cursor-pointer hover:underline"> {user.fullName} </span>
-
-                  {user.verify && <VerifiedBadge isVerified={user.verify} />}
+                  {user.fullName}
                 </h2>
+                {user.verify && <VerifiedBadge isVerified={user.verify} />}
                 <p className="text-sm text-neutral-600">{user.username}</p>
               </div>
 
@@ -102,10 +101,11 @@ const SuggestUserComponent = () => {
                 ) : (
                   <button
                     onClick={() => followHandel(user._id, user.isFollowing)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition duration-200 focus:outline-none ${user.isFollowing
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition duration-200 focus:outline-none ${
+                      user.isFollowing
                         ? "bg-gray-100 text-gray-800 hover:bg-gray-200"
                         : "bg-blue-500 text-white hover:bg-blue-600"
-                      }`}
+                    }`}
                   >
                     {user.isFollowing ? "Unfollow" : "Follow"}
                   </button>

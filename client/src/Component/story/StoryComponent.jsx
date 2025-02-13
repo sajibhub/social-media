@@ -1,11 +1,13 @@
 import {motion} from "framer-motion";
 import {useEffect, useRef} from "react";
-import {MdKeyboardDoubleArrowRight, MdOutlineKeyboardDoubleArrowLeft} from "react-icons/md";
+import {MdAdd, MdKeyboardDoubleArrowRight, MdOutlineKeyboardDoubleArrowLeft,} from "react-icons/md";
 import StoryStore from "@/store/StoryStore.js";
-
+import uiManage from "@/store/uiManage.js";
+import {useNavigate} from "react-router-dom";
 
 const StoryComponent = () => {
-
+    const navigate = useNavigate();
+    const {setCreateStory} = uiManage()
     const scrollRef = useRef(null);
     const {StoryData, StoryReq} = StoryStore()
 
@@ -68,10 +70,12 @@ const StoryComponent = () => {
             </div>
 
         )
-    } else {
+    }
+
+
+    else {
         return (
             <div className="relative px-10 max-w-[680px] mx-auto">
-
                 <motion.button
                     whileHover={{opacity: 1, scale: 1.2}}
                     animate={{opacity: 1, scale: 1}}
@@ -106,12 +110,33 @@ const StoryComponent = () => {
 
                 <div
                     ref={scrollRef}
-                    className="mt-3 p-3  scroll-bar-hidden justify-center  flex flex-row gap-5 overflow-y-auto cursor-pointer
+                    className="mt-3 p-3  scroll-bar-hidden justify-start  flex flex-row gap-5 overflow-y-auto cursor-pointer
                 "
                 >
+                    <motion.div
+                        whileHover={{opacity: 1, scale: 1.1}}
+                        animate={{opacity: 1, scale: 1}}
+                        transition={{
+                            duration: 0.3,
+                            scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
+                        }}
+
+                        className="max-w-[80px] flex-shrink-0 overflow-hidden"
+                        onClick={()=>setCreateStory(true)}
+                    >
+                        <div
+                            className="
+                                     h-[60px] w-[60px] rounded-full overflow-hidden flex flex-row justify-center items-center
+                                     border-[3px] border-sky-200 mx-auto bg-neutral-500
+                                     "
+                        >
+                            <MdAdd className="text-white text-2xl " />
+                        </div>
+                    </motion.div>
 
                     {
                         StoryData.map((item, i) => {
+                            const previewID = i -2 ;
                             return (
                                 <motion.div
                                     key={i}
@@ -122,6 +147,7 @@ const StoryComponent = () => {
                                         scale: {type: "spring", visualDuration: 0.3, bounce: 0.5},
                                     }}
                                     className="max-w-[80px] flex-shrink-0 overflow-hidden"
+                                    onClick={()=>navigate("/story/"+ previewID)}
                                 >
                                     <div
                                         className="
@@ -129,7 +155,7 @@ const StoryComponent = () => {
                                      border-[3px] border-sky-200 mx-auto
                                      "
                                     >
-                                        <img src={item.image} alt="profile" className="min-w-full min-h-full"/>
+                                        <img src={item.user.profile} alt="profile" className="min-w-full min-h-full"/>
                                     </div>
                                 </motion.div>
                             )

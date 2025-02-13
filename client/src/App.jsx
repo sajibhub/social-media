@@ -12,6 +12,7 @@ import SinglePostPreview from "@/pages/SinglePostPreview"
 import AddPostPopup from "@/pages/AddPostPage.jsx";
 import SettingPage from "@/pages/SettingPage.jsx";
 import StoryPage from "@/pages/StoryPage.jsx";
+import 'animate.css';
 
 const router = createBrowserRouter([
   {
@@ -62,20 +63,21 @@ const router = createBrowserRouter([
   },
 
   {
-    path: "/story",
+    path: "/story/:id",
     element: <StoryPage />
   },
+
   {
     path: "*",
     element: <NotFound />,
   },
 ]);
 
+
 const App = () => {
   return (
     <>
       <RouterProvider router={router} />
-
       <Toaster position="bottom-center" reverseOrder={false} />
     </>
   );

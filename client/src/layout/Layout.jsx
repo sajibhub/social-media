@@ -1,13 +1,12 @@
 import Menu from "./Menu.jsx";
-import Summary from "./Summary.jsx";
+import Summary from "../Component/users/Summary.jsx";
 import CommentPopup from "@/popup/CommentPopup.jsx";
 import BottomMenu from "@/layout/BottomMenu.jsx";
 import postStore from "@/store/postStore.js";
 import UpdatePostPopup from "@/popup/UpdatePostPopup.jsx";
 import UpdateProfilePopup from "../popup/UpdateProfilePopup.jsx";
 import uiManage from "../store/uiManage.js";
-
-
+import StoryCreatorPopup from "@/popup/StoryCreatorPopup.jsx";
 
 
 const Layout = (props) => {
@@ -30,6 +29,7 @@ const Layout = (props) => {
                 edit_profile_Ui_Control !== null && <UpdateProfilePopup />
             }
 
+            <StoryCreatorPopup />
 
             <div className="col-span-1 h-full hidden md:block scroll-bar-hidden   overflow-y-auto overflow-x-hidden ">
                 <Menu/>

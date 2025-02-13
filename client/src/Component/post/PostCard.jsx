@@ -247,7 +247,9 @@ const PostCard = () => {
         </div>
       </div>
     ));
-  } else {
+  }
+
+  else {
     return (
       <>
         <DeleteConfirmationModal />

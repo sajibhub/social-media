@@ -1,13 +1,13 @@
 
-import ActiveStoryComponent from "@/Component/story/ActiveStoryComponent.jsx";
+import PreviewStoryComponent from "@/Component/story/PreviewStoryComponent.jsx";
 
 
 const StoryPage = () => {
     return (
-        <>
-            <ActiveStoryComponent/>
+        <div className="bg-sky-200">
+            <PreviewStoryComponent/>
 
-        </>
+        </div>
     );
 };
 

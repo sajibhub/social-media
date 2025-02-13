@@ -1,5 +1,5 @@
-import ProfileSummaryComponent from "../Component/users/ProfileSummaryComponent.jsx";
-import SuggestUserComponent from "../Component/users/SuggestUserComponent.jsx";
+import ProfileSummaryComponent from "./ProfileSummaryComponent.jsx";
+import SuggestUserComponent from "./SuggestUserComponent.jsx";
 
 
 const Summary = () => {

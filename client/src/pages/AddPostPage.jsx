@@ -20,16 +20,16 @@ const AddPost = () => {
     const [text, setText] = useState("");
     const [showPicker, setShowPicker] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [loadingProfile, setLoadingProfile] = useState(true); // Profile loading state
+    const [loadingProfile, setLoadingProfile] = useState(true);
     const textareaRef = useRef(null);
 
     // Simulate profile data loading
     useEffect(() => {
         setTimeout(() => {
             if (myProfileData) {
-                setLoadingProfile(false); // Profile data loaded
+                setLoadingProfile(false);
             }
-        }, 1000); // Simulate delay in fetching data
+        }, 1000);
     }, [myProfileData]);
 
     // Resize textarea dynamically as user types
@@ -183,7 +183,7 @@ const AddPost = () => {
                     <div className="flex items-center">
                         <button
                             onClick={
-                                ()=>navigate("/")
+                                ()=>navigate(-1)
                             }
                             className="px-6 py-2 rounded-full  border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white transition duration-300 me-5"
                         >

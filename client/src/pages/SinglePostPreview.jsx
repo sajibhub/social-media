@@ -296,7 +296,7 @@ const SinglePostPreview = () => {
 
     else {
         return (
-            <div className="overflow-y-auto">
+            <div className="h-screen  overflow-y-auto scroll-bar-hidden">
                 <div className="w-full border-b-2 sticky top-0 bg-blur bg-white bg-opacity-20 z-[999999]">
                     <h1 className=" text-center text-xl font-medium text-neutral-700 py-4">Preview Post </h1>
                 </div>
@@ -423,7 +423,7 @@ const SinglePostPreview = () => {
                         </div>
                         <div className="flex flex-row gap-2 justify-start items-center">
                             <FaCommentDots className="text-neutral-900 text-lg"/>
-                            <h1 className="text-base font-medium text-neutral-900">
+                            <h1 className="text-base flex flex-row gap-1 font-medium text-neutral-900">
                                 {Single_Post_Data[0].comment}
                                 <span className="hidden md:block">Comments</span>
                             </h1>
@@ -611,7 +611,7 @@ const SinglePostPreview = () => {
                         </div>
                     </form>
                 </div>
-                <div className="py-[42px]"></div>
+                <div className="py-[42px] md:py-0"></div>
             </div>
 
         )

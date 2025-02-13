@@ -4,7 +4,7 @@ import { FaBookmark, FaSearch, FaSignOutAlt, FaUser, FaUsers } from "react-icons
 import { RiMessage3Fill, RiStickyNoteAddFill } from "react-icons/ri";
 import { IoSettingsSharp } from "react-icons/io5";
 import { motion } from "framer-motion";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -15,7 +15,7 @@ const Menu = () => {
     let userName = localStorage.getItem("userName");
     const { SignOutReq } = authorStore();
     const navigate = useNavigate();
-    const pathname = useLocation()
+    const pathname = window.location.pathname
 
     const [signOutLoading, setSignOutLoading] = useState(false);
 

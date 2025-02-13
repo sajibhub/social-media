@@ -63,7 +63,6 @@ const SignIn = () => {
 
     const forgotPasswordHandler = () => setSendOpt(true);
 
-
     return (
         <div className="flex items-center justify-center lg:min-h-screen">
             <div className="w-full max-w-[650px] bg-white rounded-lg shadow-md p-8 transition-all duration-300 ease-in-out transform hover:scale-105">
