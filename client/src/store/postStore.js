@@ -4,7 +4,7 @@ import axios from "axios";
 
 
 
-const Base_url = "https://matrix-social-media-backend.onrender.com/"
+const Base_url = "https://matrix-social-media-backend.onrender.com/api/v1/"
 const Create_Post_Api= Base_url + "user/post/create";
 const My_Post_Api= Base_url + "/user/post/read/";
 const newsFeed_Post_Api= Base_url + "/user/post/feed";
