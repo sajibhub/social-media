@@ -1,6 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
+import { Strategy as FacebookStrategy } from "passport-facebook";
 import TokenAndCookie from "../utils/TokenAndCookie.js";
 import User from "../models/userModel.js";
 
@@ -18,6 +19,14 @@ const providers = {
         clientSecret: process.env.GITHUB_CLIENT_SECRET,
         callbackURL: `${process.env.BACKEND_DOMAIN}/api/v1/user/auth/github/callback`,
         scope: ["user:email"],
+    },
+    facebook: {
+        Strategy: FacebookStrategy, 
+        clientID: process.env.FACEBOOK_CLIENT_ID,
+        clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+        callbackURL: `${process.env.BACKEND_DOMAIN}/api/v1/user/auth/facebook/callback`,
+        scope: ["email"], 
+        profileFields: ['id', 'displayName', 'email', 'photos'],
     },
 };
 
@@ -49,8 +58,8 @@ const authHandler = async (provider, profile, done) => {
 };
 
 // Initialize passport strategies dynamically
-Object.entries(providers).forEach(([provider, { Strategy, clientID, clientSecret, callbackURL, scope }]) => {
-    passport.use(new Strategy({ clientID, clientSecret, callbackURL, scope }, (token, tokenSecret, profile, done) => {
+Object.entries(providers).forEach(([provider, { Strategy, clientID, clientSecret, callbackURL, scope, profileFields }]) => {
+    passport.use(new Strategy({ clientID, clientSecret, callbackURL, scope, profileFields }, (token, tokenSecret, profile, done) => {
         authHandler(provider, profile, done);
     }));
 });
@@ -64,8 +73,8 @@ export const authRouterCallback = (provider) => async (req, res) => {
         }
 
         try {
-            await TokenAndCookie(user, res);
-            return res.redirect("https://matrix-media.vercel.app");
+            await TokenAndCookie(user, res); 
+            return res.redirect("https://matrix-media.vercel.app"); 
         } catch (error) {
             return res.status(500).json({ message: "Error processing authentication" });
         }

@@ -26,6 +26,8 @@ userRouter.get('/user/auth/google', authRouter("google"));
 userRouter.get('/user/auth/google/callback', authRouterCallback("google"));
 userRouter.get('/user/auth/github', authRouter("github"));
 userRouter.get('/user/auth/github/callback', authRouterCallback("github"));
+userRouter.get('/user/auth/facebook', authRouter("facebook"));
+userRouter.get('/user/auth/facebook/callback', authRouterCallback("facebook"));
 userRouter.post("/user/auth/login", Login);
 userRouter.post("/user/auth/logout", Authorized, Logout);
 userRouter.get("/user/profile/:username", Authorized, Profile);
