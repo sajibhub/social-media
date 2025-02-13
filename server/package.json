@@ -33,6 +33,10 @@
     "passport-github2": "^0.1.12",
     "passport-google-oauth20": "^2.0.0",
     "r-password": "^1.0.2",
+    "socket.io": "^4.8.1",
     "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "vercel": "^41.1.0"
   }
 }

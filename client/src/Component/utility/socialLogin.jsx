@@ -1,6 +1,6 @@
 import { FaGoogle, FaGithub } from "react-icons/fa";
 
-const SocialLogin = ({ redirectUrl = "/" }) => {
+const SocialLogin = ({ redirectUrl }) => {
     const handleLogin = (provider) => {
         const width = 600;
         const height = 800;
@@ -8,7 +8,7 @@ const SocialLogin = ({ redirectUrl = "/" }) => {
         const top = (window.innerHeight - height) / 2;
 
         const popup = window.open(
-            `https://matrix-media.up.railway.app/api/v1/user/auth/${provider}`,
+            `https://matrix-social-media-backend.onrender.com/api/v1/user/auth/${provider}`,
             `${provider} Login`,
             `width=${width},height=${height},top=${top},left=${left}`
         );
