@@ -1,8 +1,7 @@
 import { MdVerified } from "react-icons/md";
 
 const VerifiedBadge = ({ isVerified }) => {
-
-
+  
   return (
     <div className="relative inline-block">
       {isVerified && (
