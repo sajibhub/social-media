@@ -14,20 +14,22 @@ const MessageSchema = new mongoose.Schema(
         },
         text: {
             type: String,
-
         },
         image: {
             type: String,
-
         },
         isRead: {
             type: Boolean,
             default: false,
         },
+        conversationId: {
+            type: String,  // Store the conversationId to group messages between two users
+            required: true,
+        },
     },
     {
         timestamps: true,
-        versionKey: false
+        versionKey: false,
     }
 );
 

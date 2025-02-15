@@ -47,14 +47,16 @@ export const storyCreate = async (req, res) => {
     }
 }
 
+
 export const storyRead = async (req, res) => {
     try {
-        const { id } = req.headers
+        const { id } = req.headers;
 
-        const story = await Story.aggregate([
+        const stories = await Story.aggregate([
             {
                 $match: {
-                    views: { $not: { $in: [id] } }
+                    createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // Last 24 hours
+
                 }
             },
             {
@@ -137,48 +139,55 @@ export const storyRead = async (req, res) => {
                         },
                     },
                     isMyStory: { $eq: ["$userId", id] },
-                    isLike: { $eq: ["$likes", id] },
-                    isFollowing: { $eq: ["$user.followers", id] },
-                    rank: {
-                        $add: [
-                            { $multiply: [{ $size: "$likes" }, 1] },
-                            { $multiply: [{ $size: "$views" }, 1] },
-                            { $multiply: [{ $cond: [{ $eq: ["$user.userId", id] }, 1, 0] }, 100] }
-                        ]
+                    isLike: { $in: [id, "$likes"] },
+                    isFollowing: { $in: [id, "$user.followers"] },
+                    isSeen: { $in: [id, "$views"] },
+                }
+            },
+
+            {
+                $group: {
+                    _id: "$userId",
+                    user: { $first: "$user" },
+                    stories: {
+                        $push: {
+                            _id: "$_id",
+                            image: "$image",
+                            text: "$text",
+                            time: "$time",
+                            isMyStory: "$isMyStory",
+                            isLike: "$isLike",
+                            isFollowing: "$isFollowing",
+                            isSeen: "$isSeen",
+                            views: { $size: "$views" }
+                        }
                     }
                 }
             },
-            { $sort: { rank: -1 } },
+
+            { $sort: { "stories.time": -1 } },
+
             {
                 $project: {
-                    _id: 1,
-                    text: 1,
-                    image: 1,
-                    views: { $size: "$views" },
-                    user: {
-                        _id: 1,
-                        username: 1,
-                        fullName: 1,
-                        profile: 1,
-                        verify: 1,
-                    },
-                    isLike: 1,
-                    isMyStory: 1,
-                    isFollowing: 1,
-                    time: 1
+                    _id: "$user._id",
+                    username: "$user.username",
+                    fullName: "$user.fullName",
+                    profile: "$user.profile",
+                    verify: "$user.verify",
+                    stories: 1
                 }
-            },
-            { $limit: 20 },
-        ])
+            }
+        ]);
+
         return res.status(200).json({
-            stories: story,
-        })
+            stories
+        });
     } catch (error) {
         res.status(500).json({
             message: "An error occurred while processing your request."
-        })
+        });
     }
-}
+};
 
 export const storyDeleted = async (req, res) => {
     try {

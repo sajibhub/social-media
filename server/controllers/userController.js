@@ -1062,6 +1062,18 @@ export const SearchUser = async (req, res) => {
     const { id } = req.headers
     const { search } = req.body
 
+    if (!search) {
+      return res.status(400).json({
+        message: "Search query is required."
+      })
+    }
+
+    if (!search.trim() && /[a-zA-Z0-9]/.test(!search)) {
+      return res.status(400).json({
+        message: "Search query must contain only letters and numbers."
+      })
+    }
+
     const searchUser = await User.aggregate([
       {
         $match: {
