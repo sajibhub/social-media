@@ -1,12 +1,19 @@
 const UserAgentMiddleware = (req, res, next) => {
   const domain = req.get("origin");
- const allowedDomains = process.env.FRONTEND_URLS.split(',');
+  const router = req.originalUrl;
+  const allowedDomains = process.env.FRONTEND_URLS.split(',');
 
-  if (!allowedDomains.includes(domain)) {
-    return res.status(403).json({
-      message: "Access denied",
-    });
+  const isPassportAuthEndpoint = ["/api/v1/user/auth/google", "/api/v1/user/auth/google/callback",
+    "/api/v1/user/auth/github", "/api/v1/user/auth/github/callback", "/api/v1/user/auth/facebook", "/api/v1/user/auth/facebook/callback"
+  ]
+  if (!isPassportAuthEndpoint.includes(router)) {
+    if (!allowedDomains.includes(domain)) {
+      return res.status(403).json({
+        message: "Access denied",
+      });
+    }
   }
+
 
   const userAgent = req.headers["user-agent"];
   if (!userAgent) {
