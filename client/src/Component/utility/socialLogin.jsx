@@ -15,7 +15,7 @@ const SocialLogin = ({ redirectUrl }) => {
 
         const checkPopup = setInterval(() => {
             try {
-                if (popup.location && popup.location.href.includes(`${window.location.protocol}://${window.location.hostname}`)) {
+                if (popup.location && popup.location.href.includes(`https://matrix-media.vercel.app`)) {
                     clearInterval(checkPopup);
                     popup.close();
                     window.location.href = redirectUrl;

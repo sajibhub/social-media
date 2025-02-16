@@ -1,6 +1,6 @@
 const UserAgentMiddleware = (req, res, next) => {
   const domain = req.get("origin");
-  const router = req.originalUrl;
+  const router = req.originalUrl.split("?")[0];
   const allowedDomains = process.env.FRONTEND_URLS.split(',');
 
   const isPassportAuthEndpoint = ["/api/v1/user/auth/google", "/api/v1/user/auth/google/callback",

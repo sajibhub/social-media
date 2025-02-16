@@ -46,6 +46,9 @@ app.use(
     credentials: true,
   })
 );
+
+app.use(helmet())
+
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
@@ -54,6 +57,7 @@ app.use(
     },
   })
 );
+
 
 app.use(cookieParser());
 app.use(mongodbSanitize());

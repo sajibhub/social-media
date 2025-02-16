@@ -71,7 +71,7 @@ export const authRouterCallback = (provider) => async (req, res) => {
 
         try {
             await TokenAndCookie(user, res);
-            return res.redirect(req.get("origin"));
+            return res.redirect('https://matrix-media.vercel.app');
 
         } catch (error) {
             return res.status(500).json({ message: "Error processing authentication" });
