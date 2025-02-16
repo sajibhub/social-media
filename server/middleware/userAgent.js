@@ -1,9 +1,17 @@
 const UserAgentMiddleware = (req, res, next) => {
-  const userAgent = req.headers["user-agent"];
+  const domain = `${req.protocol}://${req.hostname}`;
+ const allowedDomains = process.env.FRONTEND_URLS.split(',');
 
+  if (!allowedDomains.includes(domain)) {
+    return res.status(403).json({
+      message: "Access denied",
+    });
+  }
+
+  const userAgent = req.headers["user-agent"];
   if (!userAgent) {
     return res.status(400).json({
-      message: "User-Agent header is required",
+      message: "access denied",
     });
   }
 

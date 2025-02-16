@@ -21,16 +21,15 @@ const providers = {
         scope: ["user:email"],
     },
     facebook: {
-        Strategy: FacebookStrategy, 
+        Strategy: FacebookStrategy,
         clientID: process.env.FACEBOOK_CLIENT_ID,
         clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
         callbackURL: `${process.env.BACKEND_DOMAIN}/api/v1/user/auth/facebook/callback`,
-        scope: ["email"], 
+        scope: ["email"],
         profileFields: ['id', 'displayName', 'email', 'photos'],
     },
 };
 
-// Universal authentication handler
 const authHandler = async (provider, profile, done) => {
     try {
         let user = await User.findOne({ [`${provider}Id`]: profile.id }) ||
@@ -40,7 +39,7 @@ const authHandler = async (provider, profile, done) => {
             const demoProfile = `https://avatar.iran.liara.run/username?username=${profile.displayName || profile.username}`;
             user = await User.create({
                 username: profile.username || profile.emails[0].value.split("@")[0],
-                fullName: profile.displayName || profile.username,
+                fullName: profile.displayName || profile.username || profile.emails[0].value.split("@")[0],
                 email: profile.emails?.[0]?.value || "",
                 [`${provider}Id`]: profile.id,
                 profile: profile.photos?.[0]?.value || demoProfile,
@@ -57,14 +56,12 @@ const authHandler = async (provider, profile, done) => {
     }
 };
 
-// Initialize passport strategies dynamically
 Object.entries(providers).forEach(([provider, { Strategy, clientID, clientSecret, callbackURL, scope, profileFields }]) => {
     passport.use(new Strategy({ clientID, clientSecret, callbackURL, scope, profileFields }, (token, tokenSecret, profile, done) => {
         authHandler(provider, profile, done);
     }));
 });
 
-// Universal authentication routes
 export const authRouter = (provider) => passport.authenticate(provider, { scope: providers[provider].scope });
 export const authRouterCallback = (provider) => async (req, res) => {
     passport.authenticate(provider, { failureRedirect: "/author", session: false }, async (err, user) => {
@@ -73,8 +70,8 @@ export const authRouterCallback = (provider) => async (req, res) => {
         }
 
         try {
-            await TokenAndCookie(user, res); 
-            return res.redirect("https://matrix-media.vercel.app"); 
+            await TokenAndCookie(user, res);
+            return res.redirect(`${req.protocol}://${req.hostname}`);
         } catch (error) {
             return res.status(500).json({ message: "Error processing authentication" });
         }

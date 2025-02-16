@@ -1,4 +1,4 @@
-import { FaGoogle, FaGithub } from "react-icons/fa";
+import { FaGoogle, FaGithub, FaFacebook } from "react-icons/fa";
 
 const SocialLogin = ({ redirectUrl }) => {
     const handleLogin = (provider) => {
@@ -15,19 +15,17 @@ const SocialLogin = ({ redirectUrl }) => {
 
         const checkPopup = setInterval(() => {
             try {
-                if (popup.location && popup.location.href.includes("https://matrix-media.vercel.app")) {
+                if (popup.location && popup.location.href.includes(`${window.location.protocol}://${window.location.hostname}`)) {
                     clearInterval(checkPopup);
                     popup.close();
                     window.location.href = redirectUrl;
                 }
             } catch (error) {
             }
-
             if (popup.closed) {
                 clearInterval(checkPopup);
             }
         }, 1000);
-
     };
 
     return (
@@ -47,6 +45,13 @@ const SocialLogin = ({ redirectUrl }) => {
                     className="p-3 rounded-full bg-gray-800 text-white hover:bg-gray-900 transition duration-300"
                 >
                     <FaGithub size={24} />
+                </button>
+
+                <button
+                    onClick={() => handleLogin("facebook")}
+                    className="p-3 rounded-full bg-gray-800 text-white hover:bg-gray-900 transition duration-300"
+                >
+                    <FaFacebook size={24} />
                 </button>
             </div>
         </div>
