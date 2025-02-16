@@ -71,7 +71,8 @@ export const authRouterCallback = (provider) => async (req, res) => {
 
         try {
             await TokenAndCookie(user, res);
-            return res.redirect(`${req.protocol}://${req.hostname}`);
+            return res.redirect(req.get("origin"));
+
         } catch (error) {
             return res.status(500).json({ message: "Error processing authentication" });
         }

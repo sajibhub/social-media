@@ -1,5 +1,5 @@
 const UserAgentMiddleware = (req, res, next) => {
-  const domain = `${req.protocol}://${req.hostname}`;
+  const domain = req.get("origin");
  const allowedDomains = process.env.FRONTEND_URLS.split(',');
 
   if (!allowedDomains.includes(domain)) {
