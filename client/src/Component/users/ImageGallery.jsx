@@ -13,7 +13,7 @@ const ImageGallery = () => {
               await imageGalleryReq(user)
           }
       )()
-  },[])
+  },[user])
 
   if (imageGallery === null) {
     return (

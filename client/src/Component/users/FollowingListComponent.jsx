@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import authorStore from "@/store/authorStore.js";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
 
 const SearchResultComponent = () => {
@@ -11,17 +11,17 @@ const SearchResultComponent = () => {
   const navigate = useNavigate();
   const [followLoader, setFollowLoader] = useState({ status: false, id: null });
 
-  const { followingList, flowReq, followingListReq, readProfileReq ,clear_followingList, } =
+  const { followingList, flowReq, followingListReq, readProfileReq, clear_followingList, } =
     authorStore();
 
   useEffect(() => {
     (
-        async () => {
-          clear_followingList()
-          await followingListReq(user);
-        }
+      async () => {
+        clear_followingList()
+        await followingListReq(user);
+      }
     )()
-  },[user])
+  }, [user])
 
 
   const goToProfile = (username) => {
@@ -61,58 +61,57 @@ const SearchResultComponent = () => {
       {followingList === null
         ? skeletonLoader
         : followingList.map((user, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ opacity: 1, scale: 1.05 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{
-                duration: 0.3,
-                scale: { type: "spring", stiffness: 300 },
-              }}
-              className="cursor-pointer flex flex-col items-end lg:flex-row justify-start lg:items-center gap-4 p-4 border rounded-lg shadow-lg mb-2 bg-white hover:shadow-xl transition-shadow"
-            >
-              <div className="flex justify-start items-center gap-3 w-full">
-                <div
-                    onClick={() => goToProfile(user.username)}
-                    className="h-[50px] w-[50px] flex items-center justify-center rounded-full overflow-hidden border-2 border-gray-200"
-                >
-                  <img
-                      src={user.profile}
-                      alt={`${user.fullName} profile`}
-                      className="w-full h-full object-cover"
-                  />
-                </div>
+          <motion.div
+            key={i}
+            whileHover={{ opacity: 1, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              duration: 0.3,
+              scale: { type: "spring", stiffness: 300 },
+            }}
+            className="cursor-pointer flex flex-col items-end lg:flex-row justify-start lg:items-center gap-4 p-4 border rounded-lg shadow-lg mb-2 bg-white hover:shadow-xl transition-shadow"
+          >
+            <div className="flex justify-start items-center gap-3 w-full">
+              <div
+                onClick={() => goToProfile(user.username)}
+                className="h-[50px] w-[50px] flex items-center justify-center rounded-full overflow-hidden border-2 border-gray-200"
+              >
+                <img
+                  src={user.profile}
+                  alt={`${user.fullName} profile`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
 
-                <div className="flex-grow cursor-pointer">
-                  <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-1">
+              <div className="flex-grow cursor-pointer">
+                <h2 className="text-lg font-semibold text-neutral-900 flex items-center gap-1">
                   <span
-                      onClick={() => goToProfile(user.username)}
-                      className="cursor-pointer hover:underline"
+                    onClick={() => goToProfile(user.username)}
+                    className="cursor-pointer hover:underline"
                   >
                     {user.fullName}
                   </span>
-                    {user.verify && <VerifiedBadge isVerified={user.verify}/>}
-                  </h2>
-                  <p className="text-sm text-gray-600">@{user.username}</p>
-                </div>
+                  {user.verify && <VerifiedBadge isVerified={user.verify} />}
+                </h2>
+                <p className="text-sm text-gray-600">@{user.username}</p>
               </div>
+            </div>
 
-              {followLoader.id === user._id ? (
-                  <div className="loader-dark w-8 h-8"></div>
-              ) : (
-                  <button
-                      onClick={() => followHandler(user._id)}
-                      className={`text-sm font-medium py-2 px-6 rounded-full transition-all ${
-                          user.isFollowing
-                              ? "bg-sky-500 text-white hover:bg-sky-600"
-                              : "bg-red-500 text-white hover:bg-red-600" 
-                      }`}
-                  >
-                    Unfollow
-                  </button>
-              )}
-            </motion.div>
-          ))}
+            {followLoader.id === user._id ? (
+              <div className="loader-dark w-8 h-8"></div>
+            ) : (
+              <button
+                onClick={() => followHandler(user._id)}
+                className={`text-sm font-medium py-2 px-6 rounded-full transition-all ${user.isFollowing
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-sky-500 text-white hover:bg-sky-600"
+                  }`}
+              >
+               {user.isFollowing ? "Unfollow" : "Follow"}
+              </button>
+            )}
+          </motion.div>
+        ))}
 
       <div className="py-[45px]"></div>
     </div>
