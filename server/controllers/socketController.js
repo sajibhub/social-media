@@ -30,8 +30,9 @@ const socketControllers = () => {
                             _id: {
                                 $cond: {
                                     if: { $gte: [{ $cmp: ["$sender", "$receiver"] }, 0] },
-                                    then: { sender: "$sender", receiver: "$receiver" },
-                                    else: { sender: "$receiver", receiver: "$sender" }
+                                    then: { sender: "$receiver", receiver: "$receiver" },
+                                    else: { sender: "$receiver", receiver: "$receiver" }
+
                                 }
                             },
                             lastMessage: { $last: "$$ROOT" }
@@ -46,17 +47,8 @@ const socketControllers = () => {
                         }
                     },
                     {
-                        $lookup: {
-                            from: "users",
-                            localField: "_id.sender",
-                            foreignField: "_id",
-                            as: "senderData",
-                        }
-                    },
-                    {
                         $addFields: {
                             receiver: { $arrayElemAt: ["$receiverData", 0] },
-                            sender: { $arrayElemAt: ["$senderData", 0] },
                             lastMessageText: "$lastMessage.text",
                             lastMessageTime: "$lastMessage.createdAt",
                         }
@@ -65,9 +57,9 @@ const socketControllers = () => {
                         $project: {
                             _id: 0,
                             conversationId: { $concat: [{ $toString: "$_id.sender" }, "-", { $toString: "$_id.receiver" }] },
-                            fullName: { $ifNull: ["$receiver.fullName", "$sender.fullName"] },
-                            username: { $ifNull: ["$receiver.username", "$sender.username"] },
-                            profile: { $ifNull: ["$receiver.profile", "$sender.profile"] },
+                            fullName: "$receiver.fullName",
+                            username: "$receiver.username",
+                            profile: "$receiver.profile",
                             lastMessageText: 1,
                             lastMessageTime: 1,
                         }
@@ -83,25 +75,24 @@ const socketControllers = () => {
 
         socket.on("sendMessage", async (message) => {
             try {
-                console.log(message);
                 const { receiver, text, image } = JSON.parse(message);
-                const sender = id; 
-        
+                const sender = id;
+
                 if (!receiver || !text) {
                     console.error("Sender or receiver is missing or message is empty.");
                     return;
                 }
-        
+
                 const conversationId = [sender, receiver].sort().join("-");
-        
+
                 const newMessage = await Message.create({
                     sender,
                     receiver,
                     text,
                     image,
-                    conversationId, 
+                    conversationId,
                 });
-        
+
                 io.emit(receiver, {
                     sender: sender,
                     receiver: receiver,
@@ -110,7 +101,7 @@ const socketControllers = () => {
                     time: newMessage.createdAt,
                     conversationId,
                 });
-        
+
                 io.emit(sender, {
                     sender: sender,
                     receiver: receiver,
@@ -119,13 +110,13 @@ const socketControllers = () => {
                     time: newMessage.createdAt,
                     conversationId,
                 });
-        
+
             } catch (error) {
                 console.error("Error sending message:", error);
             }
         });
-        
-        
+
+
         socket.on("markAsRead", async (conversationId) => {
             try {
                 await Message.updateMany(

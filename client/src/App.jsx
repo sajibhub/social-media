@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import 'animate.css';
 import HomePage from "@/pages/HomePage.jsx";
 import AuthorPage from "@/pages/authorPage.jsx";
 import ProfilePage from "@/pages/ProfilePage.jsx";
@@ -12,7 +13,8 @@ import SinglePostPreview from "@/pages/SinglePostPreview"
 import AddPostPopup from "@/pages/AddPostPage.jsx";
 import SettingPage from "@/pages/SettingPage.jsx";
 import StoryPage from "@/pages/StoryPage.jsx";
-import 'animate.css';
+import Message from "./pages/message";
+
 
 const router = createBrowserRouter([
   {
@@ -43,6 +45,12 @@ const router = createBrowserRouter([
       </Layout>
     ),
   },
+
+
+  {
+    path: "/message",
+    element: <Message />
+  },
   {
     path: "/post/:postId",
     element: <Layout>
@@ -53,7 +61,7 @@ const router = createBrowserRouter([
   {
     path: "/add-post",
     element: <Layout>
-      <AddPostPopup/>
+      <AddPostPopup />
     </Layout>
   },
 
