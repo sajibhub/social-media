@@ -481,7 +481,7 @@ const PostCard = () => {
                   
 
                   <h1
-                    className={`text-base font-medium flex items-center gap-1  ${items.comment ? "text-sky-600" : "text-neutral-800"}`}
+                    className={`text-base font-medium flex items-center gap-1`}
                   >
                     {items.comment}
                     <span className="hidden md:block">comments</span>

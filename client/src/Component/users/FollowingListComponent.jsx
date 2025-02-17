@@ -21,7 +21,7 @@ const SearchResultComponent = () => {
           await followingListReq(user);
         }
     )()
-  },[])
+  },[user])
 
 
   const goToProfile = (username) => {

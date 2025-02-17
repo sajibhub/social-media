@@ -27,7 +27,7 @@ const SearchResultComponent = () => {
           await followersReq(user);
         }
     )()
-  }, []);
+  }, [user]);
 
   const goToProfile = (user) => {
     navigate("/profile/" + user);

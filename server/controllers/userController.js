@@ -817,23 +817,23 @@ export const GetFollowers = async (req, res) => {
           from: "users",
           localField: "followers",
           foreignField: "_id",
-          as: "follower",
+          as: "users",
         }
       },
-      { $unwind: "$follower" },
+      { $unwind: "$users" },
       {
         $addFields: {
-          isFollowing: { $in: [id, "$follower.followers"] }
+          isFollowing: { $in: [id, "$users.followers"] }
         }
       },
       {
         $project: {
-          _id: "$follower._id",
-          fullName: "$follower.fullName",
-          username: "$follower.username",
-          profile: "$follower.profile",
+          _id: "$users._id",
+          fullName: "$users.fullName",
+          username: "$users.username",
+          profile: "$users.profile",
           isFollowing: 1,
-          verify: "$follower.verify",
+          verify: "$users.verify",
         }
       }
     ])
@@ -850,6 +850,7 @@ export const GetFollowers = async (req, res) => {
 
 export const GetFollowing = async (req, res) => {
   try {
+    const { id } = req.headers;
     const { username } = req.params;
 
     const userFind = await User.findOne({ username }).select({ _id: 1 })
@@ -860,17 +861,25 @@ export const GetFollowing = async (req, res) => {
           from: "users",
           localField: "following",
           foreignField: "_id",
-          as: "following",
+          as: "users",
         }
       },
-      { $unwind: "$following" },
+      { $unwind: "$users" },
+      {
+        $addFields: {
+          isFollowing: {
+            $in: [id, "$users.followers"],
+          },
+        },
+      },
       {
         $project: {
-          _id: "$following._id",
-          fullName: "$following.fullName",
-          username: "$following.username",
-          profile: "$following.profile",
-          verify: "$following.verify",
+          _id: "$users._id",
+          fullName: "$users.fullName",
+          username: "$users.username",
+          profile: "$users.profile",
+          isFollowing: 1,
+          verify: "$users.verify",
         }
       }
     ])
