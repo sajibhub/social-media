@@ -146,11 +146,11 @@ const authorStore = create((set) => ({
     readProfileReq : async (user)=>{
         try {
             let res =  await axios.get(Read_Profile_api +user,  {withCredentials: true})
-            set({profileData: res.data.profile[0]})
+            set({profileData: res.data.profile})
 
             let me =  await axios.get(Read_Profile_api +"me",  {withCredentials: true})
-            set({myProfileData: me.data.profile[0]})
-            localStorage.setItem('userName', me.data.profile[0].username);
+            set({myProfileData: me.data.profile})
+            localStorage.setItem('userName', me.data.profile.username);
 
             return true
         }
