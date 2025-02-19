@@ -387,7 +387,7 @@ export const Profile = async (req, res) => {
     ]);
 
     return res.status(200).json({
-      profile,
+      profile: profile[0],
     });
   } catch (error) {
     console.log(error);
