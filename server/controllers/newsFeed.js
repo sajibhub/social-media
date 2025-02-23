@@ -107,41 +107,34 @@ export const NewsFeed = async (req, res) => {
               { $multiply: [{ $size: "$likes" }, 1] },
               { $multiply: [{ $size: "$comments" }, 2] },
               { $multiply: [{ $size: "$view" }, 1] },
+              { $floor: { $multiply: [{ $rand: {} }, 150] } },
               {
                 $cond: {
                   if: { $in: [id, "$user.followers"] },
-                  then: 10,
-                  else: 0
+                  then: 15,
+                  else: 5
                 }
               },
               {
                 $cond: {
                   if: { $in: [id, "$user.following"] },
-                  then: 15,
-                  else: 0
+                  then: 30,
+                  else: 5
                 }
               },
               {
                 $cond: {
                   if: { $in: [id, '$likes'] },
-                  then: { $add: ["$rank", -50] },
-                  else: 0
+                  then: -80,
+                  else: 5
                 }
               },
-              {
-                $multiply: [
-                  -2, 
-                  {
-                    $divide: [
-                      { $subtract: [new Date(), "$createdAt"] }, 
-                      1000 * 60 
-                    ]
-                  }
-                ]
-              }
             ],
           },
         },
+      },
+      {
+        $sort: { rank: -1 },
       },
       {
         $project: {
@@ -158,16 +151,6 @@ export const NewsFeed = async (req, res) => {
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
-          rank: 1,
-          
-        },
-      },
-      {
-        $sort: { rank: -1 },
-      },
-      {
-        $project: {
-          rank: 0,
         },
       },
     ]);
@@ -202,7 +185,6 @@ export const SuggestUser = async (req, res) => {
           as: "posts",
           pipeline: [
             { $sort: { createdAt: -1 } },
-            { $limit: 5 }
           ]
         }
       },

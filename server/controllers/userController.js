@@ -997,7 +997,7 @@ export const GetSavePost = async (req, res) => {
           isSave: { $in: [id, "$savedPosts.postSave",] },
         }
       },
-
+      { $sort: { "postSave": 1 } },
       {
         $project: {
           _id: "$savedPosts._id",
@@ -1013,9 +1013,8 @@ export const GetSavePost = async (req, res) => {
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
-
         }
-      }
+      },
     ]);
 
 
@@ -1095,6 +1094,37 @@ export const SearchUser = async (req, res) => {
       {
         $addFields: {
           isFollowing: { $in: [id, "$following"] }
+        }
+      },
+      {
+        $addFields: {
+          bio: {
+            $let: {
+              vars: {
+                first10Words: {
+                  $reduce: {
+                    input: { $slice: [{ $split: ["$bio", " "] }, 10] },
+                    initialValue: "",
+                    in: {
+                      $cond: {
+                        if: { $eq: ["$$value", ""] },
+                        then: "$$this",
+                        else: { $concat: ["$$value", " ", "$$this"] }
+                      }
+                    }
+                  }
+                },
+                totalWords: { $size: { $split: ["$bio", " "] } }
+              },
+              in: {
+                $cond: {
+                  if: { $gt: ["$$totalWords", 10] },
+                  then: { $concat: ["$$first10Words", " ..."] },
+                  else: "$$first10Words"
+                }
+              }
+            }
+          }
         }
       },
       {

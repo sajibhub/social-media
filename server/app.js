@@ -15,9 +15,8 @@ import UserAgentMiddleware from "./middleware/userAgent.js";
 import userRouter from "./router/userRouter.js";
 import postRouter from "./router/postRouter.js";
 import Notification from "./router/notificationRouter.js";
-import Story from "./router/storyRouter.js";
+import Story from "./router/storyRouter.js";  
 import socketControllers from "./controllers/socketController.js";
-import OneTimeToken from "./middleware/oneTimeTOken.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
@@ -35,7 +34,7 @@ const limit = rateLimit({
   windowMs: parseInt(process.env.REQ_MS, 10),
   max: parseInt(process.env.REQ_LIMIT, 10),
   message: "Too many requests, please try again later.",
-  statusCode: 429,
+  statusCode: 429,  
 });
 
 app.use(limit);

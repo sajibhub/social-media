@@ -55,7 +55,7 @@ export const storyRead = async (req, res) => {
         const stories = await Story.aggregate([
             {
                 $match: {
-                    createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }, // Last 24 hours
+                    createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
 
                 }
             },
@@ -155,18 +155,43 @@ export const storyRead = async (req, res) => {
                             image: "$image",
                             text: "$text",
                             time: "$time",
-                            isMyStory: "$isMyStory",
                             isLike: "$isLike",
-                            isFollowing: "$isFollowing",
                             isSeen: "$isSeen",
                             views: { $size: "$views" }
                         }
                     }
                 }
             },
-
-            { $sort: { "stories.time": -1 } },
-
+            {
+                $addFields: {
+                    rank: {
+                        $add: [
+                            {
+                                $cond: {
+                                    if: { $eq: [id, "$user._id"] },
+                                    then: 1000,
+                                    else: 0
+                                }
+                            },
+                            {
+                                $cond: {
+                                    if: { $in: [id, "$user.followers"] },
+                                    then: 50,
+                                    else: 0
+                                }
+                            },
+                            {
+                                $cond: {
+                                    if: { $eq: [id, "$views"] },
+                                    then: -50,
+                                    else: 50
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            { $sort: { rank: -1 } },
             {
                 $project: {
                     _id: "$user._id",
@@ -174,6 +199,8 @@ export const storyRead = async (req, res) => {
                     fullName: "$user.fullName",
                     profile: "$user.profile",
                     verify: "$user.verify",
+                    isFollowing: "$isFollowing",
+                    isMyStory: "$isMyStory",
                     stories: 1
                 }
             }
