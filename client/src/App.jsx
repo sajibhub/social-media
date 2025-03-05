@@ -14,6 +14,7 @@ import AddPostPopup from "@/pages/AddPostPage.jsx";
 import SettingPage from "@/pages/SettingPage.jsx";
 import StoryPage from "@/pages/StoryPage.jsx";
 import Message from "./pages/message";
+import ChatContainer from "./Component/chat/ChatContainer";
 
 
 const router = createBrowserRouter([
@@ -49,7 +50,7 @@ const router = createBrowserRouter([
 
   {
     path: "/message",
-    element: <Message />
+    element: <ChatContainer />
   },
   {
     path: "/post/:postId",

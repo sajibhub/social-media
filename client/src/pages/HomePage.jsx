@@ -2,23 +2,23 @@ import Layout from "../layout/Layout.jsx";
 import StoryComponent from "../Component/story/StoryComponent.jsx";
 import AddPost from "../Component/post/AddPost.jsx";
 import PostCard from "../Component/post/PostCard.jsx";
-import {useEffect} from "react";
-import {useNavigate} from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
 import postStore from "@/store/postStore.js";
 
 
 const HomePage = () => {
 
-    const{readProfileReq ,suggestUserReq,  clear_suggestUser}= authorStore()
-    const {newsFeedReq ,clear_my_post_data } = postStore()
+    const { readProfileReq, suggestUserReq, clear_suggestUser } = authorStore()
+    const { newsFeedReq, clear_my_post_data } = postStore()
     const navigate = useNavigate();
 
     useEffect(() => {
 
         (
 
-            async ()=>{
+            async () => {
                 clear_my_post_data()
                 clear_suggestUser()
 
@@ -26,7 +26,7 @@ const HomePage = () => {
                 await newsFeedReq()
                 await suggestUserReq()
 
-                if(res !== true){
+                if (res !== true) {
                     navigate('/author')
                 }
             }

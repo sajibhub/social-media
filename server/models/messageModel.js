@@ -26,6 +26,14 @@ const MessageSchema = new mongoose.Schema(
             type: String,  // Store the conversationId to group messages between two users
             required: true,
         },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        },
+        readAt: {
+            type: Date, // Track when message was read
+            default: null
+        }
     },
     {
         timestamps: true,

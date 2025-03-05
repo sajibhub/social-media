@@ -7,10 +7,6 @@ const ProfileSummaryComponent = () => {
   const {user} = useParams()
   const me  = localStorage.getItem("userName");
 
-
-
-
-
   const { myProfileData } = authorStore();
   const navigate = useNavigate();
 
