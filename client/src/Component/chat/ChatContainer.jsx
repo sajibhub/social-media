@@ -15,7 +15,7 @@ const ChatContainer = () => {
   const userId = myProfileData._id;
 
   useEffect(() => {
-    const newSocket = io('http://localhost:4040', {
+    const newSocket = io('https://matrix-social-media-backend.onrender.com', {
       query: { id: userId }
     });
     setSocket(newSocket);
