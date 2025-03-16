@@ -1,45 +1,42 @@
+// models/messageModel.js
 import mongoose from "mongoose";
 
-const MessageSchema = new mongoose.Schema(
-    {
-        sender: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'users',
-            required: true,
-        },
-        receiver: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
-            required: true,
-        },
-        text: {
-            type: String,
-        },
-        image: {
-            type: String,
-        },
-        isRead: {
-            type: Boolean,
-            default: false,
-        },
-        conversationId: {
-            type: String,  // Store the conversationId to group messages between two users
-            required: true,
-        },
-        isDeleted: {
-            type: Boolean,
-            default: false,
-        },
-        readAt: {
-            type: Date, // Track when message was read
-            default: null
-        }
-    },
-    {
-        timestamps: true,
-        versionKey: false,
-    }
-);
+const messageSchema = new mongoose.Schema({
+  conversation: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Conversation",
+    required: true
+  },
+  sender: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  receiver: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
+  text: {
+    type: String,
+    trim: true
+  },
+  image: {
+    type: String
+  },
+  isRead: {
+    type: Boolean,
+    default: false
+  },
+  readAt: {
+    type: Date
+  },
+  isDeleted: {
+    type: Boolean,
+    default: false
+  }
+}, {
+  timestamps: true, versionKey: false
+});
 
-const Message = mongoose.model("Message", MessageSchema);
-export default Message;
+export default mongoose.model("Message", messageSchema);

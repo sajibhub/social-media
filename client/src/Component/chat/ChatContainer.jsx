@@ -1,22 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import io from 'socket.io-client';
 import { FaCheck, FaCheckDouble } from 'react-icons/fa';
-import authorStore from "../../store/authorStore.js"
+import authorStore from "../../store/authorStore.js";
 
 const ChatContainer = () => {
-
-  const { myProfileData } = authorStore();
-
+  let userName = localStorage.getItem('userName');
+  const { myProfileData, readProfileReq } = authorStore();
 
   const [socket, setSocket] = useState(null);
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
-  const userId = myProfileData._id;
+  const [userId, setUserId] = useState(null);
 
+  // Fetch user profile and set userId
   useEffect(() => {
-    const newSocket = io('https://matrix-social-media-backend.onrender.com', {
-      query: { id: userId }
+    if (myProfileData == null) {
+      (async () => {
+        await readProfileReq(userName);
+      })();
+    } else {
+      setUserId(myProfileData._id);
+    }
+  }, [myProfileData, readProfileReq, userName]);
+
+  // Socket setup and event listeners
+  useEffect(() => {
+    if (!userId) return; // Wait until userId is set
+
+    const newSocket = io('http://localhost:4040', {
+      query: { id: userId },
     });
     setSocket(newSocket);
 
@@ -25,18 +38,22 @@ const ChatContainer = () => {
     });
 
     newSocket.on('conversations', (data) => {
-      setConversations(data);
+      const normalizedConversations = data.map(conv => ({
+        ...conv,
+        lastMessage: conv.lastMessage || null,
+      }));
+      setConversations(normalizedConversations);
     });
 
     newSocket.on('newMessage', (message) => {
       if (selectedConversation?.conversationId === message.conversationId) {
         setMessages(prev => [...prev, message]);
       }
-      newSocket.emit('getConversations');
     });
 
     newSocket.on('chatHistory', ({ messages: history }) => {
-      setMessages(history);
+      console.log(history)
+      setMessages(messages);
     });
 
     newSocket.on('messageDeleted', ({ messageId }) => {
@@ -45,9 +62,11 @@ const ChatContainer = () => {
 
     newSocket.on('messagesRead', ({ conversationId, readAt }) => {
       if (selectedConversation?.conversationId === conversationId) {
-        setMessages(prev => prev.map(msg =>
-          msg.isRead ? msg : { ...msg, isRead: true, readAt }
-        ));
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.isRead ? msg : { ...msg, isRead: true, readAt }
+          )
+        );
       }
     });
 
@@ -56,20 +75,19 @@ const ChatContainer = () => {
     });
 
     return () => newSocket.disconnect();
-  }, [userId]);
+  }, [userId, selectedConversation]);
 
   const handleSelectConversation = (conversation) => {
     setSelectedConversation(conversation);
-    socket.emit('getChatHistory', { contactId: conversation.contactId });
-    socket.emit('markAsRead', { conversationId: conversation.conversationId });
+    socket?.emit('getChatHistory', { contactId: conversation.contactId });
+    socket?.emit('markAsRead', { conversationId: conversation.conversationId, id: userId });
   };
 
   const sendMessage = (text, image) => {
     if (!selectedConversation || !socket) return;
 
-    // Optimistic UI: Add message to the UI before server response
     const newMessage = {
-      _id: Date.now(), // Temporary ID
+      _id: Date.now(),
       sender: userId,
       receiver: selectedConversation.contactId,
       text,
@@ -77,7 +95,7 @@ const ChatContainer = () => {
       time: new Date(),
       conversationId: selectedConversation.conversationId,
       isRead: false,
-      readAt: null
+      readAt: null,
     };
 
     setMessages(prev => [...prev, newMessage]);
@@ -85,12 +103,11 @@ const ChatContainer = () => {
     const messageData = JSON.stringify({
       receiverId: selectedConversation.contactId,
       text,
-      image
+      image,
     });
 
     socket.emit('sendPrivateMessage', messageData);
 
-    // After the server confirms, update the message with the actual data
     socket.on('newMessage', (message) => {
       setMessages(prevMessages =>
         prevMessages.map(msg =>
@@ -101,7 +118,7 @@ const ChatContainer = () => {
   };
 
   const deleteMessage = (messageId) => {
-    socket.emit('deleteMessage', { messageId });
+    socket?.emit('deleteMessage', { messageId });
   };
 
   const ConversationsList = () => {
@@ -133,9 +150,9 @@ const ChatContainer = () => {
             </div>
             <div className="flex justify-between items-center mt-1">
               <p className="text-sm text-gray-500 truncate flex-1">
-                {conv.lastMessage.text}
+                {conv.lastMessage?.text || 'No messages yet'}
               </p>
-              {conv.lastMessage.sender.toString() === userId && (
+              {conv.lastMessage && conv.lastMessage.sender?.toString() === userId && (
                 <span className="ml-2">
                   {conv.lastMessage.isRead ? (
                     <FaCheckDouble className="text-blue-500" size={12} />
@@ -165,6 +182,7 @@ const ChatContainer = () => {
         sendMessage(messageText);
         setMessageText('');
       }
+
     };
 
     if (!selectedConversation) {
@@ -195,9 +213,7 @@ const ChatContainer = () => {
               className={`flex mb-4 ${msg.sender === userId ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[60%] p-3 rounded-lg ${msg.sender === userId
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-gray-800'
+                className={`max-w-[60%] p-3 rounded-lg ${msg.sender === userId ? 'bg-blue-500 text-white' : 'bg-white text-gray-800'
                   }`}
               >
                 {msg.text && <p>{msg.text}</p>}
@@ -205,7 +221,10 @@ const ChatContainer = () => {
                   <img src={msg.image} alt="attachment" className="max-w-full rounded mt-2" />
                 )}
                 <div className="flex justify-between items-center mt-1">
-                  <span className={`text-xs ${msg.sender === userId ? 'text-blue-100' : 'text-gray-500'}`}>
+                  <span
+                    className={`text-xs ${msg.sender === userId ? 'text-blue-100' : 'text-gray-500'
+                      }`}
+                  >
                     {new Date(msg.time).toLocaleTimeString()}
                   </span>
                   {msg.sender === userId && (
@@ -255,7 +274,6 @@ const ChatContainer = () => {
       <div className="w-1/3 max-w-md border-r border-gray-200">
         <ConversationsList />
       </div>
-
       <div className="flex-1">
         <ChatWindow />
       </div>

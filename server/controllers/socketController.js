@@ -2,12 +2,25 @@
 import mongoose from "mongoose";
 import { io } from "../app.js";
 import Message from "../models/messageModel.js";
+import Conversation from "../models/conversationModel.js";
 
+const totalUsers = {};
 const socketControllers = () => {
+  const updateUsers = () => {
+    Object.keys(totalUsers).forEach(userId => {
+      const userList = Object.keys(totalUsers).filter(id => id !== userId);
+      io.to(userId).emit("userList", userList);
+    });
+  };
+
   io.on("connection", (socket) => {
     const userId = socket.handshake.query.id;
 
-    // Validate user ID
+    if (userId) {
+      totalUsers[userId] = socket.id
+      updateUsers()
+    }
+
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       console.error("Invalid user ID:", userId);
       socket.emit("error", { message: "Invalid user authentication" });
@@ -19,49 +32,25 @@ const socketControllers = () => {
 
     socket.on("getConversations", async () => {
       try {
-        const conversations = await Message.aggregate([
+        const conversations = await Conversation.aggregate([
+          { $match: { participants: id } },
           {
-            $match: {
-              $or: [{ sender: id }, { receiver: id }],
-              isDeleted: { $ne: true }
+            $lookup: {
+              from: "messages",
+              localField: "lastMessage",
+              foreignField: "_id",
+              as: "lastMessageData"
             }
           },
-          { $sort: { createdAt: -1 } },
-          {
-            $group: {
-              _id: "$conversationId",
-              lastMessage: { $first: "$$ROOT" },
-              unreadCount: {
-                $sum: {
-                  $cond: [
-                    {
-                      $and: [
-                        { $eq: ["$receiver", id] },
-                        { $eq: ["$isRead", false] }
-                      ]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              participants: {
-                $first: {
-                  sender: "$sender",
-                  receiver: "$receiver"
-                }
-              }
-            }
-          },
+          { $unwind: { path: "$lastMessageData", preserveNullAndEmptyArrays: true } },
           {
             $lookup: {
               from: "users",
               let: {
                 otherUser: {
-                  $cond: [
-                    { $eq: ["$participants.sender", id] },
-                    "$participants.receiver",
-                    "$participants.sender"
+                  $arrayElemAt: [
+                    { $filter: { input: "$participants", cond: { $ne: ["$$this", id] } } },
+                    0
                   ]
                 }
               },
@@ -74,6 +63,28 @@ const socketControllers = () => {
           },
           { $unwind: "$contactData" },
           {
+            $lookup: {
+              from: "messages",
+              let: { convId: "$_id" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$conversation", "$$convId"] },
+                        { $eq: ["$receiver", id] },
+                        { $eq: ["$isRead", false] },
+                        { $eq: ["$isDeleted", false] }
+                      ]
+                    }
+                  }
+                },
+                { $count: "count" }
+              ],
+              as: "unreadMessages"
+            }
+          },
+          {
             $project: {
               _id: 0,
               conversationId: "$_id",
@@ -82,17 +93,26 @@ const socketControllers = () => {
               username: "$contactData.username",
               profile: "$contactData.profile",
               lastMessage: {
-                _id: "$lastMessage._id",
-                text: "$lastMessage.text",
-                image: "$lastMessage.image",
-                time: "$lastMessage.createdAt",
-                sender: "$lastMessage.sender",
-                isRead: "$lastMessage.isRead",
-                readAt: "$lastMessage.readAt"
+                $cond: {
+                  if: { $eq: ["$lastMessageData", undefined] },
+                  then: null,
+                  else: {
+                    _id: "$lastMessageData._id",
+                    text: "$lastMessageData.text",
+                    image: "$lastMessageData.image",
+                    time: "$lastMessageData.createdAt",
+                    sender: "$lastMessageData.sender",
+                    isRead: "$lastMessageData.isRead",
+                    readAt: "$lastMessageData.readAt"
+                  }
+                }
               },
-              unreadCount: 1
+              unreadCount: {
+                $arrayElemAt: ["$unreadMessages.count", 0]
+              }
             }
-          }
+          },
+          { $sort: { "lastMessage.time": -1 } }
         ]);
 
         socket.emit("conversations", conversations);
@@ -103,54 +123,68 @@ const socketControllers = () => {
     });
 
     socket.on("sendPrivateMessage", async (data) => {
-        try {
-          const { receiverId, text, image } = JSON.parse(data);
-          if (!mongoose.Types.ObjectId.isValid(receiverId)) {
-            return socket.emit("error", { message: "Invalid recipient" });
-          }
-      
-          const receiver = new mongoose.Types.ObjectId(receiverId);
-          const sender = id;
-          const conversationId = [sender.toString(), receiver.toString()].sort().join("-");
-      
-          const newMessage = await Message.create({
-            sender,
-            receiver,
-            text,
-            image,
-            conversationId,
-            isRead: false,
-            isDeleted: false,
-            readAt: null
-          });
-      
-          const messageData = {
-            _id: newMessage._id,
-            sender: sender.toString(),
-            receiver: receiver.toString(),
-            text: newMessage.text,
-            image: newMessage.image,
-            time: newMessage.createdAt,
-            conversationId,
-            isRead: false,
-            readAt: null
-          };
-      
-          // Emit to both sender and receiver
-          socket.emit("newMessage", messageData);
-          io.to(receiverId).emit("newMessage", messageData);
-      
-          // Update conversations for both users
-          [sender.toString(), receiver.toString()].forEach(userId => {
-            io.to(userId).emit("getConversations");
-          });
-      
-        } catch (error) {
-          console.error("Error sending message:", error);
-          socket.emit("error", { message: "Failed to send message" });
+      try {
+        const { receiverId, text, image } = JSON.parse(data);
+        if (!mongoose.Types.ObjectId.isValid(receiverId)) {
+          return socket.emit("error", { message: "Invalid recipient" });
         }
-      });
-      
+
+        const receiver = new mongoose.Types.ObjectId(receiverId);
+        const sender = id;
+        const participants = [sender, receiver].sort();
+
+        let conversation = await Conversation.findOne({ participants: { $all: participants } });
+
+        if (!conversation) {
+          conversation = await Conversation.create({ participants, lastMessage: null });
+        }
+
+        // Create new message
+        const newMessage = await Message.create({
+          conversation: conversation._id,
+          sender,
+          receiver,
+          text,
+          image,
+          isRead: false,
+          isDeleted: false,
+          readAt: null
+        });
+
+        await Conversation.findByIdAndUpdate(
+          conversation._id,
+          {
+            lastMessage: newMessage._id,
+            updatedAt: new Date()
+          },
+          { new: true }
+        );
+
+        const messageData = {
+          _id: newMessage._id,
+          sender: sender.toString(),
+          receiver: receiver.toString(),
+          text: newMessage.text,
+          image: newMessage.image,
+          time: newMessage.createdAt,
+          conversationId: conversation._id,
+          isRead: false,
+          readAt: null,
+          isDeleted: newMessage.isDeleted
+        };
+
+        io.to(receiverId).emit("newMessage", messageData);
+
+        [sender.toString(), receiver.toString()].forEach(userId => {
+          io.to(userId).emit("getConversations");
+        });
+
+      } catch (error) {
+        console.error("Error sending message:", error);
+        socket.emit("error", { message: "Failed to send message" });
+      }
+    });
+
 
     socket.on("getChatHistory", async ({ contactId }) => {
       try {
@@ -159,17 +193,23 @@ const socketControllers = () => {
         }
 
         const contact = new mongoose.Types.ObjectId(contactId);
-        const conversationId = [id.toString(), contact.toString()].sort().join("-");
+        const conversation = await Conversation.findOne({
+          participants: { $all: [id, contact] }
+        });
+
+        if (!conversation) {
+          return socket.emit("chatHistory", { conversationId: null, messages: [] });
+        }
 
         const messages = await Message.find({
-          conversationId,
+          conversation: conversation._id,
           isDeleted: { $ne: true }
         })
           .sort({ createdAt: 1 })
           .limit(50);
 
         socket.emit("chatHistory", {
-          conversationId,
+          conversationId: conversation._id,
           messages: messages.map(msg => ({
             _id: msg._id,
             sender: msg.sender.toString(),
@@ -179,7 +219,8 @@ const socketControllers = () => {
             time: msg.createdAt,
             isRead: msg.isRead,
             readAt: msg.readAt,
-            conversationId: msg.conversationId
+            conversationId: msg.conversation,
+            isDeleted: msg.isDeleted
           }))
         });
       } catch (error) {
@@ -188,30 +229,30 @@ const socketControllers = () => {
       }
     });
 
-    socket.on("markAsRead", async ({ conversationId }) => {
+    socket.on("markAsRead", async ({ id, conversationId } = JSON.parse(conversations)) => {
       try {
         const updatedMessages = await Message.updateMany(
           {
-            conversationId,
+            conversation: conversationId,
             receiver: id,
             isRead: false
           },
-          { 
-            $set: { 
+          {
+            $set: {
               isRead: true,
               readAt: new Date()
-            } 
+            }
           }
         );
 
         if (updatedMessages.modifiedCount > 0) {
-          const participants = conversationId.split("-");
-          participants.forEach(user => {
-            io.to(user).emit("messagesRead", { 
+          const conversation = await Conversation.findById(conversationId);
+          conversation.participants.forEach(user => {
+            io.to(user.toString()).emit("messagesRead", {
               conversationId,
               readAt: new Date()
             });
-            io.to(user).emit("getConversations");
+            io.to(user.toString()).emit("getConversations");
           });
         }
       } catch (error) {
@@ -226,19 +267,30 @@ const socketControllers = () => {
             _id: messageId,
             sender: id
           },
-          { isDeleted: true },
+          { $set: { isDeleted: true } },
           { new: true }
         );
 
         if (message) {
-          const participants = message.conversationId.split("-");
-          participants.forEach(user => {
-            io.to(user).emit("messageDeleted", {
+          const conversation = await Conversation.findById(message.conversation);
+          conversation.participants.forEach(user => {
+            io.to(user.toString()).emit("messageDeleted", {
               messageId,
-              conversationId: message.conversationId
+              conversationId: message.conversation
             });
-            io.to(user).emit("getConversations");
+            io.to(user.toString()).emit("getConversations");
           });
+
+          const lastMessage = await Message.findOne({
+            conversation: message.conversation,
+            isDeleted: false
+          }).sort({ createdAt: -1 });
+
+          await Conversation.findByIdAndUpdate(
+            message.conversation,
+            { lastMessage: lastMessage?._id || null },
+            { new: true }
+          );
         }
       } catch (error) {
         console.error("Error deleting message:", error);
@@ -246,7 +298,7 @@ const socketControllers = () => {
     });
 
     socket.on("disconnect", () => {
-      console.log("User disconnected:", userId);
+      updateUsers()
     });
   });
 };
