@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 
 // Base URLs and API endpoints
-const Base_url = 'http://localhost:4040/api/v1/';
+const Base_url = 'https://matrix-social-media-backend.onrender.com/api/v1/';
 const Sign_up_api = `${Base_url}user/auth/signup`;
 const Login_api = `${Base_url}user/auth/login`;
 const SignOut_api = `${Base_url}user/auth/logout`;
