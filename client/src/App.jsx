@@ -7,14 +7,17 @@ import SavePostPage from "@/pages/SavePostPage.jsx";
 import SearchPage from "@/pages/SearchPage.jsx";
 import Layout from "@/layout/Layout.jsx";
 import NotificationList from "@/pages/NotificationList.jsx";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import NotFound from "./Component/NotFound/NotFound";
-import SinglePostPreview from "@/pages/SinglePostPreview"
+import SinglePostPreview from "@/pages/SinglePostPreview";
 import AddPostPopup from "@/pages/AddPostPage.jsx";
 import SettingPage from "@/pages/SettingPage.jsx";
 import StoryPage from "@/pages/StoryPage.jsx";
-import Message from "./pages/message";
 import ChatContainer from "./Component/chat/ChatContainer";
+import { useEffect, useState } from "react";
+import { socket } from './utils/socket.js';
+import authorStore from "./store/authorStore.js";
+import NotificationSound from '../public/audio/notification.wav'
 
 
 const router = createBrowserRouter([
@@ -46,8 +49,6 @@ const router = createBrowserRouter([
       </Layout>
     ),
   },
-
-
   {
     path: "/message",
     element: <ChatContainer />
@@ -58,24 +59,20 @@ const router = createBrowserRouter([
       <SinglePostPreview />
     </Layout>
   },
-
   {
     path: "/add-post",
     element: <Layout>
       <AddPostPopup />
     </Layout>
   },
-
   {
     path: "/setting",
     element: <SettingPage />
   },
-
   {
     path: "/story/:id",
     element: <StoryPage />
   },
-
   {
     path: "*",
     element: <NotFound />,
@@ -84,6 +81,47 @@ const router = createBrowserRouter([
 
 
 const App = () => {
+  console.log = () => { };
+  const { profileData } = authorStore();
+  const [notification, setNotification] = useState(profileData?.notification || 0); // Set initial notification state
+
+  const updateProfileDataField = authorStore((state) => state.updateProfileDataField);
+
+  const audio = new Audio(NotificationSound)
+
+  useEffect(() => {
+    if (typeof profileData?.notification === 'number') {
+      setNotification(profileData?.notification);
+    }
+  }, [profileData]);
+
+  useEffect(() => {
+
+    socket.connect();
+    socket.emit("join", localStorage.getItem("id"));
+
+    // Notification handler
+    const handleNotification = (data) => {
+      toast.success(`New ${data?.type} Notification`);
+      audio.play();
+      setNotification((prev) => {
+        const newNotificationCount = prev + 1;
+        updateProfileDataField('notification', newNotificationCount);
+        return newNotificationCount;
+      });
+    };
+
+    socket.on('notification', handleNotification);
+
+    return () => {
+      socket.off('notification', handleNotification);
+      socket.disconnect();
+    };
+  }, [audio, updateProfileDataField]);
+
+
+
+
   return (
     <>
       <RouterProvider router={router} />

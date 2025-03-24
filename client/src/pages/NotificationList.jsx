@@ -4,14 +4,16 @@ import toast from "react-hot-toast";
 import { FaEllipsisH, FaTrashAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "../Component/utility/VerifyBadge"
+import { socket } from "../utils/socket.js";
 
 const NotificationList = () => {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false); // For "Clear All" confirmation dialog
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const url = "https://matrix-social-media-backend.onrender.com/api/v1";
+
 
   const fetchNotifications = async () => {
     setLoading(true);
@@ -111,6 +113,8 @@ const NotificationList = () => {
 
   useEffect(() => {
     fetchNotifications();
+    socket.on("notification", (data) => {
+      setNotifications((prevNotifications) => [data, ...prevNotifications]);    });
   }, []);
 
   const renderNotificationMessage = (notification) => {

@@ -6,7 +6,8 @@ import Post from "../models/postModel.js";
 import storage from "../utils/cloudinary.js";
 import User from "../models/userModel.js";
 import Notification from "../models/notificationModel.js";
-
+import { io } from "../app.js";
+import postTime from "../utils/postTime.js";
 
 export const PostCreate = (req, res) => {
   try {
@@ -326,12 +327,25 @@ export const PostLike = async (req, res) => {
 
     const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 })
     if (id.toString() != findPost.userId.toString()) {
-      await Notification.create({
+      const create = await Notification.create({
         userId: userId._id,
         type: "like",
         sourceId: id,
         postId,
       })
+      const user = await User.findOne({ _id: id }).select({ fullName: 1, username: 1, profile: 1, verify: 1 })
+
+      const data = {
+        _id: create._id,
+        userId: userId._id,
+        sourceId: id,
+        postId,
+        time: postTime(create.createdAt),
+        type: "like",
+        isRead: false,
+        user
+      }
+      io.to(userId._id.toString()).emit('notification', data)
     }
     return res.status(200).json({
       message: "Post liked successfully.",
@@ -433,14 +447,28 @@ export const PostComment = async (req, res) => {
     );
 
     const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 })
+    const user = await User.findOne({ _id: id }).select({ fullName: 1, username: 1, profile: 1, verify: 1 })
     if (id.toString() != findPost.userId) {
-      await Notification.create({
+      const comment = await Notification.create({
         userId: userId._id,
         type: "comment",
         sourceId: id,
         postId,
       })
+      const data = {
+        _id: comment._id,
+        userId: userId._id,
+        sourceId: id,
+        postId,
+        time: postTime(comment.createdAt),
+        type: "comment",
+        isRead: false,
+        user
+      }
+      io.to(userId._id.toString()).emit('notification', data)
     }
+
+
     return res.status(200).json({
       message: "Comment added successfully.",
     });

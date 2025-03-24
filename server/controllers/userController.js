@@ -15,10 +15,14 @@ import {
 import storage from "../utils/cloudinary.js";
 import Notification from "../models/notificationModel.js";
 import Post from "../models/postModel.js";
+import { io } from "../app.js";
+import postTime from "../utils/postTime.js";
 
 const phoneRegex = /^(?:\+88|0088)?(01[3-9]\d{8})$/;
 const usernameRegex = /^[a-zA-Z0-9]+$/;
 const FullNameRegex = /^[a-zA-Z\s]+$/;
+
+
 
 export const SignUp = async (req, res) => {
   try {
@@ -786,12 +790,24 @@ export const Follow = async (req, res) => {
         },
         { new: true }
       );
-      await Notification.create({
+      const notification = await Notification.create({
         userId,
         type: "follow",
         sourceId: id,
         postId: null
       })
+      const user = await User.findOne({ _id: id }).select({ fullName: 1, username: 1, profile: 1, verify: 1 })
+      const data = {
+        _id: notification._id,
+        userId: userId._id,
+        sourceId: id,
+        postId: null,
+        time: postTime(notification.createdAt),
+        type: "follow",
+        isRead: false,
+        user
+      }
+      io.to(userId._id.toString()).emit('notification', data)
       return res.status(200).json({
         message: "Followed successfully",
       });

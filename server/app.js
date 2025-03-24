@@ -17,6 +17,7 @@ import postRouter from "./router/postRouter.js";
 import Notification from "./router/notificationRouter.js";
 import Story from "./router/storyRouter.js";  
 import socketControllers from "./controllers/socketController.js";
+import {socketJoin} from "./utils/socketJoin.js";
 
 dotenv.config();
 const PORT = process.env.PORT || 4000;
@@ -68,7 +69,8 @@ app.use(UserAgentMiddleware);
 
 app.use("/api/v1", userRouter, postRouter, Notification, Story);
 
-socketControllers();
+// socketControllers();
+socketJoin()
 
 server.listen(PORT, () => {
   DATABASE();
