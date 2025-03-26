@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useEffect, useState } from "react";
 import 'animate.css';
 import HomePage from "@/pages/HomePage.jsx";
 import AuthorPage from "@/pages/authorPage.jsx";
@@ -13,11 +14,11 @@ import SinglePostPreview from "@/pages/SinglePostPreview";
 import AddPostPopup from "@/pages/AddPostPage.jsx";
 import SettingPage from "@/pages/SettingPage.jsx";
 import StoryPage from "@/pages/StoryPage.jsx";
-import ChatContainer from "./Component/chat/ChatContainer";
-import { useEffect, useState } from "react";
 import { socket } from './utils/socket.js';
 import authorStore from "./store/authorStore.js";
 import NotificationSound from '../public/audio/notification.wav'
+import notificationStore from "./store/notificationStore.js";
+import Conversation from "./Component/chat/conversation.jsx";
 
 
 const router = createBrowserRouter([
@@ -50,8 +51,12 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/message",
-    element: <ChatContainer />
+    path: "/conversation",
+    element: <Conversation />
+  },
+  {
+    path: "/conversation/:conversationId",
+    element: <Conversation />
   },
   {
     path: "/post/:postId",
@@ -83,11 +88,12 @@ const router = createBrowserRouter([
 const App = () => {
   console.log = () => { };
   const { profileData } = authorStore();
-  const [notification, setNotification] = useState(profileData?.notification || 0); // Set initial notification state
-
+  const { addNotification } = notificationStore();
+  const [notification, setNotification] = useState(profileData?.notification || 0);
   const updateProfileDataField = authorStore((state) => state.updateProfileDataField);
+  // Initialize audio with try-catch
+  const audio = new Audio(NotificationSound);
 
-  const audio = new Audio(NotificationSound)
 
   useEffect(() => {
     if (typeof profileData?.notification === 'number') {
@@ -96,14 +102,13 @@ const App = () => {
   }, [profileData]);
 
   useEffect(() => {
-
     socket.connect();
     socket.emit("join", localStorage.getItem("id"));
 
-    // Notification handler
     const handleNotification = (data) => {
       toast.success(`New ${data?.type} Notification`);
-      audio.play();
+      audio.play(); // Use the new function
+      addNotification(data);
       setNotification((prev) => {
         const newNotificationCount = prev + 1;
         updateProfileDataField('notification', newNotificationCount);
@@ -119,9 +124,6 @@ const App = () => {
     };
   }, [audio, updateProfileDataField]);
 
-
-
-
   return (
     <>
       <RouterProvider router={router} />
@@ -129,5 +131,4 @@ const App = () => {
     </>
   );
 };
-
 export default App;

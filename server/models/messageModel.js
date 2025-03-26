@@ -1,17 +1,12 @@
 import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema({
-  conversation: {
+  conversationId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Conversation",
     required: true
   },
   sender: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true
-  },
-  receiver: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
@@ -23,11 +18,11 @@ const messageSchema = new mongoose.Schema({
   image: {
     type: String
   },
-  isRead: {
+  seen: {
     type: Boolean,
     default: false
   },
-  readAt: {
+  seenAt: {
     type: Date
   },
   isDeleted: {
@@ -38,4 +33,5 @@ const messageSchema = new mongoose.Schema({
   timestamps: true, versionKey: false
 });
 
-export default mongoose.model("Message", messageSchema);
+const Message = mongoose.model("Message", messageSchema);
+export default Message

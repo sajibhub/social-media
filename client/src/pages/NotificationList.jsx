@@ -1,96 +1,25 @@
-import axios from "axios";
+// src/components/NotificationList.js
 import { useState, useEffect } from "react";
-import toast from "react-hot-toast";
-import { FaEllipsisH, FaTrashAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import VerifiedBadge from "../Component/utility/VerifyBadge"
-import { socket } from "../utils/socket.js";
+import { FaEllipsisH, FaTrashAlt } from "react-icons/fa";
+import VerifiedBadge from "../Component/utility/VerifyBadge";
+import notificationStore from "../store/notificationStore"; // Import the Zustand store
 
 const NotificationList = () => {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
   const [openDropdown, setOpenDropdown] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const url = "https://matrix-social-media-backend.onrender.com/api/v1";
 
-
-  const fetchNotifications = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(`${url}/user/notification/get`, {
-        withCredentials: true,
-      });
-      setNotifications(response.data.notification);
-    } catch (error) {
-      console.error("Error fetching notifications:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleClearAllNotifications = async () => {
-    setShowConfirmDelete(false);
-    try {
-      const response = await axios.delete(
-        `${url}/user/notification/all/clear`,
-        { withCredentials: true }
-      );
-      if (response.status === 200) {
-        toast.success("All notifications deleted successfully");
-        fetchNotifications();
-      }
-    } catch (error) {
-      console.error("Error clearing all notifications:", error);
-    }
-  };
-
-  const markAsRead = async (id) => {
-    try {
-      setOpenDropdown(null);
-      const response = await axios.put(
-        `${url}/user/notification/read/${id}`,
-        {},
-        { withCredentials: true }
-      );
-      if (response.status === 200) {
-        fetchNotifications();
-      }
-    } catch (error) {
-      console.error("Error marking notification as read:", error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    try {
-      const response = await axios.put(
-        `${url}/user/notification/all/read`,
-        {},
-        { withCredentials: true }
-      );
-      if (response.status === 200) {
-        toast.success("All notifications marked as read");
-        fetchNotifications();
-      }
-    } catch (error) {
-      console.error("Error marking all as read:", error);
-    }
-  };
-
-  const deleteNotification = async (id) => {
-    try {
-      const response = await axios.delete(
-        `${url}/user/notification/clear/${id}`,
-        { withCredentials: true }
-      );
-      if (response.status === 200) {
-        toast.success("Notification deleted successfully");
-        fetchNotifications();
-      }
-    } catch (error) {
-      console.error("Error deleting notification:", error);
-    }
-  };
+  const {
+    notifications,
+    loading,
+    showConfirmDelete,
+    fetchNotifications,
+    clearAllNotifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    toggleConfirmDelete,
+  } = notificationStore();
 
   const toggleDropdown = (id) => {
     setOpenDropdown(openDropdown === id ? null : id);
@@ -101,10 +30,7 @@ const NotificationList = () => {
     setOpenDropdown(null);
     if (notification.type === "follow") {
       navigate(`/profile/${notification.user.username}`);
-    } else if (
-      notification.type === "like" ||
-      notification.type === "comment"
-    ) {
+    } else if (notification.type === "like" || notification.type === "comment") {
       navigate(`/post/${notification.postId}`);
     } else {
       console.warn("Unknown notification type:", notification.type);
@@ -113,9 +39,7 @@ const NotificationList = () => {
 
   useEffect(() => {
     fetchNotifications();
-    socket.on("notification", (data) => {
-      setNotifications((prevNotifications) => [data, ...prevNotifications]);    });
-  }, []);
+  }, [fetchNotifications,]);
 
   const renderNotificationMessage = (notification) => {
     switch (notification.type) {
@@ -138,14 +62,13 @@ const NotificationList = () => {
           <div className="flex space-x-2">
             <button
               className="px-3 py-1 text-xs text-red-500 border border-red-500 rounded hover:bg-red-100 focus:outline-none"
-              onClick={() => setShowConfirmDelete(true)}
+              onClick={toggleConfirmDelete} // Use Zustand's toggleConfirmDelete
             >
               Clear All
             </button>
-
             <button
               className="px-3 py-1 text-xs text-blue-500 border border-blue-500 rounded hover:bg-blue-100 focus:outline-none"
-              onClick={markAllAsRead}
+              onClick={markAllAsRead} // Use Zustand's markAllAsRead
             >
               Mark All as Read
             </button>
@@ -177,9 +100,7 @@ const NotificationList = () => {
             notifications.map((notification) => (
               <div
                 key={notification._id}
-                onClick={() => {
-                  handleNotificationClick(notification);
-                }}
+                onClick={() => handleNotificationClick(notification)}
                 className={`flex items-center p-4 border-b last:border-b-0 ${notification.isRead ? "bg-white" : "bg-blue-100"
                   } ${notification.isRead ? "hover:bg-green-50" : ""} mb-2 -z-30`}
               >
@@ -188,11 +109,10 @@ const NotificationList = () => {
                   alt={notification.user.username}
                   className="w-12 h-12 rounded-full object-cover"
                 />
-                <div className="ml-4 flex-1 ">
+                <div className="ml-4 flex-1">
                   <div className="flex text-lg font-medium text-gray-800 items-center gap-1">
                     <span className="cursor-pointer hover:underline">
-                      {notification.user.fullName}{" "}
-
+                      {notification.user.fullName}
                     </span>
                     <VerifiedBadge isVerified={notification.user.verify} />
                   </div>
@@ -201,7 +121,6 @@ const NotificationList = () => {
                   </div>
                 </div>
                 <div className="text-xs text-gray-400">{notification.time}</div>
-
                 <div className="relative ml-4">
                   <button
                     onClick={(e) => {
@@ -212,14 +131,13 @@ const NotificationList = () => {
                   >
                     <FaEllipsisH className="w-5 h-5" />
                   </button>
-
                   {openDropdown === notification._id && (
                     <div className="absolute right-0 -top-8 mt-2 w-48 bg-white border rounded-lg shadow-lg z-100">
                       <button
                         className="block w-full px-4 py-2 text-sm text-red-500 hover:bg-red-100"
                         onClick={(e) => {
                           e.stopPropagation();
-                          deleteNotification(notification._id);
+                          deleteNotification(notification._id); // Use Zustand's deleteNotification
                         }}
                       >
                         <FaTrashAlt className="w-4 h-4 inline mr-2" />
@@ -229,7 +147,7 @@ const NotificationList = () => {
                         className="block w-full px-4 py-2 text-sm text-blue-500 hover:bg-blue-100"
                         onClick={(e) => {
                           e.stopPropagation();
-                          markAsRead(notification._id);
+                          markAsRead(notification._id); // Use Zustand's markAsRead
                         }}
                       >
                         Mark as Read
@@ -249,13 +167,13 @@ const NotificationList = () => {
                 <div className="flex justify-end space-x-2">
                   <button
                     className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                    onClick={() => setShowConfirmDelete(false)}
+                    onClick={toggleConfirmDelete} // Use Zustand's toggleConfirmDelete
                   >
                     Cancel
                   </button>
                   <button
                     className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-                    onClick={handleClearAllNotifications}
+                    onClick={clearAllNotifications} // Use Zustand's clearAllNotifications
                   >
                     Yes, Delete
                   </button>

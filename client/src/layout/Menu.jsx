@@ -32,7 +32,7 @@ const Menu = () => {
             label: "Notification",
             route: "/notification",
         },
-        { icon: <RiMessage3Fill className="text-2xl" />, label: "Messages", route: "/message" },
+        { icon: <RiMessage3Fill className="text-2xl" />, label: "Messages", route: "/conversation" },
         { icon: <FaBookmark className="text-2xl" />, label: "Saved Posts", route: "/save-post" },
         { icon: <RiStickyNoteAddFill className="text-2xl" />, label: "Add Post", route: "/add-post" },
         { icon: <FaUser className="text-2xl" />, label: "Profile", route: `/profile/${userName}` },
