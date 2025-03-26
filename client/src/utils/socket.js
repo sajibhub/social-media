@@ -1,10 +1,10 @@
 import { io } from "socket.io-client";
 
-const SOCKET_SERVER_URL = "http://localhost:4040";  
+const SOCKET_SERVER_URL = import.meta.env.VITE_API_URL
 
 export const socket = io(SOCKET_SERVER_URL, {
-    autoConnect: false, 
+    autoConnect: false,
     reconnection: true,
-    reconnectionAttempts: 5, 
-    transports: ["websocket"], 
+    reconnectionAttempts: 5,
+    transports: ["websocket"],
 });

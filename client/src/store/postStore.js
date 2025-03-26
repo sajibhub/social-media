@@ -1,7 +1,7 @@
 import {create} from "zustand";
 import axios from "axios";
 
-const Base_url = "https://matrix-social-media-backend.onrender.com/api/v1/"
+const Base_url = `${import.meta.env.VITE_API_URL}/api/v1`;
 const Create_Post_Api= Base_url + "user/post/create";
 const My_Post_Api= Base_url + "/user/post/read/";
 const newsFeed_Post_Api= Base_url + "/user/post/feed";

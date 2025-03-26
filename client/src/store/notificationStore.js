@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_URL = "https://matrix-social-media-backend.onrender.com/api/v1";
+const API_URL = `${import.meta.env.VITE_API_URL}/api/v1`;
 
 const notificationStore = create((set, get) => ({
   notifications: [],
