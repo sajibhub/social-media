@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import axios from 'axios';
 
 // Base URLs and API endpoints
-const Base_url = `${import.meta.env.VITE_API_URL}/api/v1`;
+const Base_url = `${import.meta.env.VITE_API_URL}/api/v1/`;
 const Sign_up_api = `${Base_url}user/auth/signup`;
 const Login_api = `${Base_url}user/auth/login`;
 const SignOut_api = `${Base_url}user/auth/logout`;
