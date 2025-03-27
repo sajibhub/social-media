@@ -18,7 +18,6 @@ import { socket } from './utils/socket.js';
 import authorStore from "./store/authorStore.js";
 import NotificationSound from '../public/audio/notification.wav'
 import notificationStore from "./store/notificationStore.js";
-import Conversation from "./Component/chat/conversation.jsx";
 import Message from "./pages/message.jsx"
 
 
