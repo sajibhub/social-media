@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { io } from "../app.js"; // Ensure io is imported
 
 const ConversationSchema = new mongoose.Schema({
     participants: [{
@@ -23,10 +22,10 @@ const ConversationSchema = new mongoose.Schema({
         timestamp: {
             type: Date,
         },
-        seen: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        }]
+        seen: {
+            type: Boolean,
+            default: false
+        }
     }
 },
     { timestamps: true, versionKey: false }

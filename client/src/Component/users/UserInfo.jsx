@@ -4,28 +4,57 @@ import { IoCallSharp } from "react-icons/io5";
 import { FaSquareFacebook } from "react-icons/fa6";
 import { IoLogoLinkedin } from "react-icons/io";
 import { TbBrandFiverr } from "react-icons/tb";
-import {FaGithub, FaSignOutAlt} from "react-icons/fa";
+import { FaGithub, FaSignOutAlt } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import uiManage from "@/store/uiManage.js";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
+import { socket } from "../../utils/socket.js";
 
 const UserInfo = () => {
-  const {SignOutReq} = authorStore()
+  const { SignOutReq } = authorStore();
   const navigate = useNavigate();
   const [signOutLoading, setSignOutLoading] = useState(false);
   const [loader, setLoader] = useState(false);
   const { user } = useParams();
-  let myUser = localStorage.getItem("userName");
+  const myUser = localStorage.getItem("userName");
+  const myId = localStorage.getItem("id");
   const { profileData, flowReq, readProfileReq } = authorStore();
-  const { set_profile_tab, profile_tab, set_edit_profile_Ui_Control } =
-    uiManage();
+  const { set_profile_tab, profile_tab, set_edit_profile_Ui_Control } = uiManage();
 
   const openNewWindow = (url) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
+
+  const handleMessageClick = (receiverId) => {
+    if (!myId) {
+      toast.error("You must be logged in to start a chat");
+      return;
+    }
+    if (!socket.connected) {
+      socket.connect();
+    }
+    socket.emit("conversationCreated", { senderId: myId, receiverId });
+  };
+
+  useEffect(() => {
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    const handleNewConversation = (newConversation) => {
+      
+      navigate(`/message/${newConversation._id}`); 
+    };
+
+    socket.on("conversationCreated", handleNewConversation);
+
+    return () => {
+      socket.off("conversationCreated", handleNewConversation);
+    };
+  }, [navigate]);
 
   if (profileData === null || profileData === undefined) {
     return (
@@ -78,12 +107,10 @@ const UserInfo = () => {
         </div>
       </div>
     );
-  }
-
-  else {
+  } else {
     return (
-      <div className=" rounded  border border-gray-200 mb-6 ">
-        <div className="h-[200px] w-full overflow-hidden flex flex-row justify-between items-center shadow  ">
+      <div className="rounded border border-gray-200 mb-6">
+        <div className="h-[200px] w-full overflow-hidden flex flex-row justify-between items-center shadow">
           <img
             src={profileData.cover}
             alt="Cover Photo"
@@ -111,82 +138,83 @@ const UserInfo = () => {
             )}
           </h1>
 
-          {user ===  myUser ? (
-              <div className="absolute top-[-67px] lg:top-0 right-0 flex items-center">
-
-                <button
-                    onClick={() => set_edit_profile_Ui_Control(true)}
-                    className="
+          {user === myUser ? (
+            <div className="absolute top-[-67px] lg:top-0 right-0 flex items-center">
+              <button
+                onClick={() => set_edit_profile_Ui_Control(true)}
+                className="
                           bg-white
                          text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500
                          rounded-full hover:text-sky-500 hover:border-sky-500 me-2
                         "
-                >
-                  Edit Profile
-                </button>
-
-                <button
-                    onClick={async () => {
-                      setSignOutLoading(true);
-                      const confirmSignOut = confirm("Are you sure you want to sign out?");
-                      if (confirmSignOut) {
-                        const res = await SignOutReq();
-                        localStorage.clear();
-                        setSignOutLoading(false);
-                        if (res) {
-                          navigate("/author");
-                          toast.success("Signed Out Successfully");
-                        } else {
-                          toast.error("Sign Out Failed");
-                        }
-                      } else {
-                        toast.error("Sign Out Cancelled");
-                        setSignOutLoading(false);
-                      }
-                    }}
-                    className="
+              >
+                Edit Profile
+              </button>
+              <button
+                onClick={async () => {
+                  setSignOutLoading(true);
+                  const confirmSignOut = confirm("Are you sure you want to sign out?");
+                  if (confirmSignOut) {
+                    const res = await SignOutReq();
+                    localStorage.clear();
+                    setSignOutLoading(false);
+                    if (res) {
+                      navigate("/author");
+                      toast.success("Signed Out Successfully");
+                    } else {
+                      toast.error("Sign Out Failed");
+                    }
+                  } else {
+                    toast.error("Sign Out Cancelled");
+                    setSignOutLoading(false);
+                  }
+                }}
+                className="
                          bg-white md:hidden flex items-center
                          text-base font-medium text-neutral-700 py-1 px-3  shadow-md border-2 border-white h-[36px]
                          rounded-full hover:text-sky-500 hover:border-sky-500
                         "
-                >
-                  {signOutLoading ? (
-                      <div className="loader-dark"></div>
-                  ) : (
-                      <span className="text-lg font-medium text-gray-600">Sign Out</span>
-                  )}
-
-                </button>
-              </div>
+              >
+                {signOutLoading ? (
+                  <div className="loader-dark"></div>
+                ) : (
+                  <span className="text-lg font-medium text-gray-600">Sign Out</span>
+                )}
+              </button>
+            </div>
           ) : (
+            <div className="absolute top-0 right-0 flex items-center gap-2">
               <button
-                  onClick={async () => {
-                    setLoader(true);
-                    const res = await flowReq(profileData._id);
-                    if (res) {
-                      await readProfileReq(user);
-                      toast.success("Work successfully !");
-                    } else {
-                      toast.error("Work flow failed!");
-                    }
-                    setLoader(false);
-                  }}
-              className={`
-                         absolute top-0 right-0
-                         ${
-                            !loader &&
-                            "text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500 rounded-full hover:text-sky-500 hover:border-sky-500"
-                          }
-                         ${
-                           profileData.isFollowing &&
-                           "bg-sky-500 text-white border-sky-500 hover:bg-transparent"
-                         }
+                onClick={async () => {
+                  setLoader(true);
+                  const res = await flowReq(profileData._id);
+                  if (res) {
+                    await readProfileReq(user);
+                    toast.success("Work successfully!");
+                  } else {
+                    toast.error("Work flow failed!");
+                  }
+                  setLoader(false);
+                }}
+                className={`
+                         ${!loader &&
+                  "text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500 rounded-full hover:text-sky-500 hover:border-sky-500"
+                  }
+                         ${profileData.isFollowing &&
+                  "bg-sky-500 text-white border-sky-500 hover:bg-transparent"
+                  }
                          `}
-            >
-              {loader && <LoadingButtonFit />}
-              {loader === false &&
-                (profileData.isFollowing ? "Unfollow" : "Follow")}
-            </button>
+              >
+                {loader && <LoadingButtonFit />}
+                {loader === false && (profileData.isFollowing ? "Unfollow" : "Follow")}
+              </button>
+              <button
+                onClick={() => handleMessageClick(profileData._id)}
+                className="text-base font-medium text-neutral-700 py-1 px-3 border-2 border-neutral-500 rounded-full hover:text-green-500 hover:border-green-500"
+              >
+                Message
+              </button>
+            </div>
           )}
 
           <h3 className="text-base font-normal text-neutral-700">
@@ -214,7 +242,7 @@ const UserInfo = () => {
             </div>
           </div>
 
-          <div className="p-3 my-3 bg-gray-100 rounded ">
+          <div className="p-3 my-3 bg-gray-100 rounded">
             {profileData.bio === "" ? (
               <h1 className="text-sm font-medium text-neutral-700">
                 Please add bio
@@ -227,52 +255,52 @@ const UserInfo = () => {
           </div>
 
           <div className="flex flex-wrap justify-start items-center gap-4">
-            <div className="flex flex-row justify-start items-center ">
+            <div className="flex flex-row justify-start items-center">
               <IoCallSharp className="text-neutral-800" />
               <p className="text-base font-medium ms-1 text-neutral-800">
                 {profileData.phone}
               </p>
             </div>
-            <div className="flex flex-row justify-start items-center ">
+            <div className="flex flex-row justify-start items-center">
               <MdEmail className="text-neutral-800" />
               <p className="text-base font-medium ms-1 text-neutral-800">
                 {profileData.email}
               </p>
             </div>
 
-            <div className="flex flex-row justify-center lg:justify-end items-center gap-4 flex-grow ">
+            <div className="flex flex-row justify-center lg:justify-end items-center gap-4 flex-grow">
               {profileData.mediaLink?.facebook !== "" && (
                 <FaSquareFacebook
                   className="font-lg text-neutral-800 cursor-pointer"
-                  onClick={() => openNewWindow(profileData.mediaLink?.facebook) }
+                  onClick={() => openNewWindow(profileData.mediaLink?.facebook)}
                 />
               )}
               {profileData.mediaLink?.linkedin !== "" && (
                 <IoLogoLinkedin
                   className="font-lg text-neutral-800 cursor-pointer"
-                  onClick={() => openNewWindow(profileData.mediaLink?.linkedin) }
+                  onClick={() => openNewWindow(profileData.mediaLink?.linkedin)}
                 />
               )}
               {profileData.mediaLink?.github !== "" && (
                 <FaGithub
                   className="font-lg text-neutral-800 cursor-pointer"
-                  onClick={() => openNewWindow(profileData.mediaLink?.github) }
+                  onClick={() => openNewWindow(profileData.mediaLink?.github)}
                 />
               )}
               {profileData.mediaLink?.fiver !== "" && (
                 <TbBrandFiverr
                   className="font-lg text-neutral-800 cursor-pointer"
-                  onClick={() => openNewWindow(profileData.mediaLink.fiver) }
+                  onClick={() => openNewWindow(profileData.mediaLink.fiver)}
                 />
               )}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-row gap-3 w-full overflow-x-auto scroll-bar-hidden cursor-pointer ">
+        <div className="flex flex-row gap-3 w-full overflow-x-auto scroll-bar-hidden cursor-pointer">
           <button
             onClick={() => set_profile_tab("my-post")}
-            className={` 
+            className={`
             flex-shrink-0
             ${profile_tab === "my-post" ? "profile-tab-active" : "profile-tab"}
             `}
@@ -281,7 +309,7 @@ const UserInfo = () => {
           </button>
           <button
             onClick={() => set_profile_tab("post-photo")}
-            className={` 
+            className={`
             flex-shrink-0
             ${profile_tab === "post-photo" ? "profile-tab-active" : "profile-tab"}
             `}
@@ -290,7 +318,7 @@ const UserInfo = () => {
           </button>
           <button
             onClick={() => set_profile_tab("followers")}
-            className={` 
+            className={`
             flex-shrink-0
             ${profile_tab === "followers" ? "profile-tab-active" : "profile-tab"}
             `}
@@ -299,7 +327,7 @@ const UserInfo = () => {
           </button>
           <button
             onClick={() => set_profile_tab("following")}
-            className={` 
+            className={`
             flex-shrink-0
             ${profile_tab === "following" ? "profile-tab-active" : "profile-tab"}
             `}
@@ -308,7 +336,7 @@ const UserInfo = () => {
           </button>
           <button
             onClick={() => set_profile_tab("about")}
-            className={` 
+            className={`
             flex-shrink-0
             ${profile_tab === "about" ? "profile-tab-active" : "profile-tab"}
             `}

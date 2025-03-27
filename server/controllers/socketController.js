@@ -9,7 +9,7 @@ const Chat = () => {
     // Event to create a new conversation
     socket.on("conversationCreated", async (data) => {
       try {
-        const { senderId, receiverId } = JSON.parse(data);
+        const { senderId, receiverId } = data
 
         const existingConversation = await Conversation.findOne({
           participants: {
@@ -103,46 +103,85 @@ const Chat = () => {
     socket.on('message', async (data) => {
       try {
         const { conversationId, sender, text } = JSON.parse(data);
-    
+
         const findConversation = await Conversation.findOne({ _id: conversationId }).select({ participants: 1 });
-    
+
         const opponentId = findConversation.participants.filter(participant => participant.toString() !== sender.toString());
-    
+
         // Create new message
         const messageCreate = await Message.create({
           conversationId,
           sender,
           text
         });
-    
+
         // Update conversation's last message
         await Conversation.findByIdAndUpdate(conversationId, {
           lastMessage: {
             sender,
             content: text,
             timestamp: new Date(),
-            seen: []
+            seen: false
           },
-          updatedAt: new Date() // Ensure sorting works properly
+          updatedAt: new Date()
         });
-    
-        // Fetch the latest updated conversation
+
         const updatedConversation = await Conversation.findById(conversationId);
-    
-        // Emit message to both users
+
         [sender, opponentId[0]].forEach(id => {
           io.to(id.toString()).emit('message', messageCreate);
           io.to(id.toString()).emit('updateConversation', updatedConversation); // Send the latest conversation
         });
-    
+
       } catch (error) {
         socket.emit('error', error.message);
       }
     });
-    
+
+    socket.on("seen", async (data) => {
+      try {
+        const { conversationId, senderId, messageId } = data;
+
+        const messageIds = Array.isArray(messageId) ? messageId : [messageId];
+
+        const query = {
+          conversationId,
+          _id: { $in: messageIds },
+          seen: false,
+        };
+
+        const conversation = await Conversation.findOne({ _id: conversationId }).select("participants");
+        if (!conversation) {
+          throw new Error("Conversation not found");
+        }
+
+        const receiverId = conversation.participants.find((id) => id.toString() !== senderId);
+
+        const updatedMessages = await Message.updateMany(query, { $set: { seen: true } });
+
+        if (updatedMessages.modifiedCount > 0) {
+          const recipients = [senderId, receiverId];
+          // update conversation status
+          await Conversation.updateOne(
+            { _id: conversationId },
+            { $set: { "lastMessage.seen": true } });
+            //find conversation
+          const updatedConversation = await Conversation.findById(conversationId);
+          //emit seen id and conversation
+          recipients.forEach((id) => {
+            if (id) {
+              io.to(id.toString()).emit("seen", messageIds);
+              io.to(id.toString()).emit('updateConversation', updatedConversation); // Send the latest conversation
+
+            }
+          });
+        }
+      } catch (error) {
+        socket.emit("error", { message: "Failed to mark messages as read" });
+      }
+    });
 
 
-    // Handle socket disconnection
     socket.on("disconnect", () => {
     });
   });
@@ -150,39 +189,3 @@ const Chat = () => {
 
 export default Chat;
 
-// socket.on("markAsRead", async ({ userId, conversationId }) => {
-//   try {
-//     if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(conversationId)) {
-//       return socket.emit("error", { message: "Invalid ID" });
-//     }
-
-//     const id = new mongoose.Types.ObjectId(userId);
-//     const convId = new mongoose.Types.ObjectId(conversationId);
-
-//     const updatedMessages = await Message.updateMany(
-//       {
-//         conversation: convId,
-//         receiver: id,
-//         isRead: false,
-//       },
-//       {
-//         $set: { isRead: true, readAt: new Date() },
-//       }
-//     );
-
-//     if (updatedMessages.modifiedCount > 0) {
-//       const messages = await Message.find({ conversation: convId });
-//       const participants = [...new Set(messages.flatMap((msg) => [msg.sender.toString(), msg.receiver.toString()]))];
-//       participants.forEach((user) => {
-//         io.to(user).emit("messagesRead", {
-//           conversationId,
-//           readAt: new Date(),
-//         });
-//         io.to(user).emit("getConversations");
-//       });
-//     }
-//   } catch (error) {
-//     console.error("Error marking messages as read:", error);
-//     socket.emit("error", { message: "Failed to mark messages as read" });
-//   }
-// });

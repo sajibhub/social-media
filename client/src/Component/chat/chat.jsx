@@ -5,19 +5,19 @@ import { useParams } from "react-router-dom";
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
-  const { conversationId } = useParams(); // Get conversationId from URL params
+  const { conversationId } = useParams();
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (!conversationId) {
-      console.log("No conversation ID provided.");
-      return; // If no conversationId, stop the effect early
+      setMessages([]); // Clear messages if no conversation is selected
+      return;
     }
 
+    // Ensure socket is connected only once
     if (!socket.connected) {
       socket.connect();
     }
-    socket.emit("join", conversationId);
 
     const userId = localStorage.getItem("id")?.toString();
     if (!userId) {
@@ -25,6 +25,7 @@ const Chat = () => {
       return;
     }
 
+    socket.emit("join", conversationId);
     socket.emit("messages", { userId, conversationId });
 
     const handleMessages = (data) => {
@@ -32,20 +33,42 @@ const Chat = () => {
         console.error("Expected array of messages, got:", data);
         return;
       }
-      setMessages(data.filter((msg) => !msg.isDeleted));
+      setMessages(data);
+      const unreadMessageIds = data
+        .filter((message) => !message.seen && message.sender !== userId)
+        .map((message) => message._id);
+      if (unreadMessageIds.length > 0) {
+        socket.emit("seen", { conversationId, messageId: unreadMessageIds, senderId: userId });
+      }
     };
 
     const handleNewMessage = (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-      scrollToBottom();
+      if (message.conversationId === conversationId) {
+        setMessages((prevMessages) => [...prevMessages, message]);
+        if (message.sender !== userId && !message.seen) {
+          socket.emit("seen", { conversationId, messageId: [message._id], senderId: userId });
+        }
+        scrollToBottom();
+      }
+    };
+
+    const handleSeen = (messageIds) => {
+      const ids = Array.isArray(messageIds) ? messageIds : [messageIds];
+      setMessages((prevMessages) =>
+        prevMessages.map((msg) =>
+          ids.includes(msg._id) ? { ...msg, seen: true } : msg
+        )
+      );
     };
 
     socket.on("messages", handleMessages);
     socket.on("message", handleNewMessage);
+    socket.on("seen", handleSeen);
 
     return () => {
       socket.off("messages", handleMessages);
       socket.off("message", handleNewMessage);
+      socket.off("seen", handleSeen);
     };
   }, [conversationId]);
 
@@ -83,66 +106,67 @@ const Chat = () => {
     }
   };
 
-  if (!conversationId) {
-    return (
-      <div className="w-full h-full flex flex-col">
-        <div className="p-4 border-b bg-green-500 text-white text-center font-semibold text-xl">
-          Chat
-        </div>
-        <div className="flex-1 flex items-center justify-center text-gray-500">
-          <p>No conversation selected. Please select a conversation to start chatting.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="w-full h-full flex flex-col">
-      <div className="p-4 border-b bg-green-500 text-white text-center font-semibold text-xl">
+    <div className="flex flex-col h-full w-full">
+      <div className="p-3 sm:p-4 border-b bg-green-500 text-white text-center font-semibold text-base sm:text-lg md:text-xl sticky top-0 z-10">
         Chat
       </div>
-      <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ scrollbarWidth: "none" }}>
-        {messages.map((message) => {
-          const isOwnMessage = message.sender === currentUserId;
-          return (
-            <div key={message._id} className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}>
-              <div
-                className={`max-w-xs p-3 rounded-lg shadow-md ${
-                  isOwnMessage ? "bg-green-500 text-white" : "bg-gray-200 text-gray-900"
-                }`}
-                style={{
-                  wordWrap: "break-word",
-                  overflowWrap: "break-word",
-                  whiteSpace: "pre-wrap", // Ensures line breaks are maintained
-                }}
-              >
-                <p className="text-sm">{message.text}</p>
-                <div className="flex justify-between items-center mt-1 text-xs text-gray-600">
-                  <span>{formatTime(message.createdAt)}</span>
-                  {isOwnMessage && <span>{message.seen ? "Seen" : "Sent"}</span>}
+      {conversationId ? (
+        <>
+          <div className="flex-1 overflow-y-auto p-2 sm:p-3 md:p-4 space-y-2 sm:space-y-3 scrollbar-none">
+            {messages.map((message) => {
+              const isOwnMessage = message.sender === currentUserId;
+              return (
+                <div key={message._id} className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={`max-w-[85%] xs:max-w-[75%] sm:max-w-[70%] md:max-w-[60%] p-2 sm:p-3 rounded-lg shadow-md ${
+                      isOwnMessage ? "bg-green-500 text-white" : "bg-gray-200 text-gray-900"
+                    }`}
+                    style={{
+                      wordWrap: "break-word",
+                      overflowWrap: "break-word",
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    <p className="text-xs sm:text-sm md:text-base">{message.text}</p>
+                    <div className="flex justify-between items-center mt-1 text-xs sm:text-sm text-gray-600">
+                      <span>{formatTime(message.createdAt)}</span>
+                      {isOwnMessage && (
+                        <span
+                          className={`ml-2 inline-block w-2 h-2 rounded-full transition-all duration-200 ${
+                            message.seen ? "bg-blue-500 scale-125" : "bg-gray-300"
+                          }`}
+                        ></span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-        <div ref={messagesEndRef}></div>
-      </div>
-      <div className="p-4 border-t bg-white flex items-center gap-2">
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Type a message..."
-          className="flex-1 p-2 border rounded-full focus:outline-none focus:ring-2 focus:ring-green-500"
-        />
-        <button
-          onClick={handleSendMessage}
-          className="p-2 px-4 bg-green-500 text-white rounded-full hover:bg-green-600 transition"
-        >
-          Send
-        </button>
-      </div>
+              );
+            })}
+            <div ref={messagesEndRef}></div>
+          </div>
+          <div className="p-2 sm:p-3 md:p-4 border-t bg-white flex items-center gap-2 shrink-0">
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Type a message..."
+              className="flex-1 p-2 border rounded-full text-xs sm:text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <button
+              onClick={handleSendMessage}
+              className="p-2 px-3 sm:px-4 bg-green-500 text-white rounded-full hover:bg-green-600 transition text-xs sm:text-sm md:text-base"
+            >
+              Send
+            </button>
+          </div>
+        </>
+      ) : (
+        <div className="flex-1 flex items-center justify-center text-gray-500 text-sm sm:text-base md:text-lg">
+          Select a conversation to start chatting
+        </div>
+      )}
     </div>
   );
 };

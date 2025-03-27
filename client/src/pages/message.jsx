@@ -1,11 +1,21 @@
-import React from "react";
+import Conversation from "../Component/chat/conversation";
+import Chat from "../Component/chat/chat.jsx";
+import { useParams } from "react-router-dom";
 
 const Message = () => {
+  const { conversationId } = useParams();
+
   return (
-    <div className="flex items-center justify-center h-screen bg-white text-gray-900">
-      <div className="text-center">
-        <h1 className="text-5xl font-bold mb-4 animate-pulse">Coming Soon</h1>
-        <p className="text-lg text-gray-900">We're working hard to bring you something amazing. Stay tuned!</p>
+    <div className="flex w-full h-screen">
+      <Conversation />
+      <div className="w-full md:w-2/3 h-full">
+        {conversationId ? (
+          <Chat />
+        ) : (
+          <div className="h-full flex items-center justify-center text-gray-500 text-sm md:text-base">
+            Select a conversation to start chatting
+          </div>
+        )}
       </div>
     </div>
   );

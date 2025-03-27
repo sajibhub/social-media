@@ -49,7 +49,6 @@ const SignIn = () => {
             localStorage.removeItem("rememberedEmail");
             localStorage.removeItem("rememberedPassword");
         }
-
         const res = await loginReq(loginForm);
         setLoading(false);
 
