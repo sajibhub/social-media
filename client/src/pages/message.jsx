@@ -228,9 +228,9 @@ const Message = () => {
                       {chat.participant?.fullName || "Unknown User"}
                     </h2>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center justify-between">
                     <p
-                      className={`text-xs sm:text-sm md:text-base truncate ${seen ? "text-gray-500" : "text-white font-medium"
+                      className={`text-xs sm:text-sm md:text-base truncate ${seen ? "text-gray-400" : "text-white font-medium"
                         }`}
                     >
                       {lastMessageContent}
@@ -238,6 +238,7 @@ const Message = () => {
                     {!myMessage && !seen && (
                       <span className="ml-2 w-2 h-2 bg-green-500 rounded-full"></span>
                     )}
+                    <div className="time text-gray-300">{formatTime(chat.updatedAt)}</div>
                   </div>
                 </div>
               </div>

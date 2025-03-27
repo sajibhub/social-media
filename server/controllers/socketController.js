@@ -5,6 +5,7 @@ import Message from "../models/messageModel.js";
 
 const Chat = () => {
   io.on("connection", (socket) => {
+    const cookie = socket.handshake.headers.cookie;
 
     // Event to create a new conversation
     socket.on("conversationCreated", async (data) => {
@@ -165,7 +166,7 @@ const Chat = () => {
           await Conversation.updateOne(
             { _id: conversationId },
             { $set: { "lastMessage.seen": true } });
-            //find conversation
+          //find conversation
           const updatedConversation = await Conversation.findById(conversationId);
           //emit seen id and conversation
           recipients.forEach((id) => {
