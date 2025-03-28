@@ -120,6 +120,7 @@ const UserSchema = mongoose.Schema(
       type: Number,
       default: new Date(),
     },
+    lastActive: { type: Date, default: null },
   },
   {
     timestamps: true,

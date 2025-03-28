@@ -16,8 +16,6 @@ import userRouter from "./router/userRouter.js";
 import postRouter from "./router/postRouter.js";
 import Notification from "./router/notificationRouter.js";
 import Story from "./router/storyRouter.js";  
-import socketControllers from "./controllers/socketController.js";
-import {socketJoin} from "./utils/socketJoin.js";
 import Chat from "./controllers/socketController.js";
 
 dotenv.config();
@@ -71,7 +69,6 @@ app.use(UserAgentMiddleware);
 app.use("/api/v1", userRouter, postRouter, Notification, Story);
 
 // socketControllers();
-socketJoin()
 Chat()
 
 server.listen(PORT, () => {

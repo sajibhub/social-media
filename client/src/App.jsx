@@ -86,7 +86,7 @@ const router = createBrowserRouter([
 
 
 const App = () => {
-  console.log = () => { };
+  // console.log = () => { };
   const { profileData } = authorStore();
   const { addNotification } = notificationStore();
   const [notification, setNotification] = useState(profileData?.notification || 0);
@@ -96,33 +96,38 @@ const App = () => {
 
 
   useEffect(() => {
-    if (typeof profileData?.notification === 'number') {
-      setNotification(profileData?.notification);
+    const userId = localStorage.getItem("id");
+  
+    // Only connect if not already connected
+    if (!socket.connected) {
+      socket.connect();
     }
-  }, [profileData]);
-
-  useEffect(() => {
-    socket.connect();
-    socket.emit("join", localStorage.getItem("id"));
-
+  
+    // Join with userId if it exists
+    if (userId) {
+      socket.emit("join", userId);
+    } 
+  
     const handleNotification = (data) => {
       toast.success(`New ${data?.type} Notification`);
-      audio.play(); // Use the new function
+      audio.play().catch((err) => console.error("Audio play failed:", err)); // Handle play errors
       addNotification(data);
       setNotification((prev) => {
         const newNotificationCount = prev + 1;
-        updateProfileDataField('notification', newNotificationCount);
+        updateProfileDataField("notification", newNotificationCount);
         return newNotificationCount;
       });
     };
-
-    socket.on('notification', handleNotification);
-
+  
+    socket.on("notification", handleNotification);
+  
+    // Cleanup: Remove listener but don't disconnect unless necessary
     return () => {
-      socket.off('notification', handleNotification);
-      socket.disconnect();
+      socket.off("notification", handleNotification);
+      // Only disconnect if no other components need the socket
+      // socket.disconnect(); // Comment out unless you’re sure it’s safe
     };
-  }, [audio, updateProfileDataField]);
+  }, [audio, updateProfileDataField]); // Dependencies remain the same unless they cause issues
 
   return (
     <>

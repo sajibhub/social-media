@@ -25,6 +25,20 @@ const messageSchema = new mongoose.Schema({
   seenAt: {
     type: Date
   },
+  replyTo: {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null
+    },
+    message: {
+      type: String,
+      default: null
+    }
+  },
+  edited: {
+    type: Boolean,
+    default: false
+  },
   isDeleted: {
     type: Boolean,
     default: false
