@@ -58,7 +58,7 @@ const Chat = () => {
               let: { participantIds: "$participants" },
               pipeline: [
                 { $match: { $expr: { $in: ["$_id", "$$participantIds"] } } },
-                { $project: { _id: 1, fullName: 1, profile: 1, lastActive: 1 } },
+                { $project: { _id: 1, username: 1, fullName: 1, profile: 1, lastActive: 1 } },
               ],
               as: "participantDetails",
             },
@@ -355,11 +355,11 @@ const Chat = () => {
           {
             lastMessage: latestMessage
               ? {
-                  sender: latestMessage.sender,
-                  content: latestMessage.text,
-                  timestamp: latestMessage.createdAt,
-                  seen: latestMessage.seen,
-                }
+                sender: latestMessage.sender,
+                content: latestMessage.text,
+                timestamp: latestMessage.createdAt,
+                seen: latestMessage.seen,
+              }
               : null,
             updatedAt: new Date(),
           },

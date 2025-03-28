@@ -353,14 +353,16 @@ const Message = () => {
               </button>
               <div className="relative">
                 <img
+                  onClick={() => navigate(`/profile/${currentUserInfo?.username}`)}
                   src={currentUserInfo?.profile || "/default-avatar.png"}
                   alt={currentUserInfo?.fullName || "User"}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-600"
+                  className="w-12 h-12 cursor-pointer rounded-full object-cover border-2 border-gray-600"
                 />
                 <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${currentUserInfo?.isActive ? "bg-green-500" : "bg-gray-500"}`}></span>
               </div>
               <div>
-                <h2 className="font-semibold text-lg">{currentUserInfo?.fullName || "Unknown"}</h2>
+                <h2 onClick={() => navigate(`/profile/${currentUserInfo?.username}`)}
+                  className="font-semibold cursor-pointer text-lg">{currentUserInfo?.fullName || "Unknown"}</h2>
                 <p className="text-sm text-gray-400">
                   {currentUserInfo?.isActive ? "Active now" : formatLastActive(currentUserInfo?.lastActive)}
                 </p>
