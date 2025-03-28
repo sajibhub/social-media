@@ -10,6 +10,9 @@ const Message = () => {
   const [currentUserInfo, setCurrentUserInfo] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeUsers, setActiveUsers] = useState([]);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [editModal, setEditModal] = useState(null);
+  const [deleteModal, setDeleteModal] = useState(null);
   const { conversationId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
@@ -18,8 +21,10 @@ const Message = () => {
   const socketInitialized = useRef(false);
   const [replayId, setReplayId] = useState(null);
   const [replayMessage, setReplayMessage] = useState(null);
+  const contextMenuRef = useRef(null);
+  const editModalRef = useRef(null);
+  const deleteModalRef = useRef(null);
 
-  // Socket Initialization and Active Users
   useEffect(() => {
     if (!currentUserId) return;
     if (!socket.connected && !socketInitialized.current) {
@@ -40,7 +45,6 @@ const Message = () => {
     };
   }, [currentUserId]);
 
-  // Handle Conversations and Current User Info
   useEffect(() => {
     if (!currentUserId) return;
     socket.emit("getConversation", { userId: currentUserId });
@@ -110,7 +114,6 @@ const Message = () => {
     };
   }, [currentUserId, conversationId, activeUsers]);
 
-  // Handle Messages
   useEffect(() => {
     if (!conversationId) {
       setMessages([]);
@@ -138,21 +141,36 @@ const Message = () => {
       }
     };
 
+    const handleMessageEdited = (updatedMessage) => {
+      if (updatedMessage.conversationId === conversationId) {
+        setMessages((prev) =>
+          prev.map((msg) => (msg._id === updatedMessage._id ? updatedMessage : msg))
+        );
+      }
+    };
+
+    const handleMessageDeleted = ({ messageId }) => {
+      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
+    };
+
     socket.on("messages", handleMessages);
     socket.on("message", handleNewMessage);
     socket.on("seen", (messageIds) => {
       const ids = Array.isArray(messageIds) ? messageIds : [messageIds];
       setMessages((prev) => prev.map((msg) => ids.includes(msg._id) ? { ...msg, seen: true } : msg));
     });
+    socket.on("messageEdited", handleMessageEdited);
+    socket.on("messageDeleted", handleMessageDeleted);
 
     return () => {
       socket.off("messages");
       socket.off("message");
       socket.off("seen");
+      socket.off("messageEdited");
+      socket.off("messageDeleted");
     };
   }, [conversationId, currentUserId]);
 
-  // Scroll Utilities
   useEffect(() => scrollToBottom(), [messages]);
 
   const scrollToBottom = () => {
@@ -163,15 +181,14 @@ const Message = () => {
     const messageRef = messageRefs.current[messageId];
     if (messageRef) {
       messageRef.scrollIntoView({ behavior: "smooth", block: "center" });
-      messageRef.classList.add("highlight-original");
-      setTimeout(() => messageRef.classList.remove("highlight-original"), 2000);
+      messageRef.classList.add("highlight-reply"); // Use a new class for reply-specific effect
+      setTimeout(() => messageRef.classList.remove("highlight-reply"), 2000); // Remove after 2 seconds
     }
   };
 
-  // Message Handling
   const formatTime = (dateString) => {
     const date = new Date(dateString);
-    return isNaN(date.getTime()) ? "Invalid" : 
+    return isNaN(date.getTime()) ? "Invalid" :
       date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
@@ -198,9 +215,57 @@ const Message = () => {
     setReplayMessage(null);
   };
 
-  const handleReplaySelect = (id, text) => {
+  const handleContextMenu = (e, message) => {
+    e.preventDefault();
+    const menuWidth = 120;
+    const menuHeight = 100;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    let x = e.pageX;
+    let y = e.pageY;
+
+    if (x + menuWidth > windowWidth) x = windowWidth - menuWidth - 10;
+    if (x < 0) x = 10;
+    if (y + menuHeight > windowHeight) y = windowHeight - menuHeight - 10;
+    if (y < 0) y = 10;
+
+    const isOwnMessage = message.sender === currentUserId;
+    setContextMenu({
+      x,
+      y,
+      messageId: message._id,
+      text: message.text,
+      isOwnMessage,
+    });
+  };
+
+  const handleReplay = (id, text) => {
     setReplayId(id);
     setReplayMessage(text);
+    setContextMenu(null);
+  };
+
+  const handleEdit = (id, text) => {
+    setEditModal({ messageId: id, text });
+    setContextMenu(null);
+  };
+
+  const handleDelete = (id) => {
+    setDeleteModal({ messageId: id });
+    setContextMenu(null);
+  };
+
+  const handleSaveEdit = (newText) => {
+    if (newText && newText.trim() && newText !== editModal.text) {
+      socket.emit("editMessage", { messageId: editModal.messageId, senderId: currentUserId, newText: newText.trim() });
+    }
+    setEditModal(null);
+  };
+
+  const handleConfirmDelete = () => {
+    socket.emit("deleteMessage", { messageId: deleteModal.messageId, senderId: currentUserId });
+    setDeleteModal(null);
   };
 
   const clearReplay = () => {
@@ -208,9 +273,28 @@ const Message = () => {
     setReplayMessage(null);
   };
 
+  const closeContextMenu = () => setContextMenu(null);
+  const closeEditModal = () => setEditModal(null);
+  const closeDeleteModal = () => setDeleteModal(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (contextMenu && contextMenuRef.current && !contextMenuRef.current.contains(e.target)) {
+        closeContextMenu();
+      }
+      if (editModal && editModalRef.current && !editModalRef.current.contains(e.target)) {
+        closeEditModal();
+      }
+      if (deleteModal && deleteModalRef.current && !deleteModalRef.current.contains(e.target)) {
+        closeDeleteModal();
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [contextMenu, editModal, deleteModal]);
+
   return (
     <div className="flex h-screen bg-gray-900 text-white font-sans">
-      {/* Conversations Sidebar */}
       <div className={`${conversationId ? "hidden sm:flex" : "flex"} w-full sm:w-80 flex-col bg-gray-800 border-r border-gray-700 shadow-lg`}>
         <div className="p-4 border-b border-gray-600">
           <input
@@ -246,7 +330,10 @@ const Message = () => {
                         <span className="bg-red-500 text-xs font-bold px-2 py-0.5 rounded-full">{chat.unseen}</span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-400 truncate">{chat.lastMessage?.content || "No messages yet"}</p>
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs text-gray-400 truncate">{chat.lastMessage?.content || "No messages yet"}</p>
+                      {/* <span className="text-xs text-gray-400">{formatTime(chat.updatedAt)}</span> */}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -254,8 +341,7 @@ const Message = () => {
         </div>
       </div>
 
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col" onContextMenu={(e) => e.preventDefault()}>
         {conversationId ? (
           <>
             <div className="p-4 bg-gray-800 border-b border-gray-700 flex items-center gap-3 sticky top-0 z-10 shadow-md">
@@ -289,13 +375,13 @@ const Message = () => {
                     key={message._id}
                     ref={(el) => (messageRefs.current[message._id] = el)}
                     className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
+                    onContextMenu={(e) => handleContextMenu(e, message)}
                   >
                     <div
-                      className={`max-w-[70%] p-3 rounded-2xl shadow-sm transition-all ${
-                        isOwnMessage 
-                          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white" 
-                          : "bg-gray-700 text-gray-200"
-                      }`}
+                      className={`max-w-[70%] p-3 rounded-2xl shadow-sm transition-all ${isOwnMessage
+                        ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white"
+                        : "bg-gray-700 text-gray-200"
+                        }`}
                     >
                       {message.replyTo && (
                         <div
@@ -308,12 +394,7 @@ const Message = () => {
                           <p className="text-sm truncate text-gray-300">{message.replyTo.message}</p>
                         </div>
                       )}
-                      <p
-                        className="text-sm cursor-pointer hover:underline"
-                        onClick={() => handleReplaySelect(message._id, message.text)}
-                      >
-                        {message.text}
-                      </p>
+                      <p className="text-sm">{message.text}</p>
                       <div className="flex items-center gap-2 mt-1 text-xs text-gray-300">
                         <span>{formatTime(message.createdAt)}</span>
                         {isOwnMessage && (
@@ -326,6 +407,102 @@ const Message = () => {
               })}
               <div ref={messagesEndRef} />
             </div>
+
+            {contextMenu && (
+              <div
+                ref={contextMenuRef}
+                className="absolute bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-20 animate-fade-in"
+                style={{ top: contextMenu.y, left: contextMenu.x }}
+              >
+                <ul className="py-2 text-sm">
+                  <li
+                    className="px-4 py-2 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-150"
+                    onClick={() => handleReplay(contextMenu.messageId, contextMenu.text)}
+                  >
+                    Reply
+                  </li>
+                  {contextMenu.isOwnMessage && (
+                    <>
+                      <li
+                        className="px-4 py-2 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-150"
+                        onClick={() => handleEdit(contextMenu.messageId, contextMenu.text)}
+                      >
+                        Edit
+                      </li>
+                      <li
+                        className="px-4 py-2 hover:bg-blue-600 hover:text-white cursor-pointer transition-colors duration-150"
+                        onClick={() => handleDelete(contextMenu.messageId)}
+                      >
+                        Delete
+                      </li>
+                    </>
+                  )}
+                </ul>
+              </div>
+            )}
+
+            {editModal && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-30 animate-fade-in">
+                <div ref={editModalRef} className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Edit Message</h3>
+                    <IoIosClose
+                      onClick={closeEditModal}
+                      className="text-2xl cursor-pointer hover:text-gray-200 transition-colors"
+                    />
+                  </div>
+                  <textarea
+                    defaultValue={editModal.text}
+                    onChange={(e) => (editModal.text = e.target.value)}
+                    className="w-full p-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 mb-4 resize-none"
+                    rows="3"
+                  />
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={closeEditModal}
+                      className="px-4 py-2 bg-gray-600 rounded-full hover:bg-gray-700 transition-colors text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleSaveEdit(editModal.text)}
+                      className="px-4 py-2 bg-blue-600 rounded-full hover:bg-blue-700 transition-colors text-sm font-medium"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {deleteModal && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-30 animate-fade-in">
+                <div ref={deleteModalRef} className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-sm">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Delete Message</h3>
+                    <IoIosClose
+                      onClick={closeDeleteModal}
+                      className="text-2xl cursor-pointer hover:text-gray-200 transition-colors"
+                    />
+                  </div>
+                  <p className="text-sm text-gray-300 mb-4">Are you sure you want to delete this message?</p>
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={closeDeleteModal}
+                      className="px-4 py-2 bg-gray-600 rounded-full hover:bg-gray-700 transition-colors text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleConfirmDelete}
+                      className="px-4 py-2 bg-red-600 rounded-full hover:bg-red-700 transition-colors text-sm font-medium"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="p-4 bg-gray-800 border-t border-gray-700 shadow-lg">
               {replayId && (
@@ -367,12 +544,18 @@ const Message = () => {
   );
 };
 
-// Updated CSS
 const styles = `
   .highlight-original {
     animation: highlightOriginal 2s ease-out;
     border: 2px solid #60A5FA;
     background-color: rgba(96, 165, 250, 0.1);
+  }
+
+  .highlight-reply {
+    animation: highlightReply 2s ease-out;
+    border: 3px solid #10B981; /* Green to indicate reply */
+    background-color: rgba(16, 185, 129, 0.1); /* Light green background */
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); /* Glow effect */
   }
 
   @keyframes highlightOriginal {
@@ -388,12 +571,42 @@ const styles = `
     }
   }
 
+  @keyframes highlightReply {
+    0% { 
+      border-color: #10B981;
+      background-color: rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.7);
+      transform: scale(1.03);
+    }
+    50% { 
+      border-color: #10B981;
+      background-color: rgba(16, 185, 129, 0.2);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+      transform: scale(1.05);
+    }
+    100% { 
+      border-color: transparent;
+      background-color: transparent;
+      box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+      transform: scale(1);
+    }
+  }
+
   .shadow-sm {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
 
   .shadow-lg {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-in;
+  }
+
+  @keyframes fadeIn {
+    0% { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
 `;
 

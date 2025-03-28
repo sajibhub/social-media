@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { io } from "../app.js";
 import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
-import User from "../models/userModel.js"; // Add User model import
+import User from "../models/userModel.js";
 
 const activeUsers = {}; // Maps userId to socket.id
 
@@ -257,6 +257,140 @@ const Chat = () => {
       } catch (error) {
         console.error("Error in seen:", error);
         socket.emit("error", { message: "Failed to mark messages as read" });
+      }
+    });
+
+    socket.on("editMessage", async (data) => {
+      try {
+        const { messageId, senderId, newText } = data;
+
+        if (!messageId || !senderId || !newText) {
+          throw new Error("Missing required fields");
+        }
+
+        const message = await Message.findById(messageId).lean();
+        if (!message) throw new Error("Message not found");
+        if (message.sender.toString() !== senderId) {
+          throw new Error("You can only edit your own messages");
+        }
+
+        const updatedMessage = await Message.findByIdAndUpdate(
+          messageId,
+          { text: newText, updatedAt: new Date() },
+          { new: true }
+        ).lean();
+
+        const conversation = await Conversation.findById(updatedMessage.conversationId)
+          .populate("participants", "fullName profile lastActive")
+          .lean();
+        if (!conversation) throw new Error("Conversation not found");
+
+        const opponentId = conversation.participants.find(
+          (p) => p._id.toString() !== senderId
+        )?._id;
+
+        // Update lastMessage if this was the most recent message
+        const latestMessage = await Message.findOne({ conversationId: updatedMessage.conversationId })
+          .sort({ createdAt: -1 })
+          .lean();
+        if (latestMessage._id.toString() === messageId) {
+          await Conversation.findByIdAndUpdate(
+            updatedMessage.conversationId,
+            {
+              lastMessage: {
+                sender: updatedMessage.sender,
+                content: newText,
+                timestamp: updatedMessage.createdAt,
+                seen: updatedMessage.seen,
+              },
+              updatedAt: new Date(),
+            },
+            { new: true }
+          )
+            .populate("participants", "fullName profile lastActive")
+            .lean();
+        }
+
+        const userIds = [senderId, opponentId].filter(Boolean);
+        userIds.forEach((id) => {
+          io.to(id.toString()).emit("messageEdited", updatedMessage);
+        });
+      } catch (error) {
+        console.error("Error in editMessage:", error);
+        socket.emit("error", { message: error.message || "Failed to edit message" });
+      }
+    });
+
+    socket.on("deleteMessage", async (data) => {
+      try {
+        const { messageId, senderId } = data;
+
+        if (!messageId || !senderId) {
+          throw new Error("Missing required fields");
+        }
+
+        const message = await Message.findById(messageId).lean();
+        if (!message) throw new Error("Message not found");
+        if (message.sender.toString() !== senderId) {
+          throw new Error("You can only delete your own messages");
+        }
+
+        await Message.findByIdAndDelete(messageId);
+
+        const conversation = await Conversation.findById(message.conversationId)
+          .populate("participants", "fullName profile lastActive")
+          .lean();
+        if (!conversation) throw new Error("Conversation not found");
+
+        const opponentId = conversation.participants.find(
+          (p) => p._id.toString() !== senderId
+        )?._id;
+
+        // Update lastMessage if the deleted message was the most recent
+        const latestMessage = await Message.findOne({ conversationId: message.conversationId })
+          .sort({ createdAt: -1 })
+          .lean();
+        const updatedConversation = await Conversation.findByIdAndUpdate(
+          message.conversationId,
+          {
+            lastMessage: latestMessage
+              ? {
+                  sender: latestMessage.sender,
+                  content: latestMessage.text,
+                  timestamp: latestMessage.createdAt,
+                  seen: latestMessage.seen,
+                }
+              : null,
+            updatedAt: new Date(),
+          },
+          { new: true }
+        )
+          .populate("participants", "fullName profile lastActive")
+          .lean();
+
+        const unseenSender = await Message.countDocuments({
+          conversationId: message.conversationId,
+          sender: { $ne: senderId },
+          seen: false,
+        });
+        const unseenReceiver = await Message.countDocuments({
+          conversationId: message.conversationId,
+          sender: { $eq: senderId },
+          seen: false,
+        });
+
+        const userIds = [senderId, opponentId].filter(Boolean);
+        userIds.forEach((id) => {
+          io.to(id.toString()).emit("messageDeleted", { messageId });
+          io.to(id.toString()).emit("updateConversation", updatedConversation);
+          io.to(id.toString()).emit("unseen", {
+            unseen: id === senderId ? unseenSender : unseenReceiver,
+            conversationId: message.conversationId,
+          });
+        });
+      } catch (error) {
+        console.error("Error in deleteMessage:", error);
+        socket.emit("error", { message: error.message || "Failed to delete message" });
       }
     });
 
