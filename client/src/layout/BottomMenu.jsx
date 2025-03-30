@@ -12,7 +12,7 @@ const menuItems = [
   { path: "/", icon: TiHome },
   { path: "/search", icon: FaSearch },
   { path: "/notification", icon: IoMdNotifications, badge: true },
-  { path: "/conversations", icon: RiMessage3Fill },
+  { path: "/conversation", icon: RiMessage3Fill },
   { path: "/save-post", icon: BsBookmarkFill },
   // { path: "/add-post", icon: BsPlusSquareFill },
   { path: "/profile", icon: FaUser, isProfile: true },

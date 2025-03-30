@@ -1,100 +1,225 @@
-// Message.jsx
-import { useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { IoIosClose } from 'react-icons/io';
-import useMessageStore from '../store/messageStore.js'; 
+import { useEffect, useRef, useState } from "react";
+import { socket } from "../utils/socket.js";
+import { useParams, useNavigate } from "react-router-dom";
+import { IoIosClose } from "react-icons/io";
 
 const Message = () => {
-  const {
-    messages,
-    inputText,
-    conversations,
-    currentUserInfo,
-    searchQuery,
-    activeUsers,
-    contextMenu,
-    editModal,
-    editText,
-    deleteModal,
-    replayId,
-    replayMessage,
-    setInputText,
-    setSearchQuery,
-    setContextMenu,
-    setEditModal,
-    setEditText,
-    setDeleteModal,
-    setReplay,
-    clearReplay,
-    initializeSocket,
-    cleanupSocket,
-    fetchConversations,
-    fetchMessages,
-    cleanupMessages,
-    sendMessage,
-    editMessage,
-    deleteMessage,
-  } = useMessageStore();
-
-
+  const [messages, setMessages] = useState([]);
+  const [inputText, setInputText] = useState("");
+  const [conversations, setConversations] = useState([]);
+  const [currentUserInfo, setCurrentUserInfo] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeUsers, setActiveUsers] = useState([]);
+  const [contextMenu, setContextMenu] = useState(null);
+  const [editModal, setEditModal] = useState(null);
+  const [editText, setEditText] = useState("");
+  const [deleteModal, setDeleteModal] = useState(null);
   const { conversationId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
   const messageRefs = useRef({});
-  const currentUserId = localStorage.getItem('id');
+  const currentUserId = localStorage.getItem("id");
+  const socketInitialized = useRef(false);
+  const [replayId, setReplayId] = useState(null);
+  const [replayMessage, setReplayMessage] = useState(null);
   const contextMenuRef = useRef(null);
   const editModalRef = useRef(null);
   const deleteModalRef = useRef(null);
 
   useEffect(() => {
-    initializeSocket(currentUserId);
-    return () => cleanupSocket();
-  }, [currentUserId, initializeSocket, cleanupSocket]);
+    if (!currentUserId) return;
+    if (!socket.connected && !socketInitialized.current) {
+      socket.connect();
+      socketInitialized.current = true;
+      socket.emit("join", currentUserId);
+    }
+
+    const handleActiveUsers = (users) => setActiveUsers(users);
+    socket.on("active", handleActiveUsers);
+
+    return () => {
+      socket.off("active", handleActiveUsers);
+      if (socket.connected) {
+        socket.disconnect();
+        socketInitialized.current = false;
+      }
+    };
+  }, [currentUserId]);
 
   useEffect(() => {
-    fetchConversations(currentUserId);
-  }, [currentUserId, conversationId, activeUsers, fetchConversations]);
+    if (!currentUserId) return;
+    socket.emit("getConversation", { userId: currentUserId });
+
+    const handleConversations = (data) => {
+      if (!Array.isArray(data)) return;
+      setConversations(data);
+      if (conversationId) {
+        const currentConv = data.find((conv) => conv._id === conversationId);
+        if (currentConv && currentConv.participant) {
+          setCurrentUserInfo({
+            ...currentConv.participant,
+            isActive: activeUsers.includes(currentConv.participant._id?.toString() || ""),
+            lastActive: currentConv.participant.lastActive,
+          });
+        } else {
+          setCurrentUserInfo(null);
+        }
+      }
+    };
+
+    const handleUpdateConversation = (updatedConversation) => {
+      setConversations((prev) => {
+        const updatedList = prev.map((chat) =>
+          chat._id === updatedConversation._id ? { ...chat, ...updatedConversation } : chat
+        );
+        return updatedList.sort(
+          (a, b) =>
+            new Date(b.lastMessage?.timestamp || b.updatedAt) -
+            new Date(a.lastMessage?.timestamp || a.updatedAt)
+        );
+      });
+      if (updatedConversation._id === conversationId && updatedConversation.participant) {
+        setCurrentUserInfo({
+          ...updatedConversation.participant,
+          isActive: activeUsers.includes(updatedConversation.participant._id?.toString() || ""),
+          lastActive: updatedConversation.participant.lastActive,
+        });
+      }
+    };
+
+    const handleUnseen = ({ unseen, conversationId: updatedConversationId }) => {
+      setConversations((prev) => {
+        const updatedList = prev.map((chat) =>
+          chat._id === updatedConversationId ? { ...chat, unseen } : chat
+        );
+        return updatedList.sort(
+          (a, b) =>
+            new Date(b.lastMessage?.timestamp || b.updatedAt) -
+            new Date(a.lastMessage?.timestamp || a.updatedAt)
+        );
+      });
+    };
+
+    socket.on("getConversation", handleConversations);
+    socket.on("conversationCreated", (newConv) => {
+      setConversations((prev) => [...prev.filter((c) => c._id !== newConv._id), newConv]);
+    });
+    socket.on("updateConversation", handleUpdateConversation);
+    socket.on("unseen", handleUnseen);
+
+    return () => {
+      socket.off("getConversation");
+      socket.off("conversationCreated");
+      socket.off("updateConversation");
+      socket.off("unseen");
+    };
+  }, [currentUserId, conversationId, activeUsers]);
 
   useEffect(() => {
-    fetchMessages(currentUserId, conversationId);
-    return () => cleanupMessages();
-  }, [conversationId, currentUserId, fetchMessages, cleanupMessages]);
+    if (!conversationId) {
+      setMessages([]);
+      return;
+    }
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    socket.emit("messages", { userId: currentUserId, conversationId });
+
+    const handleMessages = (data) => {
+      if (!Array.isArray(data)) return;
+      setMessages(data);
+      const unreadMessageIds = data.filter((msg) => !msg.seen && msg.sender !== currentUserId && !msg.isDeleted).map((msg) => msg._id);
+      if (unreadMessageIds.length > 0) {
+        socket.emit("seen", { conversationId, messageId: unreadMessageIds, senderId: currentUserId });
+      }
+    };
+
+    const handleNewMessage = (message) => {
+      if (message.conversationId === conversationId) {
+        setMessages((prev) => [...prev, message]);
+        if (message.sender !== currentUserId && !message.seen && !message.isDeleted) {
+          socket.emit("seen", { conversationId, messageId: [message._id], senderId: currentUserId });
+        }
+        scrollToBottom();
+      }
+    };
+
+    const handleMessageEdited = (updatedMessage) => {
+      if (updatedMessage.conversationId === conversationId) {
+        setMessages((prev) =>
+          prev.map((msg) => (msg._id === updatedMessage._id ? { ...updatedMessage } : msg))
+        );
+      }
+    };
+
+    const handleMessageDeleted = ({ messageId, isDeleted }) => {
+      setMessages((prev) =>
+        prev.map((msg) => (msg._id === messageId ? { ...msg, isDeleted } : msg))
+      );
+    };
+
+    socket.on("messages", handleMessages);
+    socket.on("message", handleNewMessage);
+    socket.on("seen", (messageIds) => {
+      const ids = Array.isArray(messageIds) ? messageIds : [messageIds];
+      setMessages((prev) => prev.map((msg) => ids.includes(msg._id) ? { ...msg, seen: true } : msg));
+    });
+    socket.on("messageEdited", handleMessageEdited);
+    socket.on("messageDeleted", handleMessageDeleted);
+
+    return () => {
+      socket.off("messages");
+      socket.off("message");
+      socket.off("seen");
+      socket.off("messageEdited");
+      socket.off("messageDeleted");
+    };
+  }, [conversationId, currentUserId]);
+
+  useEffect(() => scrollToBottom(), [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const scrollToMessage = (messageId) => {
     const messageRef = messageRefs.current[messageId];
     if (messageRef) {
-      messageRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      messageRef.classList.add('highlight-reply');
-      setTimeout(() => messageRef.classList.remove('highlight-reply'), 2000);
+      messageRef.scrollIntoView({ behavior: "smooth", block: "center" });
+      messageRef.classList.add("highlight-reply");
+      setTimeout(() => messageRef.classList.remove("highlight-reply"), 2000);
     }
   };
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
-    return isNaN(date.getTime())
-      ? 'Invalid'
-      : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return isNaN(date.getTime()) ? "Invalid" :
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
   const formatLastActive = (lastActive) => {
-    if (!lastActive) return 'Last seen: Unknown';
+    if (!lastActive) return "Last seen: Unknown";
     const now = new Date();
     const diff = (now - new Date(lastActive)) / 1000 / 60;
-    if (diff < 1) return 'Last seen: Just now';
+    if (diff < 1) return "Last seen: Just now";
     if (diff < 60) return `Last seen: ${Math.floor(diff)}m ago`;
     return `Last seen: ${new Date(lastActive).toLocaleTimeString()}`;
   };
 
+  const handleSendMessage = () => {
+    if (!inputText.trim() || !conversationId || !currentUserId) return;
+    const messageData = {
+      conversationId,
+      sender: currentUserId,
+      text: inputText.trim(),
+      replyTo: replayId ? { id: replayId, message: replayMessage } : null,
+    };
+    socket.emit("message", JSON.stringify(messageData));
+    setInputText("");
+    setReplayId(null);
+    setReplayMessage(null);
+  };
+
   const handleContextMenu = (e, message) => {
-    if (message.isDeleted) return;
+    if (message.isDeleted) return; // Disable context menu for deleted messages
     e.preventDefault();
     const menuWidth = 120;
     const menuHeight = 100;
@@ -110,11 +235,18 @@ const Message = () => {
     if (y < 0) y = 10;
 
     const isOwnMessage = message.sender === currentUserId;
-    setContextMenu({ x, y, messageId: message._id, text: message.text, isOwnMessage });
+    setContextMenu({
+      x,
+      y,
+      messageId: message._id,
+      text: message.text,
+      isOwnMessage,
+    });
   };
 
   const handleReplay = (id, text) => {
-    setReplay(id, text);
+    setReplayId(id);
+    setReplayMessage(text);
     setContextMenu(null);
   };
 
@@ -129,14 +261,28 @@ const Message = () => {
     setContextMenu(null);
   };
 
-  const handleSendMessage = () => sendMessage(currentUserId, conversationId);
-  const handleSaveEdit = (newText) => editMessage(editModal.messageId, currentUserId, newText);
-  const handleConfirmDelete = () => deleteMessage(deleteModal.messageId, currentUserId);
+  const handleSaveEdit = (newText) => {
+    if (newText && newText.trim() && newText !== editModal.text) {
+      socket.emit("editMessage", { messageId: editModal.messageId, senderId: currentUserId, newText: newText.trim() });
+    }
+    setEditModal(null);
+    setEditText("");
+  };
+
+  const handleConfirmDelete = () => {
+    socket.emit("deleteMessage", { messageId: deleteModal.messageId, senderId: currentUserId });
+    setDeleteModal(null);
+  };
+
+  const clearReplay = () => {
+    setReplayId(null);
+    setReplayMessage(null);
+  };
 
   const closeContextMenu = () => setContextMenu(null);
   const closeEditModal = () => {
     setEditModal(null);
-    setEditText('');
+    setEditText("");
   };
   const closeDeleteModal = () => setDeleteModal(null);
 
@@ -152,15 +298,13 @@ const Message = () => {
         closeDeleteModal();
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [contextMenu, editModal, deleteModal]);
 
   return (
     <div className="flex h-screen bg-gray-900 text-white font-sans">
-      <div
-        className={`${conversationId ? 'hidden sm:flex' : 'flex'} w-full sm:w-80 flex-col bg-gray-800 border-r border-gray-700 shadow-lg`}
-      >
+      <div className={`${conversationId ? "hidden sm:flex" : "flex"} w-full sm:w-80 flex-col bg-gray-800 border-r border-gray-700 shadow-lg`}>
         <div className="p-4 border-b border-gray-600">
           <input
             type="text"
@@ -176,29 +320,27 @@ const Message = () => {
             .map((chat) => (
               <div
                 key={chat._id}
-                className={`p-3 hover:bg-gray-700 cursor-pointer transition-colors ${conversationId === chat._id ? 'bg-gray-600' : ''}`}
+                className={`p-3 hover:bg-gray-700 cursor-pointer transition-colors ${conversationId === chat._id ? "bg-gray-600" : ""}`}
                 onClick={() => navigate(`/message/${chat._id}`)}
               >
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <img
-                      src={chat.participant?.profile || '/default-avatar.png'}
-                      alt={chat.participant?.fullName || 'User'}
+                      src={chat.participant?.profile || "/default-avatar.png"}
+                      alt={chat.participant?.fullName || "User"}
                       className="w-10 h-10 rounded-full object-cover border-2 border-gray-600"
                     />
-                    <span
-                      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${activeUsers.includes(chat.participant?._id.toString()) ? 'bg-green-500' : 'bg-gray-500'}`}
-                    ></span>
+                    <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${activeUsers.includes(chat.participant?._id.toString()) ? "bg-green-500" : "bg-gray-500"}`}></span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
-                      <h3 className="font-medium text-sm truncate">{chat.participant?.fullName || 'Unknown'}</h3>
+                      <h3 className="font-medium text-sm truncate">{chat.participant?.fullName || "Unknown"}</h3>
                       {chat.unseen > 0 && (
                         <span className="bg-red-500 text-xs font-bold px-2 py-0.5 rounded-full">{chat.unseen}</span>
                       )}
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-xs text-gray-400 truncate">{chat.lastMessage?.content || 'No messages yet'}</p>
+                      <p className="text-xs text-gray-400 truncate">{chat.lastMessage?.content || "No messages yet"}</p>
                     </div>
                   </div>
                 </div>
@@ -213,30 +355,24 @@ const Message = () => {
             <div className="p-4 bg-gray-800 border-b border-gray-700 flex items-center gap-3 sticky top-0 z-10 shadow-md">
               <button
                 className="sm:hidden p-2 hover:bg-gray-700 rounded-full transition-colors"
-                onClick={() => navigate('/conversation')}
+                onClick={() => navigate("/conversation")}
               >
                 <span className="text-xl">←</span>
               </button>
               <div className="relative">
                 <img
                   onClick={() => navigate(`/profile/${currentUserInfo?.username}`)}
-                  src={currentUserInfo?.profile || '/default-avatar.png'}
-                  alt={currentUserInfo?.fullName || 'User'}
+                  src={currentUserInfo?.profile || "/default-avatar.png"}
+                  alt={currentUserInfo?.fullName || "User"}
                   className="w-12 h-12 cursor-pointer rounded-full object-cover border-2 border-gray-600"
                 />
-                <span
-                  className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${currentUserInfo?.isActive ? 'bg-green-500' : 'bg-gray-500'}`}
-                ></span>
+                <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${currentUserInfo?.isActive ? "bg-green-500" : "bg-gray-500"}`}></span>
               </div>
               <div>
-                <h2
-                  onClick={() => navigate(`/profile/${currentUserInfo?.username}`)}
-                  className="font-semibold cursor-pointer text-lg"
-                >
-                  {currentUserInfo?.fullName || 'Unknown'}
-                </h2>
+                <h2 onClick={() => navigate(`/profile/${currentUserInfo?.username}`)}
+                  className="font-semibold cursor-pointer text-lg">{currentUserInfo?.fullName || "Unknown"}</h2>
                 <p className="text-sm text-gray-400">
-                  {currentUserInfo?.isActive ? 'Active now' : formatLastActive(currentUserInfo?.lastActive)}
+                  {currentUserInfo?.isActive ? "Active now" : formatLastActive(currentUserInfo?.lastActive)}
                 </p>
               </div>
             </div>
@@ -248,14 +384,17 @@ const Message = () => {
                   <div
                     key={message._id}
                     ref={(el) => (messageRefs.current[message._id] = el)}
-                    className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
                     onContextMenu={(e) => handleContextMenu(e, message)}
                   >
                     <div
-                      className={`max-w-[70%] p-3 rounded-2xl shadow-sm transition-all ${isOwnMessage ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' : 'bg-gray-700 text-gray-200'}`}
+                      className={`max-w-[70%] p-3 rounded-2xl shadow-sm transition-all ${isOwnMessage
+                        ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white"
+                        : "bg-gray-700 text-gray-200"
+                        }`}
                     >
                       {message.isDeleted ? (
-                        <p className="text-sm italic text-gray-200">This message was deleted</p>
+                        <p className="text-sm italic text-gray-400">This message was deleted</p>
                       ) : (
                         <>
                           {message.replyTo && (
@@ -264,7 +403,7 @@ const Message = () => {
                               onClick={() => scrollToMessage(message.replyTo.id)}
                             >
                               <p className="text-xs text-gray-400 italic">
-                                {isOwnMessage ? 'You replied to:' : 'Replying to:'}
+                                {isOwnMessage ? "You replied to:" : "Replying to:"}
                               </p>
                               <p className="text-sm truncate text-gray-300">{message.replyTo.message}</p>
                             </div>
@@ -272,11 +411,9 @@ const Message = () => {
                           <p className="text-sm">{message.text}</p>
                           <div className="flex items-center gap-2 mt-1 text-xs text-gray-300">
                             <span>{formatTime(message.createdAt)}</span>
-                            {message.isEdited && <span className="text-gray-200 italic">Edited</span>}
+                            {message.isEdited && <span className="text-gray-400 italic">Edited</span>}
                             {isOwnMessage && (
-                              <span
-                                className={`w-2 h-2 rounded-full ${message.seen ? 'bg-green-400' : 'bg-gray-400'}`}
-                              ></span>
+                              <span className={`w-2 h-2 rounded-full ${message.seen ? "bg-green-400" : "bg-gray-400"}`}></span>
                             )}
                           </div>
                         </>
@@ -401,7 +538,7 @@ const Message = () => {
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   placeholder="Type a message..."
                   className="flex-1 p-3 bg-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 shadow-sm"
                 />
@@ -424,7 +561,6 @@ const Message = () => {
   );
 };
 
-// CSS styles remain unchanged
 const styles = `
   .highlight-original {
     animation: highlightOriginal 2s ease-out forwards, pulseGlow 1.5s infinite alternate;

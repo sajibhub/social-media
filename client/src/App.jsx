@@ -127,7 +127,7 @@ const App = () => {
       socket.off("notification", handleNotification);
       socket.off('active');
     };
-  }, [audio, updateProfileDataField]);
+  }, []);
   
 
   return (
