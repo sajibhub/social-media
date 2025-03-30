@@ -19,6 +19,7 @@ import authorStore from "./store/authorStore.js";
 import NotificationSound from '../public/audio/notification.wav'
 import notificationStore from "./store/notificationStore.js";
 import Message from "./pages/message.jsx"
+import useActiveStore from './store/useActiveStore.js'
 
 
 const router = createBrowserRouter([
@@ -52,7 +53,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/conversation",
-    element: < Message/>
+    element: < Message />
   },
   {
     path: "/message/:conversationId",
@@ -89,11 +90,11 @@ const App = () => {
   // console.log = () => { };
   const { profileData } = authorStore();
   const { addNotification } = notificationStore();
+  const { setActiveUsers, isUserOnline } = useActiveStore()
   const [notification, setNotification] = useState(profileData?.notification || 0);
   const updateProfileDataField = authorStore((state) => state.updateProfileDataField);
   // Initialize audio with try-catch
   const audio = new Audio(NotificationSound);
-
 
   useEffect(() => {
     const userId = localStorage.getItem("id");
@@ -103,10 +104,10 @@ const App = () => {
       socket.connect();
     }
   
-    // Join with userId if it exists
-    if (userId) {
+    // Join with userId if it exists and socket is connected
+    if (userId && socket.connected) {
       socket.emit("join", userId);
-    } 
+    }
   
     const handleNotification = (data) => {
       toast.success(`New ${data?.type} Notification`);
@@ -120,14 +121,14 @@ const App = () => {
     };
   
     socket.on("notification", handleNotification);
+    socket.on('active', (users) => setActiveUsers(users));
   
-    // Cleanup: Remove listener but don't disconnect unless necessary
     return () => {
       socket.off("notification", handleNotification);
-      // Only disconnect if no other components need the socket
-      // socket.disconnect(); // Comment out unless you’re sure it’s safe
+      socket.off('active');
     };
-  }, [audio, updateProfileDataField]); // Dependencies remain the same unless they cause issues
+  }, [audio, updateProfileDataField]);
+  
 
   return (
     <>

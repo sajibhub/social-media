@@ -6,40 +6,46 @@ import { useState } from "react";
 
 const SearchPage = () => {
   const { searchUserReq, searchKeywords, setSearchKeywords } = authorStore();
-
   const [loading, setLoading] = useState(false);
 
-  const searchHandel = async (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-
-    setLoading(true);
-    await searchUserReq(searchKeywords);
-    setLoading(false);
+    
+    if (!searchKeywords.trim()) return; 
+    
+    try {
+      setLoading(true);
+      await searchUserReq(searchKeywords);
+    } catch (error) {
+      console.error("Search failed:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Layout>
-      <>
-        <form
-          onSubmit={searchHandel}
-          className="w-full  border-b-2 sticky top-0 bg-blur bg-white bg-opacity-20 z-[999999] flex items-center "
-        >
-          <input
-            onChange={(e) => setSearchKeywords(e.target.value)}
-            placeholder="Type hare"
-            className="py-4 ps-4 w-full text-lg flex-grow"
-          />
-
+      <form
+        onSubmit={handleSearch}
+        className="w-full border-b-2 sticky top-0 bg-white bg-opacity-20 backdrop-blur-md z-[999999] flex items-center"
+      >
+        <input
+          value={searchKeywords} // Controlled input
+          onChange={(e) => setSearchKeywords(e.target.value)}
+          placeholder="Type here" // Fixed typo
+          className="py-4 ps-4 w-full text-lg flex-grow outline-none bg-transparent"
+          disabled={loading} // Disable input while loading
+        />
+        <div className="me-5">
           {loading ? (
-            <div className="loader-dark me-5"></div>
+            <div className="loader-dark w-5 h-5 border-2 border-t-transparent border-gray-500 rounded-full animate-spin"></div>
           ) : (
-            <button type="submit">
-              <IoSearch className="text-xl me-5 font-medium hover:text-sky-500" />
+            <button type="submit" disabled={loading}>
+              <IoSearch className="text-xl font-medium hover:text-sky-500 transition-colors" />
             </button>
           )}
-        </form>
-      </>
-
+        </div>
+      </form>
       <SearchResultComponent />
     </Layout>
   );

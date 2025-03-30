@@ -1101,12 +1101,14 @@ export const SearchUser = async (req, res) => {
     const searchUser = await User.aggregate([
       {
         $match: {
+          _id: { $ne: id },
           $or: [
             { username: { $regex: search, $options: "i" } },
             { fullName: { $regex: search, $options: "i" } }
           ]
         }
       },
+
       {
         $addFields: {
           isFollowing: { $in: [id, "$following"] }

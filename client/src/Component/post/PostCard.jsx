@@ -12,6 +12,7 @@ import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
 import DynamicText from "@/Component/utility/DynamicText.jsx";
+import useActiveStore from "@/store/useActiveStore.js";
 
 
 
@@ -33,6 +34,8 @@ const PostCard = () => {
     update_my_post_data,
     clear_my_post_data,
   } = postStore();
+
+  const { isUserOnline } = useActiveStore()
 
   const { myProfileData, flowReq } = authorStore();
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -170,8 +173,8 @@ const PostCard = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'KAM_DEE',
-          text: 'Mr.CEO_and_Founder_Of_UVIOM .',
+          title: 'Matrix Media',
+          text: "Post Share",
           url: url,
         });
 
@@ -269,19 +272,23 @@ const PostCard = () => {
               onClick={() => (openMenuId != null ? setOpenMenuId(null) : "")}
             >
               <div className="flex flex-row ms-3 me-5 gap-3 justify-start items-center">
-                <div
-                  className=" flex-shrink-0  h-[40px] w-[40px] rounded-full
-                    overflow-hidden flex flex-row justify-center items-center shadow"
-                >
+                <div className="relative">
+                <div className="h-12 w-12 rounded-full overflow-hidden cursor-pointer border border-gray-300 ">
                   <img
-                    className="min-h-full min-w-full"
-                    onClick={() =>
-                      goToProfile(items.myPost, items.user.username)
-                    }
+                    className="object-cover w-full h-full"
+                    onClick={() => goToProfile(items.myPost, items.user.username)}
                     src={items.user.profile}
                     alt="profile image"
                   />
+
+                  {/* Online/Offline Status Indicator */}
+                  <div
+                    className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${isUserOnline(items.user._id) ? 'bg-green-500 border-white' : 'bg-red-500 border-white'}`}
+                  ></div>
                 </div>
+                </div>
+
+
                 <div className="mb-2 flex-grow">
                   <h2 className="text-base font-medium text-neutral-800 flex gap-1 items-center w-fit">
                     <span
@@ -478,7 +485,7 @@ const PostCard = () => {
                         "
                 >
                   <FaCommentDots className="text-neutral-900 text-lg" />
-                  
+
 
                   <h1
                     className={`text-base font-medium flex items-center gap-1`}

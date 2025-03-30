@@ -19,7 +19,7 @@ const following_list_api = `${Base_url}user/following/`;
 const image_Gallery_api = `${Base_url}user/profile/post/images/`;
 
 const authorStore = create((set, get) => ({
-  signUpForm: [],
+  signUpForm: {},
   setSignUpForm: (name, value) => {
     set((state) => ({
       signUpForm: { ...state.signUpForm, [name]: value },
@@ -36,7 +36,7 @@ const authorStore = create((set, get) => ({
     }
   },
 
-  loginForm: '',
+  loginForm: {},
   setLoginForm: (name, value) => {
     set((state) => ({
       loginForm: { ...state.loginForm, [name]: value },
@@ -45,7 +45,7 @@ const authorStore = create((set, get) => ({
 
   loginReq: async (data) => {
     try {
-      let res = await axios.post(Login_api, data, { withCredentials: true });
+      const res = await axios.post(Login_api, data, { withCredentials: true });
       return res.status;
     } catch (err) {
       console.error('Error in login:', err);
@@ -56,6 +56,18 @@ const authorStore = create((set, get) => ({
   SignOutReq: async () => {
     try {
       await axios.post(SignOut_api, '', { withCredentials: true });
+      // Clear all user-related data on sign out
+      set({
+        profileData: null,
+        myProfileData: null,
+        suggestUser: null,
+        searchUserData: null,
+        followersList: null,
+        followingList: null,
+        imageGallery: null,
+      });
+      localStorage.removeItem('userName');
+      localStorage.removeItem('id');
       return true;
     } catch (error) {
       console.error('Error during sign-out:', error);
@@ -104,13 +116,12 @@ const authorStore = create((set, get) => ({
 
   updateProfileReq: async (data) => {
     const existingProfile = get().myProfileData;
-    if (existingProfile) {
-      data = { ...existingProfile, ...data }; // Merge data if exists locally
-    }
+    if (!existingProfile) return false; // No profile to update
 
+    const mergedData = { ...existingProfile, ...data };
     try {
-      await axios.put(Profile_info_update_api, data, { withCredentials: true });
-      set({ myProfileData: data }); // Update local state after API call
+      await axios.put(Profile_info_update_api, mergedData, { withCredentials: true });
+      set({ myProfileData: mergedData });
       return true;
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -119,48 +130,41 @@ const authorStore = create((set, get) => ({
   },
 
   readProfileReq: async (user) => {
-    const profileData = get().profileData;
-    const myProfileData = get().myProfileData;
-  
-    // If profile data exists, no need to call the API, return true
-    if (profileData && myProfileData) {
-      return true; // Data exists locally, no need to refetch
-    }
-  
+    const { profileData, myProfileData } = get();
+    const isMe = user === 'me' || !user;
+
+    // Check if data already exists
+    if (isMe && myProfileData) return true;
+    if (!isMe && profileData && profileData.username === user) return true;
+
     try {
-      let res = await axios.get(Read_Profile_api + user, { withCredentials: true });
-      set({ profileData: res.data.profile });
-  
-      let me = await axios.get(Read_Profile_api + 'me', { withCredentials: true });
-      set({ myProfileData: me.data.profile });
-  
-      localStorage.setItem('userName', me.data.profile.username);
-      localStorage.setItem('id', me.data.profile._id);
-  
+      const url = isMe ? `${Read_Profile_api}me` : `${Read_Profile_api}${user}`;
+      const res = await axios.get(url, { withCredentials: true });
+      const newProfileData = res.data.profile;
+
+      if (isMe) {
+        set({ myProfileData: newProfileData });
+        localStorage.setItem('userName', newProfileData.username);
+        localStorage.setItem('id', newProfileData._id);
+      } else {
+        set({ profileData: newProfileData });
+      }
       return true;
     } catch (error) {
       console.error('Error fetching profile:', error);
       return false;
     }
   },
-  
+
   updateProfileDataField: (name, value) => {
-    const profileData = get().profileData;
-    const myProfileData = get().myProfileData;
-  
+    const { profileData, myProfileData } = get();
     if (profileData) {
-      set({
-        profileData: { ...profileData, [name]: value },
-      });
+      set({ profileData: { ...profileData, [name]: value } });
     }
-  
     if (myProfileData) {
-      set({
-        myProfileData: { ...myProfileData, [name]: value },
-      });
+      set({ myProfileData: { ...myProfileData, [name]: value } });
     }
   },
-  
 
   profileUpdateData: null,
   setProfileUpdateData: (name, value) => {
@@ -170,12 +174,17 @@ const authorStore = create((set, get) => ({
   },
 
   updateProfileRuq: async (cover, profile) => {
-    let formData = new FormData();
+    const formData = new FormData();
     formData.append('profile', profile);
     formData.append('cover', cover);
 
     try {
-      await axios.put(Profile_Update_api, formData, { withCredentials: true });
+      const res = await axios.put(Profile_Update_api, formData, { withCredentials: true });
+      // Update myProfileData with new image URLs if returned by API
+      const updatedImages = res.data.profile || {};
+      set((state) => ({
+        myProfileData: { ...state.myProfileData, ...updatedImages },
+      }));
       return true;
     } catch (error) {
       console.error('Error updating profile images:', error);
@@ -185,7 +194,8 @@ const authorStore = create((set, get) => ({
 
   flowReq: async (id) => {
     try {
-      await axios.put(Follow_api + id, '', { withCredentials: true });
+      await axios.put(`${Follow_api}${id}`, '', { withCredentials: true });
+      // Optionally update local state if API returns updated follow status
       return true;
     } catch (error) {
       console.error('Error following user:', error);
@@ -207,10 +217,8 @@ const authorStore = create((set, get) => ({
   },
 
   suggestUserReq: async () => {
-    const suggestUser = get().suggestUser;
-    if (suggestUser) {
-      return suggestUser; // Return if suggestUser exists locally
-    }
+    const { suggestUser } = get();
+    if (suggestUser) return true;
 
     try {
       const res = await axios.get(Suggest_user_api, { withCredentials: true });
@@ -229,15 +237,13 @@ const authorStore = create((set, get) => ({
 
   searchUserData: null,
   searchUserReq: async (data) => {
-    const searchUserData = get().searchUserData;
-    if (searchUserData) {
-      return searchUserData; // Return if searchUserData exists locally
-    }
+    const { searchUserData, searchKeywords } = get();
+    if (searchUserData && searchKeywords === data) return true;
 
     const body = { search: data };
     try {
       const res = await axios.post(Search_user_api, body, { withCredentials: true });
-      set({ searchUserData: res.data.searchUser });
+      set({ searchUserData: res.data.searchUser, searchKeywords: data });
       return true;
     } catch (error) {
       console.error('Error searching users:', error);
@@ -259,13 +265,11 @@ const authorStore = create((set, get) => ({
   },
 
   followersReq: async (data) => {
-    const followersList = get().followersList;
-    if (followersList) {
-      return followersList; // Return if followersList exists locally
-    }
+    const { followersList } = get();
+    if (followersList) return true;
 
     try {
-      const res = await axios.get(follower_list_api + data, { withCredentials: true });
+      const res = await axios.get(`${follower_list_api}${data}`, { withCredentials: true });
       set({ followersList: res.data.followers });
       return true;
     } catch (error) {
@@ -280,13 +284,11 @@ const authorStore = create((set, get) => ({
   },
 
   followingListReq: async (data) => {
-    const followingList = get().followingList;
-    if (followingList) {
-      return followingList; 
-    }
+    const { followingList } = get();
+    if (followingList) return true;
 
     try {
-      const res = await axios.get(following_list_api + data, { withCredentials: true });
+      const res = await axios.get(`${following_list_api}${data}`, { withCredentials: true });
       set({ followingList: res.data.following });
       return true;
     } catch (error) {
@@ -301,13 +303,11 @@ const authorStore = create((set, get) => ({
   },
 
   imageGalleryReq: async (user) => {
-    const imageGallery = get().imageGallery;
-    if (imageGallery) {
-      return imageGallery; 
-    }
+    const { imageGallery } = get();
+    if (imageGallery) return true;
 
     try {
-      const res = await axios.get(image_Gallery_api + user, { withCredentials: true });
+      const res = await axios.get(`${image_Gallery_api}${user}`, { withCredentials: true });
       set({ imageGallery: res.data.images });
       return true;
     } catch (error) {

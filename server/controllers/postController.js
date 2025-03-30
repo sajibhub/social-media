@@ -167,6 +167,7 @@ export const PostRead = async (req, res) => {
         $project: {
           _id: 1,
           user: {
+            _id: 1,
             fullName: 1,
             username: 1,
             profile: 1,

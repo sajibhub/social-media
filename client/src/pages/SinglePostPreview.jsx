@@ -1,27 +1,30 @@
-import {AiFillDelete, AiFillLike} from "react-icons/ai";
-import {FaCommentDots,  FaShare} from "react-icons/fa";
-import {IoBookmark, } from "react-icons/io5";
-import {MdEmojiEmotions, MdMoreVert} from "react-icons/md";
-import {RiEdit2Fill} from "react-icons/ri";
+import { AiFillDelete, AiFillLike } from "react-icons/ai";
+import { FaCommentDots, FaShare } from "react-icons/fa";
+import { IoBookmark, } from "react-icons/io5";
+import { MdEmojiEmotions, MdMoreVert } from "react-icons/md";
+import { RiEdit2Fill } from "react-icons/ri";
 
 
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import postStore from "@/store/postStore.js";
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 import EmojiPicker from "emoji-picker-react";
 import toast from "react-hot-toast";
 import VerifiedBadge from "@/Component/utility/VerifyBadge.jsx";
 
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import DynamicText from "@/Component/utility/DynamicText.jsx";
+import useActiveStore from '../store/useActiveStore.js'
+
 
 const SinglePostPreview = () => {
     const getUrl = window.location.href
     const postId = useParams();
     const navigate = useNavigate();
+    const { isUserOnline } = useActiveStore();
 
-    const {likePostReq, update_Single_Post_data} =postStore()
-    const {Single_Post_Req , Single_Post_Data ,  commentListReq, commentList, savePostReq , commentPostReq , updateComment , deletePostCommentReq ,clear_my_post_data} = postStore()
+    const { likePostReq, update_Single_Post_data } = postStore()
+    const { Single_Post_Req, Single_Post_Data, commentListReq, commentList, savePostReq, commentPostReq, updateComment, deletePostCommentReq, clear_my_post_data } = postStore()
 
     const [hovered, setHovered] = useState(
         {
@@ -32,11 +35,11 @@ const SinglePostPreview = () => {
 
 
     const [loader, setLoader] = useState({
-        status : false,
+        status: false,
         id: null
     });
     const [savePostLoader, setSavePostLoader] = useState({
-        status : false,
+        status: false,
         id: null
     });
 
@@ -54,21 +57,21 @@ const SinglePostPreview = () => {
 
     useEffect(() => {
         (
-           async ()=>{
-               await Single_Post_Req(postId.postId)
-               await  commentListReq(postId.postId)
+            async () => {
+                await Single_Post_Req(postId.postId)
+                await commentListReq(postId.postId)
 
             }
         )()
     }, [])
 
 
-    const likePostHandler = async (id,isLike ,Like ) => {
+    const likePostHandler = async (id, isLike, Like) => {
         setLoader({
             status: true,
             id: id
         })
-        const res =  await likePostReq(id);
+        const res = await likePostReq(id);
 
 
         setLoader({
@@ -76,38 +79,38 @@ const SinglePostPreview = () => {
             id: null
         })
 
-        let like = Like-1
+        let like = Like - 1
         let add = Like + 1
 
         if (res && (isLike === true)) {
-            update_Single_Post_data(id, { isLike: false, likes:like})
+            update_Single_Post_data(id, { isLike: false, likes: like })
 
         }
-        if (res && (isLike ===false)) {
-            update_Single_Post_data(id, { isLike: true, likes:add})
+        if (res && (isLike === false)) {
+            update_Single_Post_data(id, { isLike: true, likes: add })
 
         }
     }
 
-    const postSaveHandler = async (id , isSave , save)=>{
+    const postSaveHandler = async (id, isSave, save) => {
         setSavePostLoader(
             {
                 status: true,
-                id:id
+                id: id
             }
         )
 
-        const res =  await savePostReq(id)
-        if(res){
-            let remove =  save-1
-            let add =  save + 1
+        const res = await savePostReq(id)
+        if (res) {
+            let remove = save - 1
+            let add = save + 1
 
             if (isSave === true) {
-                update_Single_Post_data(id, { isSave: false, postSave:remove})
+                update_Single_Post_data(id, { isSave: false, postSave: remove })
 
             }
-            if (isSave ===false) {
-                update_Single_Post_data(id, { isSave: true, postSave:add})
+            if (isSave === false) {
+                update_Single_Post_data(id, { isSave: true, postSave: add })
 
             }
         }
@@ -115,7 +118,7 @@ const SinglePostPreview = () => {
         setSavePostLoader(
             {
                 status: false,
-                id:null
+                id: null
             }
         )
     }
@@ -125,22 +128,22 @@ const SinglePostPreview = () => {
         e.preventDefault();
 
         const data = {
-            id : Single_Post_Data[0]._id,
-            comment : commentData
+            id: Single_Post_Data[0]._id,
+            comment: commentData
         }
         setCommentListLoader(true)
-        const res =  await commentPostReq(data)
-        if(res){
+        const res = await commentPostReq(data)
+        if (res) {
             setCommentData(" ")
             setCommentListLoader(false)
-            await  commentListReq(postId.postId)
+            await commentListReq(postId.postId)
         }
         else {
             toast.error("something went wrong")
         }
     }
 
-    const commentEdit = async (id, text)=>{
+    const commentEdit = async (id, text) => {
         setCommentData(text);
         setCommentId(id)
         setHovered({
@@ -154,32 +157,32 @@ const SinglePostPreview = () => {
         e.preventDefault();
         setCommentListLoader(true)
         const data = {
-            commentId : commentId,
+            commentId: commentId,
             comment: commentData,
             id: Single_Post_Data[0]._id
         }
-        const res =  await updateComment(data)
+        const res = await updateComment(data)
 
         setCommentListLoader(false)
-        if(res){
+        if (res) {
             setCommentId("")
             setCommentData("")
-            await  commentListReq(postId.postId)
+            await commentListReq(postId.postId)
         }
         else {
             toast.error("update comment fail")
         }
     }
 
-    const deleteCommentHandel = async (id)=>{
+    const deleteCommentHandel = async (id) => {
         setHovered({
             id: " ",
             status: false,
         })
 
-        let res = await  deletePostCommentReq(Single_Post_Data[0]._id , id)
-        if(res){
-            await  commentListReq(postId.postId)
+        let res = await deletePostCommentReq(Single_Post_Data[0]._id, id)
+        if (res) {
+            await commentListReq(postId.postId)
         }
         else {
             toast.error("deleteCommentHandel fail")
@@ -202,7 +205,7 @@ const SinglePostPreview = () => {
                 await navigator.share({
                     title: 'KAM_DEE',
                     text: 'Mr.CEO_and_Founder_Of_UVIOM .',
-                    url: getUrl ,
+                    url: getUrl,
                 });
 
             } catch (error) {
@@ -217,7 +220,7 @@ const SinglePostPreview = () => {
 
 
 
-    if(Single_Post_Data === null){
+    if (Single_Post_Data === null) {
         return (
             <>
                 <div className="w-full border-b-2 sticky top-0 bg-blur bg-white bg-opacity-20 z-[999999]">
@@ -307,13 +310,14 @@ const SinglePostPreview = () => {
                 >
                     {showPicker && (
                         <div className=" absolute top-0 right-0 z-30"
-                             onMouseLeave={() => setShowPicker(!showPicker)}
+                            onMouseLeave={() => setShowPicker(!showPicker)}
                         >
-                            <EmojiPicker className="ms-auto" onEmojiClick={handleEmojiClick}/>
+                            <EmojiPicker className="ms-auto" onEmojiClick={handleEmojiClick} />
                         </div>
                     )}
 
                     <div className="flex flex-row ms-3 me-5 gap-3 justify-start items-center">
+                        <div className="relative">
                         <div
                             className=" flex-shrink-0  h-[40px] w-[40px] rounded-full
                                      overflow-hidden flex flex-row justify-center items-center shadow
@@ -327,20 +331,27 @@ const SinglePostPreview = () => {
                                 src={Single_Post_Data[0].user.profile}
                                 alt="profile image"
                             />
+                            <div
+                                className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${isUserOnline(Single_Post_Data[0].user._id)
+                                    ? "bg-green-500 border-white"
+                                    : "bg-red-500 border-white"
+                                    } z-10`}
+                            ></div>
+                        </div>
                         </div>
                         <div className="mb-2 flex-grow">
                             <h2 className="text-base font-medium text-neutral-800 flex gap-1 items-center w-fit">
-                    <span
-                        onClick={() =>
-                            goToProfile(Single_Post_Data[0].myPost, Single_Post_Data[0].user.username)
-                        }
-                        className="cursor-pointer hover:underline"
-                    >
-                      {Single_Post_Data[0].user?.fullName}
+                                <span
+                                    onClick={() =>
+                                        goToProfile(Single_Post_Data[0].myPost, Single_Post_Data[0].user.username)
+                                    }
+                                    className="cursor-pointer hover:underline"
+                                >
+                                    {Single_Post_Data[0].user?.fullName}
 
-                    </span>
+                                </span>
                                 {Single_Post_Data[0].user.verify && (
-                                    <VerifiedBadge isVerified={Single_Post_Data[0].user.verify}/>
+                                    <VerifiedBadge isVerified={Single_Post_Data[0].user.verify} />
                                 )}
                             </h2>
                             <p className="text-base text-neutral-600 w-fit">
@@ -405,24 +416,22 @@ const SinglePostPreview = () => {
                                 loader.id !== Single_Post_Data[0]._id && (
 
                                     <AiFillLike
-                                        className={`${
-                                            Single_Post_Data[0].isLike ? "text-sky-600" : "text-neutral-800"
-                                        } text-lg`}
+                                        className={`${Single_Post_Data[0].isLike ? "text-sky-600" : "text-neutral-800"
+                                            } text-lg`}
                                     />
                                 )
                             }
 
                             <h1
-                                className={`text-base font-medium flex gap-1 items-center ${
-                                    Single_Post_Data[0].isLike ? "text-sky-600" : "text-neutral-800"
-                                } `}
+                                className={`text-base font-medium flex gap-1 items-center ${Single_Post_Data[0].isLike ? "text-sky-600" : "text-neutral-800"
+                                    } `}
                             >
                                 {Single_Post_Data[0].likes}
                                 <span className="hidden md:block">Like</span>
                             </h1>
                         </div>
                         <div className="flex flex-row gap-2 justify-start items-center">
-                            <FaCommentDots className="text-neutral-900 text-lg"/>
+                            <FaCommentDots className="text-neutral-900 text-lg" />
                             <h1 className="text-base flex flex-row gap-1 font-medium text-neutral-900">
                                 {Single_Post_Data[0].comment}
                                 <span className="hidden md:block">Comments</span>
@@ -434,7 +443,7 @@ const SinglePostPreview = () => {
                             }
                             className="flex flex-row gap-2 justify-start items-center"
                         >
-                            <FaShare className="text-neutral-900 text-lg"/>
+                            <FaShare className="text-neutral-900 text-lg" />
                             <h1 className="text-base font-medium text-neutral-900">
                                 Shares
                             </h1>
@@ -449,7 +458,7 @@ const SinglePostPreview = () => {
                                         onClick={
                                             () => postSaveHandler(Single_Post_Data[0]._id, Single_Post_Data[0].isSave, Single_Post_Data[0].postSave)
                                         }
-                                        className="text-neutral-900 text-lg"/>
+                                        className="text-neutral-900 text-lg" />
                             }
 
                             <h1
@@ -536,7 +545,7 @@ const SinglePostPreview = () => {
                                                             className="flex items-center gap-3 py-2 px-4 hover:bg-sky-100"
                                                         >
                                                             <RiEdit2Fill
-                                                                className="text-lg font-semibold text-neutral-700 hover:text-neutral-800"/>
+                                                                className="text-lg font-semibold text-neutral-700 hover:text-neutral-800" />
                                                             <h1 className="text-base font-medium text-neutral-700 hover:text-neutral-800">Edit </h1>
                                                         </div>
                                                         <div
@@ -547,7 +556,7 @@ const SinglePostPreview = () => {
 
                                                         >
                                                             <AiFillDelete
-                                                                className="text-lg font-semibold text-neutral-700 hover:text-neutral-800"/>
+                                                                className="text-lg font-semibold text-neutral-700 hover:text-neutral-800" />
                                                             <h1 className="text-base font-medium text-neutral-700 hover:text-neutral-800">Delete </h1>
                                                         </div>
                                                     </div>
@@ -591,7 +600,7 @@ const SinglePostPreview = () => {
                                 onClick={() => setShowPicker((prev) => !prev)}
                             >
 
-                                <MdEmojiEmotions className="text-xl text-neutral-700 cursor-pointer"/>
+                                <MdEmojiEmotions className="text-xl text-neutral-700 cursor-pointer" />
                             </div>
 
 

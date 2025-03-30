@@ -1,221 +1,100 @@
-import { useEffect, useRef, useState } from "react";
-import { socket } from "../utils/socket.js";
-import { useParams, useNavigate } from "react-router-dom";
-import { IoIosClose } from "react-icons/io";
+// Message.jsx
+import { useEffect, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { IoIosClose } from 'react-icons/io';
+import useMessageStore from '../store/messageStore.js'; 
 
 const Message = () => {
-  const [messages, setMessages] = useState([]);
-  const [inputText, setInputText] = useState("");
-  const [conversations, setConversations] = useState([]);
-  const [currentUserInfo, setCurrentUserInfo] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [activeUsers, setActiveUsers] = useState([]);
-  const [contextMenu, setContextMenu] = useState(null);
-  const [editModal, setEditModal] = useState(null);
-  const [deleteModal, setDeleteModal] = useState(null);
+  const {
+    messages,
+    inputText,
+    conversations,
+    currentUserInfo,
+    searchQuery,
+    activeUsers,
+    contextMenu,
+    editModal,
+    editText,
+    deleteModal,
+    replayId,
+    replayMessage,
+    setInputText,
+    setSearchQuery,
+    setContextMenu,
+    setEditModal,
+    setEditText,
+    setDeleteModal,
+    setReplay,
+    clearReplay,
+    initializeSocket,
+    cleanupSocket,
+    fetchConversations,
+    fetchMessages,
+    cleanupMessages,
+    sendMessage,
+    editMessage,
+    deleteMessage,
+  } = useMessageStore();
+
+
   const { conversationId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
   const messageRefs = useRef({});
-  const currentUserId = localStorage.getItem("id");
-  const socketInitialized = useRef(false);
-  const [replayId, setReplayId] = useState(null);
-  const [replayMessage, setReplayMessage] = useState(null);
+  const currentUserId = localStorage.getItem('id');
   const contextMenuRef = useRef(null);
   const editModalRef = useRef(null);
   const deleteModalRef = useRef(null);
 
   useEffect(() => {
-    if (!currentUserId) return;
-    if (!socket.connected && !socketInitialized.current) {
-      socket.connect();
-      socketInitialized.current = true;
-      socket.emit("join", currentUserId);
-    }
-
-    const handleActiveUsers = (users) => setActiveUsers(users);
-    socket.on("active", handleActiveUsers);
-
-    return () => {
-      socket.off("active", handleActiveUsers);
-      if (socket.connected) {
-        socket.disconnect();
-        socketInitialized.current = false;
-      }
-    };
-  }, [currentUserId]);
+    initializeSocket(currentUserId);
+    return () => cleanupSocket();
+  }, [currentUserId, initializeSocket, cleanupSocket]);
 
   useEffect(() => {
-    if (!currentUserId) return;
-    socket.emit("getConversation", { userId: currentUserId });
-
-    const handleConversations = (data) => {
-      if (!Array.isArray(data)) return;
-      setConversations(data);
-      if (conversationId) {
-        const currentConv = data.find((conv) => conv._id === conversationId);
-        if (currentConv && currentConv.participant) {
-          setCurrentUserInfo({
-            ...currentConv.participant,
-            isActive: activeUsers.includes(currentConv.participant._id?.toString() || ""),
-            lastActive: currentConv.participant.lastActive,
-          });
-        } else {
-          setCurrentUserInfo(null);
-        }
-      }
-    };
-
-    const handleUpdateConversation = (updatedConversation) => {
-      setConversations((prev) => {
-        const updatedList = prev.map((chat) =>
-          chat._id === updatedConversation._id ? { ...chat, ...updatedConversation } : chat
-        );
-        return updatedList.sort(
-          (a, b) =>
-            new Date(b.lastMessage?.timestamp || b.updatedAt) -
-            new Date(a.lastMessage?.timestamp || a.updatedAt)
-        );
-      });
-      if (updatedConversation._id === conversationId && updatedConversation.participant) {
-        setCurrentUserInfo({
-          ...updatedConversation.participant,
-          isActive: activeUsers.includes(updatedConversation.participant._id?.toString() || ""),
-          lastActive: updatedConversation.participant.lastActive,
-        });
-      }
-    };
-
-    const handleUnseen = ({ unseen, conversationId: updatedConversationId }) => {
-      setConversations((prev) => {
-        const updatedList = prev.map((chat) =>
-          chat._id === updatedConversationId ? { ...chat, unseen } : chat
-        );
-        return updatedList.sort(
-          (a, b) =>
-            new Date(b.lastMessage?.timestamp || b.updatedAt) -
-            new Date(a.lastMessage?.timestamp || a.updatedAt)
-        );
-      });
-    };
-
-    socket.on("getConversation", handleConversations);
-    socket.on("conversationCreated", (newConv) => {
-      setConversations((prev) => [...prev.filter((c) => c._id !== newConv._id), newConv]);
-    });
-    socket.on("updateConversation", handleUpdateConversation);
-    socket.on("unseen", handleUnseen);
-
-    return () => {
-      socket.off("getConversation");
-      socket.off("conversationCreated");
-      socket.off("updateConversation");
-      socket.off("unseen");
-    };
-  }, [currentUserId, conversationId, activeUsers]);
+    fetchConversations(currentUserId);
+  }, [currentUserId, conversationId, activeUsers, fetchConversations]);
 
   useEffect(() => {
-    if (!conversationId) {
-      setMessages([]);
-      return;
-    }
+    fetchMessages(currentUserId, conversationId);
+    return () => cleanupMessages();
+  }, [conversationId, currentUserId, fetchMessages, cleanupMessages]);
 
-    socket.emit("messages", { userId: currentUserId, conversationId });
-
-    const handleMessages = (data) => {
-      if (!Array.isArray(data)) return;
-      setMessages(data);
-      const unreadMessageIds = data.filter((msg) => !msg.seen && msg.sender !== currentUserId).map((msg) => msg._id);
-      if (unreadMessageIds.length > 0) {
-        socket.emit("seen", { conversationId, messageId: unreadMessageIds, senderId: currentUserId });
-      }
-    };
-
-    const handleNewMessage = (message) => {
-      if (message.conversationId === conversationId) {
-        setMessages((prev) => [...prev, message]);
-        if (message.sender !== currentUserId && !message.seen) {
-          socket.emit("seen", { conversationId, messageId: [message._id], senderId: currentUserId });
-        }
-        scrollToBottom();
-      }
-    };
-
-    const handleMessageEdited = (updatedMessage) => {
-      if (updatedMessage.conversationId === conversationId) {
-        setMessages((prev) =>
-          prev.map((msg) => (msg._id === updatedMessage._id ? updatedMessage : msg))
-        );
-      }
-    };
-
-    const handleMessageDeleted = ({ messageId }) => {
-      setMessages((prev) => prev.filter((msg) => msg._id !== messageId));
-    };
-
-    socket.on("messages", handleMessages);
-    socket.on("message", handleNewMessage);
-    socket.on("seen", (messageIds) => {
-      const ids = Array.isArray(messageIds) ? messageIds : [messageIds];
-      setMessages((prev) => prev.map((msg) => ids.includes(msg._id) ? { ...msg, seen: true } : msg));
-    });
-    socket.on("messageEdited", handleMessageEdited);
-    socket.on("messageDeleted", handleMessageDeleted);
-
-    return () => {
-      socket.off("messages");
-      socket.off("message");
-      socket.off("seen");
-      socket.off("messageEdited");
-      socket.off("messageDeleted");
-    };
-  }, [conversationId, currentUserId]);
-
-  useEffect(() => scrollToBottom(), [messages]);
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const scrollToMessage = (messageId) => {
     const messageRef = messageRefs.current[messageId];
     if (messageRef) {
-      messageRef.scrollIntoView({ behavior: "smooth", block: "center" });
-      messageRef.classList.add("highlight-reply"); // Use a new class for reply-specific effect
-      setTimeout(() => messageRef.classList.remove("highlight-reply"), 2000); // Remove after 2 seconds
+      messageRef.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      messageRef.classList.add('highlight-reply');
+      setTimeout(() => messageRef.classList.remove('highlight-reply'), 2000);
     }
   };
 
   const formatTime = (dateString) => {
     const date = new Date(dateString);
-    return isNaN(date.getTime()) ? "Invalid" :
-      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    return isNaN(date.getTime())
+      ? 'Invalid'
+      : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   const formatLastActive = (lastActive) => {
-    if (!lastActive) return "Last seen: Unknown";
+    if (!lastActive) return 'Last seen: Unknown';
     const now = new Date();
     const diff = (now - new Date(lastActive)) / 1000 / 60;
-    if (diff < 1) return "Last seen: Just now";
+    if (diff < 1) return 'Last seen: Just now';
     if (diff < 60) return `Last seen: ${Math.floor(diff)}m ago`;
     return `Last seen: ${new Date(lastActive).toLocaleTimeString()}`;
   };
 
-  const handleSendMessage = () => {
-    if (!inputText.trim() || !conversationId || !currentUserId) return;
-    const messageData = {
-      conversationId,
-      sender: currentUserId,
-      text: inputText.trim(),
-      replyTo: replayId ? { id: replayId, message: replayMessage } : null,
-    };
-    socket.emit("message", JSON.stringify(messageData));
-    setInputText("");
-    setReplayId(null);
-    setReplayMessage(null);
-  };
-
   const handleContextMenu = (e, message) => {
+    if (message.isDeleted) return;
     e.preventDefault();
     const menuWidth = 120;
     const menuHeight = 100;
@@ -231,23 +110,17 @@ const Message = () => {
     if (y < 0) y = 10;
 
     const isOwnMessage = message.sender === currentUserId;
-    setContextMenu({
-      x,
-      y,
-      messageId: message._id,
-      text: message.text,
-      isOwnMessage,
-    });
+    setContextMenu({ x, y, messageId: message._id, text: message.text, isOwnMessage });
   };
 
   const handleReplay = (id, text) => {
-    setReplayId(id);
-    setReplayMessage(text);
+    setReplay(id, text);
     setContextMenu(null);
   };
 
   const handleEdit = (id, text) => {
     setEditModal({ messageId: id, text });
+    setEditText(text);
     setContextMenu(null);
   };
 
@@ -256,25 +129,15 @@ const Message = () => {
     setContextMenu(null);
   };
 
-  const handleSaveEdit = (newText) => {
-    if (newText && newText.trim() && newText !== editModal.text) {
-      socket.emit("editMessage", { messageId: editModal.messageId, senderId: currentUserId, newText: newText.trim() });
-    }
-    setEditModal(null);
-  };
-
-  const handleConfirmDelete = () => {
-    socket.emit("deleteMessage", { messageId: deleteModal.messageId, senderId: currentUserId });
-    setDeleteModal(null);
-  };
-
-  const clearReplay = () => {
-    setReplayId(null);
-    setReplayMessage(null);
-  };
+  const handleSendMessage = () => sendMessage(currentUserId, conversationId);
+  const handleSaveEdit = (newText) => editMessage(editModal.messageId, currentUserId, newText);
+  const handleConfirmDelete = () => deleteMessage(deleteModal.messageId, currentUserId);
 
   const closeContextMenu = () => setContextMenu(null);
-  const closeEditModal = () => setEditModal(null);
+  const closeEditModal = () => {
+    setEditModal(null);
+    setEditText('');
+  };
   const closeDeleteModal = () => setDeleteModal(null);
 
   useEffect(() => {
@@ -289,13 +152,15 @@ const Message = () => {
         closeDeleteModal();
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [contextMenu, editModal, deleteModal]);
 
   return (
     <div className="flex h-screen bg-gray-900 text-white font-sans">
-      <div className={`${conversationId ? "hidden sm:flex" : "flex"} w-full sm:w-80 flex-col bg-gray-800 border-r border-gray-700 shadow-lg`}>
+      <div
+        className={`${conversationId ? 'hidden sm:flex' : 'flex'} w-full sm:w-80 flex-col bg-gray-800 border-r border-gray-700 shadow-lg`}
+      >
         <div className="p-4 border-b border-gray-600">
           <input
             type="text"
@@ -311,28 +176,29 @@ const Message = () => {
             .map((chat) => (
               <div
                 key={chat._id}
-                className={`p-3 hover:bg-gray-700 cursor-pointer transition-colors ${conversationId === chat._id ? "bg-gray-600" : ""}`}
+                className={`p-3 hover:bg-gray-700 cursor-pointer transition-colors ${conversationId === chat._id ? 'bg-gray-600' : ''}`}
                 onClick={() => navigate(`/message/${chat._id}`)}
               >
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <img
-                      src={chat.participant?.profile || "/default-avatar.png"}
-                      alt={chat.participant?.fullName || "User"}
+                      src={chat.participant?.profile || '/default-avatar.png'}
+                      alt={chat.participant?.fullName || 'User'}
                       className="w-10 h-10 rounded-full object-cover border-2 border-gray-600"
                     />
-                    <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${activeUsers.includes(chat.participant?._id.toString()) ? "bg-green-500" : "bg-gray-500"}`}></span>
+                    <span
+                      className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${activeUsers.includes(chat.participant?._id.toString()) ? 'bg-green-500' : 'bg-gray-500'}`}
+                    ></span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex justify-between items-center">
-                      <h3 className="font-medium text-sm truncate">{chat.participant?.fullName || "Unknown"}</h3>
+                      <h3 className="font-medium text-sm truncate">{chat.participant?.fullName || 'Unknown'}</h3>
                       {chat.unseen > 0 && (
                         <span className="bg-red-500 text-xs font-bold px-2 py-0.5 rounded-full">{chat.unseen}</span>
                       )}
                     </div>
                     <div className="flex justify-between items-center">
-                      <p className="text-xs text-gray-400 truncate">{chat.lastMessage?.content || "No messages yet"}</p>
-                      {/* <span className="text-xs text-gray-400">{formatTime(chat.updatedAt)}</span> */}
+                      <p className="text-xs text-gray-400 truncate">{chat.lastMessage?.content || 'No messages yet'}</p>
                     </div>
                   </div>
                 </div>
@@ -347,24 +213,30 @@ const Message = () => {
             <div className="p-4 bg-gray-800 border-b border-gray-700 flex items-center gap-3 sticky top-0 z-10 shadow-md">
               <button
                 className="sm:hidden p-2 hover:bg-gray-700 rounded-full transition-colors"
-                onClick={() => navigate("/conversation")}
+                onClick={() => navigate('/conversation')}
               >
                 <span className="text-xl">←</span>
               </button>
               <div className="relative">
                 <img
                   onClick={() => navigate(`/profile/${currentUserInfo?.username}`)}
-                  src={currentUserInfo?.profile || "/default-avatar.png"}
-                  alt={currentUserInfo?.fullName || "User"}
+                  src={currentUserInfo?.profile || '/default-avatar.png'}
+                  alt={currentUserInfo?.fullName || 'User'}
                   className="w-12 h-12 cursor-pointer rounded-full object-cover border-2 border-gray-600"
                 />
-                <span className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${currentUserInfo?.isActive ? "bg-green-500" : "bg-gray-500"}`}></span>
+                <span
+                  className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${currentUserInfo?.isActive ? 'bg-green-500' : 'bg-gray-500'}`}
+                ></span>
               </div>
               <div>
-                <h2 onClick={() => navigate(`/profile/${currentUserInfo?.username}`)}
-                  className="font-semibold cursor-pointer text-lg">{currentUserInfo?.fullName || "Unknown"}</h2>
+                <h2
+                  onClick={() => navigate(`/profile/${currentUserInfo?.username}`)}
+                  className="font-semibold cursor-pointer text-lg"
+                >
+                  {currentUserInfo?.fullName || 'Unknown'}
+                </h2>
                 <p className="text-sm text-gray-400">
-                  {currentUserInfo?.isActive ? "Active now" : formatLastActive(currentUserInfo?.lastActive)}
+                  {currentUserInfo?.isActive ? 'Active now' : formatLastActive(currentUserInfo?.lastActive)}
                 </p>
               </div>
             </div>
@@ -376,33 +248,39 @@ const Message = () => {
                   <div
                     key={message._id}
                     ref={(el) => (messageRefs.current[message._id] = el)}
-                    className={`flex ${isOwnMessage ? "justify-end" : "justify-start"}`}
+                    className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
                     onContextMenu={(e) => handleContextMenu(e, message)}
                   >
                     <div
-                      className={`max-w-[70%] p-3 rounded-2xl shadow-sm transition-all ${isOwnMessage
-                        ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white"
-                        : "bg-gray-700 text-gray-200"
-                        }`}
+                      className={`max-w-[70%] p-3 rounded-2xl shadow-sm transition-all ${isOwnMessage ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' : 'bg-gray-700 text-gray-200'}`}
                     >
-                      {message.replyTo && (
-                        <div
-                          className="mb-2 p-2 bg-gray-600/30 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors"
-                          onClick={() => scrollToMessage(message.replyTo.id)}
-                        >
-                          <p className="text-xs text-gray-400 italic">
-                            {isOwnMessage ? "You replied to:" : "Replying to:"}
-                          </p>
-                          <p className="text-sm truncate text-gray-300">{message.replyTo.message}</p>
-                        </div>
+                      {message.isDeleted ? (
+                        <p className="text-sm italic text-gray-200">This message was deleted</p>
+                      ) : (
+                        <>
+                          {message.replyTo && (
+                            <div
+                              className="mb-2 p-2 bg-gray-600/30 rounded-lg cursor-pointer hover:bg-gray-600/50 transition-colors"
+                              onClick={() => scrollToMessage(message.replyTo.id)}
+                            >
+                              <p className="text-xs text-gray-400 italic">
+                                {isOwnMessage ? 'You replied to:' : 'Replying to:'}
+                              </p>
+                              <p className="text-sm truncate text-gray-300">{message.replyTo.message}</p>
+                            </div>
+                          )}
+                          <p className="text-sm">{message.text}</p>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-gray-300">
+                            <span>{formatTime(message.createdAt)}</span>
+                            {message.isEdited && <span className="text-gray-200 italic">Edited</span>}
+                            {isOwnMessage && (
+                              <span
+                                className={`w-2 h-2 rounded-full ${message.seen ? 'bg-green-400' : 'bg-gray-400'}`}
+                              ></span>
+                            )}
+                          </div>
+                        </>
                       )}
-                      <p className="text-sm">{message.text}</p>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-gray-300">
-                        <span>{formatTime(message.createdAt)}</span>
-                        {isOwnMessage && (
-                          <span className={`w-2 h-2 rounded-full ${message.seen ? "bg-green-400" : "bg-gray-400"}`}></span>
-                        )}
-                      </div>
                     </div>
                   </div>
                 );
@@ -454,8 +332,8 @@ const Message = () => {
                     />
                   </div>
                   <textarea
-                    defaultValue={editModal.text}
-                    onChange={(e) => (editModal.text = e.target.value)}
+                    value={editText}
+                    onChange={(e) => setEditText(e.target.value)}
                     className="w-full p-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 mb-4 resize-none"
                     rows="3"
                   />
@@ -467,7 +345,7 @@ const Message = () => {
                       Cancel
                     </button>
                     <button
-                      onClick={() => handleSaveEdit(editModal.text)}
+                      onClick={() => handleSaveEdit(editText)}
                       className="px-4 py-2 bg-blue-600 rounded-full hover:bg-blue-700 transition-colors text-sm font-medium"
                     >
                       Save
@@ -523,7 +401,7 @@ const Message = () => {
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Type a message..."
                   className="flex-1 p-3 bg-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-white placeholder-gray-400 shadow-sm"
                 />
@@ -546,18 +424,19 @@ const Message = () => {
   );
 };
 
+// CSS styles remain unchanged
 const styles = `
   .highlight-original {
-    animation: highlightOriginal 2s ease-out;
+    animation: highlightOriginal 2s ease-out forwards, pulseGlow 1.5s infinite alternate;
     border: 2px solid #60A5FA;
     background-color: rgba(96, 165, 250, 0.1);
   }
 
   .highlight-reply {
-    animation: highlightReply 2s ease-out;
-    border: 3px solid #10B981; /* Green to indicate reply */
-    background-color: rgba(16, 185, 129, 0.1); /* Light green background */
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); /* Glow effect */
+    animation: highlightReply 2s ease-out forwards, pulseGlow 1.5s infinite alternate;
+    border: 3px solid #10B981;
+    background-color: rgba(16, 185, 129, 0.1);
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
   }
 
   @keyframes highlightOriginal {
@@ -594,6 +473,43 @@ const styles = `
     }
   }
 
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+    100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
+  }
+
+  .animate-bounce-in {
+    animation: bounceIn 0.6s ease-out;
+  }
+
+  @keyframes bounceIn {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-3px); }
+  }
+
+  .animate-wiggle {
+    animation: wiggle 1s ease-in-out infinite;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(3deg); }
+    50% { transform: rotate(-3deg); }
+    75% { transform: rotate(2deg); }
+  }
+
   .shadow-sm {
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
@@ -604,6 +520,7 @@ const styles = `
 
   .animate-fade-in {
     animation: fadeIn 0.2s ease-in;
+    will-change: opacity, transform;
   }
 
   @keyframes fadeIn {

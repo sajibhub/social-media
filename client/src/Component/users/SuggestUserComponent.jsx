@@ -5,12 +5,15 @@ import LoadingButtonFit from "@/Component/button/LoadingButtonFit.jsx";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
+import useActiveStore from "@/store/useActiveStore.js";
 
 const SuggestUserComponent = () => {
   const navigate = useNavigate();
   const [followLoader, setFollowLoader] = useState({ status: false, id: null });
-  const { suggestUser, suggestUserReq, flowReq, update_suggestUser } =
-    authorStore();
+  const { suggestUser, suggestUserReq, flowReq, update_suggestUser } = authorStore();
+  
+  // Get online status for users from Zustand store
+  const { isUserOnline } = useActiveStore(); 
 
   useEffect(() => {
     (async () => {
@@ -24,9 +27,7 @@ const SuggestUserComponent = () => {
     setFollowLoader({ status: false, id: null });
 
     if (res) {
-      toast.success(
-        isFollowing ? "Unfollowed Successfully" : "Followed Successfully"
-      );
+      toast.success(isFollowing ? "Unfollowed Successfully" : "Followed Successfully");
       update_suggestUser(id, { isFollowing: !isFollowing });
     } else {
       toast.error("Action Failed");
@@ -39,9 +40,7 @@ const SuggestUserComponent = () => {
 
   return (
     <div className="mt-6 mx-4">
-      <h1 className="mb-4 text-lg font-semibold text-neutral-800">
-        Suggested For You
-      </h1>
+      <h1 className="mb-4 text-lg font-semibold text-neutral-800">Suggested For You</h1>
 
       {suggestUser === null && (
         <>
@@ -73,15 +72,22 @@ const SuggestUserComponent = () => {
               transition={{ duration: 0.3, type: "spring", stiffness: 150 }}
               className="flex items-center gap-2 p-4 border rounded-lg bg-white shadow-sm hover:shadow-md"
             >
-              <div
-                onClick={() => goToProfile(user.username)}
-                className="h-10 w-10 rounded-full overflow-hidden cursor-pointer border border-gray-300"
-              >
-                <img
-                  src={user.profile}
-                  alt="Profile"
-                  className="object-cover w-full h-full"
-                />
+              <div className="relative">
+                <div
+                  onClick={() => goToProfile(user.username)}
+                  className="h-16 w-16 rounded-full overflow-hidden cursor-pointer border border-gray-300"
+                >
+                  <img
+                    src={user.profile}
+                    alt="Profile"
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+                
+                {/* Online/Offline Status Indicator */}
+                <div
+                  className={`absolute bottom-1 right-0 h-4 w-4 rounded-full border-2 ${isUserOnline(user._id) ? 'bg-green-500 border-white' : 'bg-red-500 border-white'}`}
+                ></div>
               </div>
 
               <div className="flex-grow">
