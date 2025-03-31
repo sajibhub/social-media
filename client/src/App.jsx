@@ -119,12 +119,18 @@ const App = () => {
 
     socket.on("notification", handleNotification);
     socket.on('active', (users) => setActiveUsers(users));
-
     return () => {
       socket.off("notification", handleNotification);
       socket.off('active');
     };
   }, []);
+
+  useEffect(() => {
+    socket.on('active', (users) => setActiveUsers(users));
+    return () => {
+      socket.off('active');
+    };
+  },[setActiveUsers])
 
 
   return (

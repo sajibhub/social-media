@@ -37,7 +37,7 @@ const Chat = () => {
           .lean();
 
         [senderId, receiverId].forEach((userId) =>
-          io.to(userId.toString()).emit("conversationCreated", populatedConversation)
+          io.to(userId.toString()).emit("newConversation", populatedConversation)
         );
       } catch (error) {
         socket.emit("error", { message: error.message });

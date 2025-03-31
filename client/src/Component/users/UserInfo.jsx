@@ -62,10 +62,10 @@ const UserInfo = () => {
       navigate(`/message/${newConversation._id}`);
     };
 
-    socket.on("conversationCreated", handleNewConversation);
+    socket.on("newConversation", handleNewConversation);
 
     return () => {
-      socket.off("conversationCreated", handleNewConversation);
+      socket.off("newConversation", handleNewConversation);
     };
   }, [navigate]);
 
