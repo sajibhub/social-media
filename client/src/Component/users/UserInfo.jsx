@@ -116,18 +116,18 @@ const UserInfo = () => {
         </div>
         <div
           className="
-          h-[80px] w-[80px] lg:h-[100px] lg:w-[100px] rounded-full flex justify-center items-center mx-[25px] mt-[-40px] lg:mt-[-50px] shadow relative"
+      h-[100px] w-[100px] lg:h-[100px] lg:w-[100px] rounded-full
+      flex justify-center items-center mx-[25px] mt-[-40px] lg:mt-[-50px] 
+      shadow overflow-hidden relative"
         >
           <img
             src={profileData.profile}
             alt="Profile"
             className="min-w-full min-h-full object-cover rounded-full"
           />
+          {/* Status Indicator */}
           <div
-            className={`absolute bottom-1 right-0 h-4 w-4 rounded-full border-2 ${isUserOnline(profileData?._id)
-              ? "bg-green-500 border-white"
-              : "bg-red-500 border-white"
-              } z-10`}
+            className={`absolute bottom-2 right-2 h-4 w-4 rounded-full border-2 ${isUserOnline(profileData._id) ? 'bg-green-500 border-white' : 'bg-red-500 border-white'}`}
           ></div>
         </div>
         <div className="mx-3 lg:mx-[25px] pb-3 mt-3 relative">

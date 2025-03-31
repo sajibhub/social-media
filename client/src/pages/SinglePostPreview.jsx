@@ -318,26 +318,26 @@ const SinglePostPreview = () => {
 
                     <div className="flex flex-row ms-3 me-5 gap-3 justify-start items-center">
                         <div className="relative">
-                        <div
-                            className=" flex-shrink-0  h-[40px] w-[40px] rounded-full
+                            <div
+                                className=" flex-shrink-0  h-[40px] w-[40px] rounded-full
                                      overflow-hidden flex flex-row justify-center items-center shadow
                             "
-                        >
-                            <img
-                                className="min-h-full min-w-full"
-                                onClick={() =>
-                                    goToProfile(Single_Post_Data[0].myPost, Single_Post_Data[0].user.username)
-                                }
-                                src={Single_Post_Data[0].user.profile}
-                                alt="profile image"
-                            />
-                            <div
-                                className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${isUserOnline(Single_Post_Data[0].user._id)
-                                    ? "bg-green-500 border-white"
-                                    : "bg-red-500 border-white"
-                                    } z-10`}
-                            ></div>
-                        </div>
+                            >
+                                <img
+                                    className="min-h-full min-w-full"
+                                    onClick={() =>
+                                        goToProfile(Single_Post_Data[0].myPost, Single_Post_Data[0].user.username)
+                                    }
+                                    src={Single_Post_Data[0].user.profile}
+                                    alt="profile image"
+                                />
+                                <div
+                                    className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${isUserOnline(Single_Post_Data[0].user._id)
+                                        ? "bg-green-500 border-white"
+                                        : "bg-red-500 border-white"
+                                        } z-10`}
+                                ></div>
+                            </div>
                         </div>
                         <div className="mb-2 flex-grow">
                             <h2 className="text-base font-medium text-neutral-800 flex gap-1 items-center w-fit">
@@ -488,6 +488,7 @@ const SinglePostPreview = () => {
                             className="pt-3 pb-1  border-b my-4"
                         >
                             <div className="flex flex-row gap-3 justify-start items-start">
+                                <div className="relative">
                                 <div
                                     className="flex-shrink-0 h-[35px] w-[35px] rounded-full
                                     overflow-hidden flex justify-center items-center"
@@ -497,6 +498,13 @@ const SinglePostPreview = () => {
                                         alt="profile image"
                                         className="min-w-full min-h-full"
                                     />
+                                    <div
+                                        className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${isUserOnline(items.user._id)
+                                            ? "bg-green-500 border-white"
+                                            : "bg-red-500 border-white"
+                                            } z-10`}
+                                    ></div>
+                                </div>
                                 </div>
                                 <div className="flex-grow">
                                     <h2 className="text-base font-semibold text-neutral-800">

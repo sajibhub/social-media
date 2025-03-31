@@ -12,12 +12,14 @@ import { AiFillDelete } from "react-icons/ai";
 import { useParams } from "react-router-dom";
 import authorStore from "@/store/authorStore.js";
 import VerifiedBadge from "../Component/utility/VerifyBadge.jsx";
+import useActiveStore from "../store/useActiveStore.js";
 
 const CommentPopup = () => {
   const { user } = useParams();
   const path = window.location.pathname;
   const [image, setImage] = useState(null);
   const [showPicker, setShowPicker] = useState(false);
+  const { isUserOnline } = useActiveStore()
 
   const {
     setCommentPostData,
@@ -193,55 +195,68 @@ const CommentPopup = () => {
           {commentList !== null &&
             commentList.map((item, index) => {
               return (
-                <div key={index} className=" pt-3 pb-1 ps-2 pe-1 border-b mx-4">
-                  <div className="flex flex-row gap-3 justify-start items-start">
-                    <div className=" flex-shrink-0  h-[35px] w-[35px] rounded-full overflow-hidden flex  justify-center items-center">
-                      <img
-                        src={item.user.profile}
-                        alt="profile image"
-                        className="min-w-full min-h-full "
-                      />
+                <div
+                  key={index}
+                  className="py-4 px-4 border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Profile Image and Status */}
+                    <div className="relative flex-shrink-0">
+                      <Link to={`/profile/${item.user.username}`}>
+                        <div className="h-10 w-10 rounded-full overflow-hidden">
+                          <img
+                            src={item.user.profile}
+                            alt={`${item.user.fullName} profile`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </Link>
+                      <div
+                        className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${isUserOnline(item.user._id)
+                            ? "bg-green-500 border-white"
+                            : "bg-red-500 border-white"
+                          }`}
+                      ></div>
                     </div>
-                    <div className=" flex-grow">
-                      <h2 className="text-base font-semibold text-neutral-800 flex items-center gap-1">
+
+                    {/* Comment Content */}
+                    <div className="flex-grow min-w-0">
+                      <div className="flex items-center gap-2">
                         <Link
                           to={`/profile/${item.user.username}`}
-                          className="hover:underline"
+                          className="text-sm font-semibold text-neutral-800 hover:underline"
                         >
                           {item.user.fullName}
                         </Link>
-                        {item.user.verify && (
-                          <VerifiedBadge isVerified={item.user.verify} />
-                        )}
-                      </h2>
-                      <h2 className="text-base font-normal text-neutral-700 ">
-                        {item.user.username}
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="mt-2 flex flex-wrap items-end">
-                    <p className="text-sm text-neutral-600 flex-grow ">
-                      {item.comment}
-                    </p>
-
-                    {item.isComment && (
-                      <div className="flex justify-end items-center gap-3 my-1">
-                        <button
-                          onClick={() => editComment(item._id, item.comment)}
-                        >
-                          <RiEdit2Fill className="text-lg font-semibold" />
-                        </button>
-                        <button onClick={() => deleteComment(item._id)}>
-                          {deleteLoader.status &&
-                            deleteLoader.id === item._id ? (
-                            <div className="loader-dark"></div>
-                          ) : (
-                            <AiFillDelete className="text-lg font-semibold" />
-                          )}
-                        </button>
+                        {item.user.verify && <VerifiedBadge isVerified={item.user.verify} />}
+                        <span className="text-xs text-gray-500">@{item.user.username}</span>
                       </div>
-                    )}
+                      <p className="text-sm text-neutral-700 mt-1 break-words">{item.comment}</p>
+
+                      {/* Actions (Edit/Delete) */}
+                      {item.isComment && (
+                        <div className="flex items-center gap-4 mt-2">
+                          <button
+                            onClick={() => editComment(item._id, item.comment)}
+                            className="text-neutral-600 hover:text-sky-500 transition-colors"
+                            title="Edit comment"
+                          >
+                            <RiEdit2Fill className="text-base" />
+                          </button>
+                          <button
+                            onClick={() => deleteComment(item._id)}
+                            className="text-neutral-600 hover:text-red-500 transition-colors"
+                            title="Delete comment"
+                          >
+                            {deleteLoader.status && deleteLoader.id === item._id ? (
+                              <div className="loader-dark w-4 h-4"></div>
+                            ) : (
+                              <AiFillDelete className="text-base" />
+                            )}
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

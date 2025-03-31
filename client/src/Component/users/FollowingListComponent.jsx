@@ -4,11 +4,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
 import VerifiedBadge from "../utility/VerifyBadge.jsx";
+import useActiveStore from "../../store/useActiveStore.js";
 
 const SearchResultComponent = () => {
   const userName = localStorage.getItem("userName");
   const { user } = useParams();
   const navigate = useNavigate();
+  const { isUserOnline } = useActiveStore()
   const [followLoader, setFollowLoader] = useState({ status: false, id: null });
 
   const { followingList, flowReq, followingListReq, readProfileReq, clear_followingList, } =
@@ -74,13 +76,14 @@ const SearchResultComponent = () => {
             <div className="flex justify-start items-center gap-3 w-full">
               <div
                 onClick={() => goToProfile(user.username)}
-                className="h-[50px] w-[50px] flex items-center justify-center rounded-full overflow-hidden border-2 border-gray-200"
+                className="h-[50px] w-[50px] flex items-center justify-center rounded-full overflow-hidden border-2 border-gray-200 "
               >
                 <img
                   src={user.profile}
                   alt={`${user.fullName} profile`}
                   className="w-full h-full object-cover"
                 />
+                
               </div>
 
               <div className="flex-grow cursor-pointer">
@@ -103,11 +106,11 @@ const SearchResultComponent = () => {
               <button
                 onClick={() => followHandler(user._id)}
                 className={`text-sm font-medium py-2 px-6 rounded-full transition-all ${user.isFollowing
-                    ? "bg-red-500 text-white hover:bg-red-600"
-                    : "bg-sky-500 text-white hover:bg-sky-600"
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : "bg-sky-500 text-white hover:bg-sky-600"
                   }`}
               >
-               {user.isFollowing ? "Unfollow" : "Follow"}
+                {user.isFollowing ? "Unfollow" : "Follow"}
               </button>
             )}
           </motion.div>

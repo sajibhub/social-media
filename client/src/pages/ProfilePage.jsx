@@ -1,10 +1,10 @@
 import Layout from "@/layout/Layout.jsx";
 import UserInfo from "@/Component/users/UserInfo.jsx";
 import postStore from "@/store/postStore.js";
-import {useEffect} from "react";
+import { useEffect } from "react";
 import PostCard from "@/Component/post/PostCard.jsx";
 import authorStore from "@/store/authorStore.js";
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 import uiManage from "@/store/uiManage.js";
 import FollowersListComponent from "@/Component/users/FollowersListComponent.jsx";
 import FollowingListComponent from "@/Component/users/FollowingListComponent.jsx";
@@ -16,20 +16,24 @@ import ChangePasswordComponent from "@/Component/users/ChangePasswordComponent.j
 
 
 const ProfilePage = () => {
-    const {user} = useParams();
+    const { user } = useParams();
     let userName = localStorage.getItem('userName');
-    const {myPostReq, clear_my_post_data} = postStore()
-    const {readProfileReq , clear_profileData , }= authorStore()
-    const {profile_tab} = uiManage()
+    const { myPostReq, clear_my_post_data, my_post_data } = postStore()
+    const { readProfileReq, clear_profileData, profileData } = authorStore()
+    const { profile_tab } = uiManage()
 
 
     useEffect(() => {
         (
-            async ()=>{
+            async () => {
                 clear_profileData()
                 clear_my_post_data()
-                await readProfileReq(user)
-                await myPostReq(user);
+                if (profileData == null) {
+                    await readProfileReq(user)
+                }
+                if (my_post_data == null) {
+                    await myPostReq(user);
+                }
 
             }
         )()
@@ -41,7 +45,7 @@ const ProfilePage = () => {
             <UserInfo />
 
             {
-                profile_tab === "my-post" && <PostCard/>
+                profile_tab === "my-post" && <PostCard />
             }
             {
                 profile_tab === "post-photo" && <ImageGallery />
@@ -60,7 +64,7 @@ const ProfilePage = () => {
                         <SocialMediaComponent />
 
                         {
-                            user === userName &&  <ChangePasswordComponent />
+                            user === userName && <ChangePasswordComponent />
                         }
                         <div className="py-6 lg:py-3"></div>
                     </>

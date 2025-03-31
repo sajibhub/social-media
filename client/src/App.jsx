@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import 'animate.css';
 import HomePage from "@/pages/HomePage.jsx";
 import AuthorPage from "@/pages/authorPage.jsx";
@@ -111,7 +111,7 @@ const App = () => {
   
     const handleNotification = (data) => {
       toast.success(`New ${data?.type} Notification`);
-      audio.play().catch((err) => console.error("Audio play failed:", err)); // Handle play errors
+      audio.play().catch((err) => console.error("Audio play failed:", err)); 
       addNotification(data);
       setNotification((prev) => {
         const newNotificationCount = prev + 1;
@@ -127,7 +127,7 @@ const App = () => {
       socket.off("notification", handleNotification);
       socket.off('active');
     };
-  }, []);
+  }, [profileData]);
   
 
   return (
