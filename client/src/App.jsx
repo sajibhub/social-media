@@ -96,22 +96,19 @@ const App = () => {
   // Initialize audio with try-catch
   const audio = new Audio(NotificationSound);
 
+  const userId = localStorage.getItem("id");
   useEffect(() => {
-    const userId = localStorage.getItem("id");
-  
-    // Only connect if not already connected
-    if (!socket.connected) {
+    if (socket.disconnected) {
       socket.connect();
     }
-  
-    // Join with userId if it exists and socket is connected
-    if (userId && socket.connected) {
+
+    if (!socket.connected) {
       socket.emit("join", userId);
     }
-  
+
     const handleNotification = (data) => {
       toast.success(`New ${data?.type} Notification`);
-      audio.play().catch((err) => console.error("Audio play failed:", err)); 
+      audio.play().catch((err) => console.error("Audio play failed:", err));
       addNotification(data);
       setNotification((prev) => {
         const newNotificationCount = prev + 1;
@@ -119,16 +116,16 @@ const App = () => {
         return newNotificationCount;
       });
     };
-  
+
     socket.on("notification", handleNotification);
     socket.on('active', (users) => setActiveUsers(users));
-  
+
     return () => {
       socket.off("notification", handleNotification);
       socket.off('active');
     };
-  }, [profileData]);
-  
+  }, []);
+
 
   return (
     <>
