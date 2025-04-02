@@ -4,30 +4,29 @@ import Conversation from "../models/conversationModel.js";
 import Message from "../models/messageModel.js";
 import User from "../models/userModel.js";
 
-const activeUsers = {}; // Maps userId to socket.id
+const activeUsers = {};
 
 const Chat = () => {
-  io.on("connection", (socket) => {
-    socket.on("join", async (userId) => {
-      if (userId) {
-        activeUsers[userId] = socket.id;
-        socket.join(userId.toString());
-        await User.findByIdAndUpdate(userId, { lastActive: new Date() });
+  io.on("connection",async (socket) => {
+    const id = socket.handshake.headers.id
+
+        activeUsers[id] = socket.id;
+        socket.join(id.toString());
+        await User.findByIdAndUpdate(id, { lastActive: new Date() });
         io.emit("active", Object.keys(activeUsers));
-      }
-    });
+ 
 
     socket.on("conversationCreated", async (data) => {
       try {
-        const { senderId, receiverId } = data;
+        const {receiverId } = data;
         const existingConversation = await Conversation.findOne({
-          participants: { $all: [senderId, receiverId] },
+          participants: { $all: [id, receiverId] },
         }).lean();
-
+        
         let conversation = existingConversation;
         if (!conversation) {
           conversation = await Conversation.create({
-            participants: [senderId, receiverId],
+            participants: [id, receiverId],
             type: "private",
           });
         }
@@ -36,7 +35,7 @@ const Chat = () => {
           .populate("participants", "fullName profile lastActive")
           .lean();
 
-        [senderId, receiverId].forEach((userId) =>
+        [id, receiverId].forEach((userId) =>
           io.to(userId.toString()).emit("newConversation", populatedConversation)
         );
       } catch (error) {
@@ -44,10 +43,10 @@ const Chat = () => {
       }
     });
 
-    socket.on("getConversation", async (data) => {
+    socket.on("getConversation", async () => {
       try {
-        const { userId } = data;
-        const userObjectId = new mongoose.Types.ObjectId(userId);
+       
+        const userObjectId = new mongoose.Types.ObjectId(id);
 
         const conversations = await Conversation.aggregate([
           { $match: { participants: userObjectId } },
@@ -112,7 +111,7 @@ const Chat = () => {
           { $sort: { "lastMessage.timestamp": -1, updatedAt: -1 } },
         ]);
 
-        io.to(userId.toString()).emit("getConversation", conversations);
+        io.to(id.toString()).emit("getConversation", conversations);
       } catch (error) {
         socket.emit("error", { message: error.message });
       }
@@ -120,11 +119,11 @@ const Chat = () => {
 
     socket.on("messages", async (data) => {
       try {
-        const { conversationId, userId } = data;
+        const { conversationId } = data;
         const messages = await Message.find({ conversationId })
           .sort({ createdAt: 1 })
           .lean();
-        io.to(userId.toString()).emit("messages", messages);
+        io.to(id.toString()).emit("messages", messages);
       } catch (error) {
         socket.emit("error", { message: error.message });
       }
@@ -133,9 +132,9 @@ const Chat = () => {
     socket.on("message", async (data) => {
       try {
         const parsedData = JSON.parse(data);
-        const { conversationId, sender, text, replyTo } = parsedData;
+        const { conversationId, text, replyTo } = parsedData;
 
-        if (!conversationId || !sender || !text) {
+        if (!conversationId || !text) {
           throw new Error("Missing required fields");
         }
 
@@ -145,7 +144,7 @@ const Chat = () => {
         if (!conversation) throw new Error("Conversation not found");
 
         const opponentId = conversation.participants.find(
-          (p) => p._id.toString() !== sender.toString()
+          (p) => p._id.toString() !== id.toString()
         )?._id;
 
         const replyToData = replyTo && replyTo.id && replyTo.message
@@ -154,7 +153,7 @@ const Chat = () => {
 
         const newMessage = await Message.create({
           conversationId,
-          sender,
+          sender:id,
           text,
           replyTo: replyToData,
           seen: false,
@@ -165,7 +164,7 @@ const Chat = () => {
           conversationId,
           {
             lastMessage: {
-              sender,
+              sender:id,
               content: text,
               timestamp: new Date(),
               seen: false,
@@ -179,21 +178,21 @@ const Chat = () => {
 
         const unseenSender = await Message.countDocuments({
           conversationId,
-          sender: { $ne: sender },
+          id: { $ne: id },
           seen: false,
         });
         const unseenReceiver = await Message.countDocuments({
           conversationId,
-          sender: { $eq: sender },
+          id: { $eq: id },
           seen: false,
         });
 
-        const userIds = [sender, opponentId].filter(Boolean);
+        const userIds = [id, opponentId].filter(Boolean);
         userIds.forEach((id) => {
           io.to(id.toString()).emit("message", newMessage.toObject());
           io.to(id.toString()).emit("updateConversation", updatedConversation);
           io.to(id.toString()).emit("unseen", {
-            unseen: id === sender ? unseenSender : unseenReceiver,
+            unseen: opponentId == id ? unseenSender : unseenReceiver,
             conversationId,
           });
         });
@@ -204,7 +203,7 @@ const Chat = () => {
 
     socket.on("seen", async (data) => {
       try {
-        const { conversationId, senderId, messageId } = data;
+        const { conversationId, messageId } = data;
         const messageIds = Array.isArray(messageId) ? messageId : [messageId];
 
         const conversation = await Conversation.findById(conversationId)
@@ -213,7 +212,7 @@ const Chat = () => {
         if (!conversation) throw new Error("Conversation not found");
 
         const receiverId = conversation.participants.find(
-          (p) => p._id.toString() !== senderId
+          (p) => p._id.toString() !== id
         )?._id;
 
         await Message.updateMany(
@@ -231,21 +230,21 @@ const Chat = () => {
 
         const unseenSender = await Message.countDocuments({
           conversationId,
-          sender: { $ne: senderId },
+          sender: { $ne: id },
           seen: false,
         });
         const unseenReceiver = await Message.countDocuments({
           conversationId,
-          sender: { $eq: senderId },
+          sender: { $eq: id },
           seen: false,
         });
 
-        [senderId, receiverId].forEach((id) => {
+        [id, receiverId].forEach((id) => {
           if (id) {
             io.to(id.toString()).emit("seen", messageIds);
             io.to(id.toString()).emit("updateConversation", updatedConversation);
             io.to(id.toString()).emit("unseen", {
-              unseen: id === senderId ? unseenSender : unseenReceiver,
+              unseen: receiverId == id ? unseenSender : unseenReceiver,
               conversationId,
             });
           }
@@ -257,15 +256,15 @@ const Chat = () => {
 
     socket.on("editMessage", async (data) => {
       try {
-        const { messageId, senderId, newText } = data;
+        const { messageId, newText } = data;
 
-        if (!messageId || !senderId || !newText) {
+        if (!messageId || !newText) {
           throw new Error("Missing required fields");
         }
 
         const message = await Message.findById(messageId).lean();
         if (!message) throw new Error("Message not found");
-        if (message.sender.toString() !== senderId) {
+        if (message.sender.toString() !== id) {
           throw new Error("You can only edit your own messages");
         }
 
@@ -281,7 +280,7 @@ const Chat = () => {
         if (!conversation) throw new Error("Conversation not found");
 
         const opponentId = conversation.participants.find(
-          (p) => p._id.toString() !== senderId
+          (p) => p._id.toString() !== id
         )?._id;
 
         const latestMessage = await Message.findOne({ conversationId: updatedMessage.conversationId })
@@ -304,13 +303,13 @@ const Chat = () => {
             .populate("participants", "fullName profile lastActive")
             .lean();
 
-          const userIds = [senderId, opponentId].filter(Boolean);
+          const userIds = [id, opponentId].filter(Boolean);
           userIds.forEach((id) => {
             io.to(id.toString()).emit("messageEdited", updatedMessage);
             io.to(id.toString()).emit("updateConversation", updatedConversation);
           });
         } else {
-          const userIds = [senderId, opponentId].filter(Boolean);
+          const userIds = [id, opponentId].filter(Boolean);
           userIds.forEach((id) => {
             io.to(id.toString()).emit("messageEdited", updatedMessage);
           });
@@ -322,52 +321,52 @@ const Chat = () => {
 
     socket.on("deleteMessage", async (data) => {
       try {
-        const { messageId, senderId } = data;
-    
-        if (!messageId || !senderId) {
+        const { messageId } = data;
+
+        if (!messageId ) {
           throw new Error("Missing required fields");
         }
-    
+
         const message = await Message.findById(messageId).lean();
         if (!message) throw new Error("Message not found");
-        if (message.sender.toString() !== senderId) {
+        if (message.sender.toString() !== id) {
           throw new Error("You can only delete your own messages");
         }
-    
+
         // Update the message to mark it as deleted instead of removing it
         const updatedMessage = await Message.findByIdAndUpdate(
           messageId,
           { isDeleted: true, updatedAt: new Date() },
           { new: true }
         ).lean();
-    
+
         const conversation = await Conversation.findById(message.conversationId)
           .populate("participants", "fullName profile lastActive")
           .lean();
         if (!conversation) throw new Error("Conversation not found");
-    
+
         const opponentId = conversation.participants.find(
-          (p) => p._id.toString() !== senderId
+          (p) => p._id.toString() !== id
         )?._id;
-    
+
         // Update the conversation's lastMessage if the deleted message was the latest
-        const latestMessage = await Message.findOne({ 
+        const latestMessage = await Message.findOne({
           conversationId: message.conversationId,
           isDeleted: false // Only consider non-deleted messages
         })
           .sort({ createdAt: -1 })
           .lean();
-        
+
         const updatedConversation = await Conversation.findByIdAndUpdate(
           message.conversationId,
           {
             lastMessage: latestMessage
               ? {
-                  sender: latestMessage.sender,
-                  content: latestMessage.text,
-                  timestamp: latestMessage.createdAt,
-                  seen: latestMessage.seen,
-                }
+                sender: latestMessage.sender,
+                content: latestMessage.text,
+                timestamp: latestMessage.createdAt,
+                seen: latestMessage.seen,
+              }
               : null,
             updatedAt: new Date(),
           },
@@ -375,26 +374,26 @@ const Chat = () => {
         )
           .populate("participants", "fullName profile lastActive")
           .lean();
-    
+
         const unseenSender = await Message.countDocuments({
           conversationId: message.conversationId,
-          sender: { $ne: senderId },
+          sender: { $ne: id },
           seen: false,
           isDeleted: false, // Only count non-deleted messages
         });
         const unseenReceiver = await Message.countDocuments({
           conversationId: message.conversationId,
-          sender: { $eq: senderId },
+          sender: { $eq: id },
           seen: false,
           isDeleted: false, // Only count non-deleted messages
         });
-    
-        const userIds = [senderId, opponentId].filter(Boolean);
+
+        const userIds = [id, opponentId].filter(Boolean);
         userIds.forEach((id) => {
           io.to(id.toString()).emit("messageDeleted", { messageId, isDeleted: true }); // Updated event payload
           io.to(id.toString()).emit("updateConversation", updatedConversation);
           io.to(id.toString()).emit("unseen", {
-            unseen: id === senderId ? unseenSender : unseenReceiver,
+            unseen: opponentId == id ? unseenSender : unseenReceiver,
             conversationId: message.conversationId,
           });
         });
@@ -402,12 +401,12 @@ const Chat = () => {
         socket.emit("error", { message: error.message || "Failed to delete message" });
       }
     });
-    
-    
+
+
     socket.on("disconnect", async () => {
       const userId = Object.keys(activeUsers).find((id) => activeUsers[id] === socket.id);
-      if (userId) {
-        delete activeUsers[userId];
+      if (id) {
+        delete activeUsers[id];
         await User.findByIdAndUpdate(userId, { lastActive: new Date() });
         io.emit("active", Object.keys(activeUsers));
       }

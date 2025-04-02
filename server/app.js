@@ -1,6 +1,8 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
+import cookie from "cookie";
+import jwt from 'jsonwebtoken'
 import cors from "cors";
 import helmet from "helmet";
 import hpp from "hpp";
@@ -26,8 +28,7 @@ const server = http.createServer(app);
 export const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
-    credentials: true
-  }
+    credentials: true,  }
 });
 
 const limit = rateLimit({
@@ -56,6 +57,35 @@ app.use(
     },
   })
 );
+
+io.use((socket, next) => {
+  try {
+    const cookies = socket.handshake.headers.cookie;
+
+    if (cookies) {
+      const parsedCookies = cookie.parse(cookies); 
+
+      const token = parsedCookies.token; 
+
+      if (!token) {
+        return next(new Error("Authentication error: Token missing")); 
+      }
+
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          return next(new Error("Authentication error: Invalid token")); 
+        }
+
+        socket.handshake.headers.id = decoded.userId;
+        next(); 
+      });
+    } else {
+      return next(new Error("Authentication error: No cookies found")); 
+    }
+  } catch (error) {
+    next(new Error("Authentication error")); 
+  }
+});
 
 
 app.use(cookieParser());
