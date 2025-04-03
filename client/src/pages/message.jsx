@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { socket } from "../utils/socket.js";
 import { useParams, useNavigate } from "react-router-dom";
 import { IoIosClose } from "react-icons/io";
+import '../../public/css/message.css'
 
 const Message = () => {
   const [messages, setMessages] = useState([]);
@@ -31,7 +32,6 @@ const Message = () => {
     if (!socket.connected && !socketInitialized.current) {
       socket.connect();
       socketInitialized.current = true;
-      socket.emit("join", currentUserId);
     }
 
     const handleActiveUsers = (users) => setActiveUsers(users);
@@ -48,7 +48,7 @@ const Message = () => {
 
   useEffect(() => {
     if (!currentUserId) return;
-    socket.emit("getConversation", { userId: currentUserId });
+    socket.emit("getConversation");
 
     const handleConversations = (data) => {
       if (!Array.isArray(data)) return;
@@ -121,14 +121,14 @@ const Message = () => {
       return;
     }
 
-    socket.emit("messages", { userId: currentUserId, conversationId });
+    socket.emit("messages", { conversationId });
 
     const handleMessages = (data) => {
       if (!Array.isArray(data)) return;
       setMessages(data);
       const unreadMessageIds = data.filter((msg) => !msg.seen && msg.sender !== currentUserId && !msg.isDeleted).map((msg) => msg._id);
       if (unreadMessageIds.length > 0) {
-        socket.emit("seen", { conversationId, messageId: unreadMessageIds, senderId: currentUserId });
+        socket.emit("seen", { conversationId, messageId: unreadMessageIds,});
       }
     };
 
@@ -185,7 +185,7 @@ const Message = () => {
     if (messageRef) {
       messageRef.scrollIntoView({ behavior: "smooth", block: "center" });
       messageRef.classList.add("highlight-reply");
-      setTimeout(() => messageRef.classList.remove("highlight-reply"), 2000);
+      setTimeout(() => messageRef.classList.remove("highlight-reply"), 3000);
     }
   };
 
@@ -219,7 +219,7 @@ const Message = () => {
   };
 
   const handleContextMenu = (e, message) => {
-    if (message.isDeleted) return; // Disable context menu for deleted messages
+    if (message.isDeleted) return; 
     e.preventDefault();
     const menuWidth = 120;
     const menuHeight = 100;
@@ -263,14 +263,14 @@ const Message = () => {
 
   const handleSaveEdit = (newText) => {
     if (newText && newText.trim() && newText !== editModal.text) {
-      socket.emit("editMessage", { messageId: editModal.messageId, senderId: currentUserId, newText: newText.trim() });
+      socket.emit("editMessage", { messageId: editModal.messageId, newText: newText.trim() });
     }
     setEditModal(null);
     setEditText("");
   };
 
   const handleConfirmDelete = () => {
-    socket.emit("deleteMessage", { messageId: deleteModal.messageId, senderId: currentUserId });
+    socket.emit("deleteMessage", { messageId: deleteModal.messageId });
     setDeleteModal(null);
   };
 
@@ -377,7 +377,7 @@ const Message = () => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-900">
+            <div className="flex-1 overflow-y-auto px-4 pb-4 pt-2 space-y-2 bg-gray-900">
               {messages.map((message) => {
                 const isOwnMessage = message.sender === currentUserId;
                 return (
@@ -560,109 +560,5 @@ const Message = () => {
     </div>
   );
 };
-
-const styles = `
-  .highlight-original {
-    animation: highlightOriginal 2s ease-out forwards, pulseGlow 1.5s infinite alternate;
-    border: 2px solid #60A5FA;
-    background-color: rgba(96, 165, 250, 0.1);
-  }
-
-  .highlight-reply {
-    animation: highlightReply 2s ease-out forwards, pulseGlow 1.5s infinite alternate;
-    border: 3px solid #10B981;
-    background-color: rgba(16, 185, 129, 0.1);
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
-  }
-
-  @keyframes highlightOriginal {
-    0% { 
-      border-color: #60A5FA;
-      background-color: rgba(96, 165, 250, 0.3);
-      transform: scale(1.02);
-    }
-    100% { 
-      border-color: transparent;
-      background-color: transparent;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes highlightReply {
-    0% { 
-      border-color: #10B981;
-      background-color: rgba(16, 185, 129, 0.3);
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.7);
-      transform: scale(1.03);
-    }
-    50% { 
-      border-color: #10B981;
-      background-color: rgba(16, 185, 129, 0.2);
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
-      transform: scale(1.05);
-    }
-    100% { 
-      border-color: transparent;
-      background-color: transparent;
-      box-shadow: 0 0 0 rgba(16, 185, 129, 0);
-      transform: scale(1);
-    }
-  }
-
-  @keyframes pulseGlow {
-    0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
-    100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.6); }
-  }
-
-  .animate-bounce-in {
-    animation: bounceIn 0.6s ease-out;
-  }
-
-  @keyframes bounceIn {
-    0% { transform: scale(0.8); opacity: 0; }
-    50% { transform: scale(1.1); opacity: 1; }
-    100% { transform: scale(1); }
-  }
-
-  .animate-shake {
-    animation: shake 0.4s ease-in-out;
-  }
-
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-3px); }
-  }
-
-  .animate-wiggle {
-    animation: wiggle 1s ease-in-out infinite;
-  }
-
-  @keyframes wiggle {
-    0%, 100% { transform: rotate(0deg); }
-    25% { transform: rotate(3deg); }
-    50% { transform: rotate(-3deg); }
-    75% { transform: rotate(2deg); }
-  }
-
-  .shadow-sm {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-
-  .shadow-lg {
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  .animate-fade-in {
-    animation: fadeIn 0.2s ease-in;
-    will-change: opacity, transform;
-  }
-
-  @keyframes fadeIn {
-    0% { opacity: 0; transform: translateY(-10px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-`;
 
 export default Message;

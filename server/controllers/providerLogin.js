@@ -32,23 +32,22 @@ const providers = {
 
 const authHandler = async (provider, profile, done) => {
     try {
+        // Look for existing user with social media ID or email
         let user = await User.findOne({ [`${provider}Id`]: profile.id }) ||
             await User.findOne({ email: profile.emails?.[0]?.value });
 
         if (!user) {
-            const demoProfile = `https://avatar.iran.liara.run/username?username=${profile.displayName || profile.username}`;
-            user = await User.create({
-                username: profile.username || profile.emails[0].value.split("@")[0],
-                fullName: profile.displayName || profile.username || profile.emails[0].value.split("@")[0],
-                email: profile.emails?.[0]?.value || "",
-                [`${provider}Id`]: profile.id,
-                profile: profile.photos?.[0]?.value || demoProfile,
-                cover: demoProfile,
-                provider,
+            return done(null, false, { message: "User not found. Please register first." });
+        }
+
+        // Update user's social media ID if not already connected
+        if (!user[`${provider}Id`]) {
+            await User.findByIdAndUpdate(user._id, { 
+                provider, 
+                [`${provider}Id`]: profile.id 
             });
         }
 
-        await User.findByIdAndUpdate(user._id, { provider, [`${provider}Id`]: profile.id });
         return done(null, user._id);
     } catch (error) {
         console.error(`${provider} authentication error:`, error);
@@ -64,15 +63,17 @@ Object.entries(providers).forEach(([provider, { Strategy, clientID, clientSecret
 
 export const authRouter = (provider) => passport.authenticate(provider, { scope: providers[provider].scope });
 export const authRouterCallback = (provider) => async (req, res) => {
-    passport.authenticate(provider, { failureRedirect: "/author", session: false }, async (err, user) => {
+    passport.authenticate(provider, { failureRedirect: "/author", session: false }, async (err, user, info) => {
         if (err || !user) {
-            return res.status(400).json({ message: "Authentication failed", error: err });
+            return res.status(400).json({ 
+                message: info?.message || "Authentication failed", 
+                error: err 
+            });
         }
 
         try {
             await TokenAndCookie(user, res);
             return res.redirect('https://matrix-media.vercel.app');
-
         } catch (error) {
             return res.status(500).json({ message: "Error processing authentication" });
         }

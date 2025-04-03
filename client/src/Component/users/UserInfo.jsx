@@ -32,14 +32,11 @@ const UserInfo = () => {
   };
 
   const handleMessageClick = (receiverId) => {
-    if (!myId) {
-      toast.error("You must be logged in to start a chat");
-      return;
-    }
+
     if (!socket.connected) {
       socket.connect();
     }
-    socket.emit("conversationCreated", { senderId: myId, receiverId });
+    socket.emit("conversationCreated", { receiverId });
   };
 
   const handleLogout = async () => {

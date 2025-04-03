@@ -102,9 +102,6 @@ const App = () => {
       socket.connect();
     }
 
-    if (!socket.connected) {
-      socket.emit("join", userId);
-    }
 
     const handleNotification = (data) => {
       toast.success(`New ${data?.type} Notification`);

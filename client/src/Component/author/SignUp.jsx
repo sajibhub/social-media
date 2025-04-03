@@ -6,21 +6,38 @@ import SocialLogin from "../utility/socialLogin.jsx";
 
 const SignUp = () => {
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
-    const { signUpFrom, setSignUpFrom, signUpReq } = authorStore();
+    const [showPassword, setShowPassword] = useState(false);
+    // Provide default empty object if authorStore values are undefined
+    const { 
+        signUpFrom = {
+            username: '',
+            fullName: '',
+            email: '',
+            phone: '',
+            password: ''
+        }, 
+        setSignUpFrom, 
+        signUpReq 
+    } = authorStore();
     const { setAuthor } = uiManage();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
-        const res = await signUpReq(signUpFrom);
-        setLoading(false);
+        try {
+            const res = await signUpReq(signUpFrom);
+            setLoading(false);
 
-        if (res === 201) {
-            toast.success("Your account successfully created!");
-            setAuthor("signIn");
-        } else {
-            toast.error(res.response.data.message);
+            if (res === 201) {
+                toast.success("Your account successfully created!");
+                setAuthor("signIn");
+            } else {
+                toast.error(res?.response?.data?.message || "Signup failed");
+            }
+        } catch (error) {
+            setLoading(false);
+            toast.error("An error occurred during signup");
+            console.error("Signup error:", error);
         }
     };
 
@@ -46,7 +63,7 @@ const SignUp = () => {
                             type="text"
                             id="username"
                             name="username"
-                            value={signUpFrom.username}
+                            value={signUpFrom.username || ''}
                             onChange={(e) => setSignUpFrom("username", e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your username"
@@ -66,7 +83,7 @@ const SignUp = () => {
                             type="text"
                             id="fullName"
                             name="fullName"
-                            value={signUpFrom.fullName}
+                            value={signUpFrom.fullName || ''}
                             onChange={(e) => setSignUpFrom("fullName", e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your full name"
@@ -86,7 +103,7 @@ const SignUp = () => {
                             type="email"
                             id="email"
                             name="email"
-                            value={signUpFrom.email}
+                            value={signUpFrom.email || ''}
                             onChange={(e) => setSignUpFrom("email", e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your email"
@@ -106,7 +123,7 @@ const SignUp = () => {
                             type="text"
                             id="phone"
                             name="phone"
-                            value={signUpFrom.phone}
+                            value={signUpFrom.phone || ''}
                             onChange={(e) => setSignUpFrom("phone", e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your phone number"
@@ -127,7 +144,7 @@ const SignUp = () => {
                                 type={showPassword ? "text" : "password"}
                                 id="password"
                                 name="password"
-                                value={signUpFrom.password}
+                                value={signUpFrom.password || ''}
                                 onChange={(e) => setSignUpFrom("password", e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="Enter your password"
@@ -147,7 +164,8 @@ const SignUp = () => {
                     {loading ? (
                         <button
                             type="submit"
-                            className="w-full bg-sky-300 text-white py-2 rounded-lg hover:bg-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 text-center"
+                            disabled
+                            className="w-full bg-sky-300 text-white py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 text-center"
                         >
                             <div className="loader w-fit mx-auto"></div>
                         </button>
