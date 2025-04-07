@@ -385,7 +385,8 @@ export const Profile = async (req, res) => {
           postSave: 1,
           myProfile: 1,
           isFollowing: 1,
-          notification: 1
+          notification: 1,
+          lastActive: 1
         },
       },
     ]);
