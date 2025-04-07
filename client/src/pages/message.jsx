@@ -128,7 +128,7 @@ const Message = () => {
       setMessages(data);
       const unreadMessageIds = data.filter((msg) => !msg.seen && msg.sender !== currentUserId && !msg.isDeleted).map((msg) => msg._id);
       if (unreadMessageIds.length > 0) {
-        socket.emit("seen", { conversationId, messageId: unreadMessageIds,});
+        socket.emit("seen", { conversationId, messageId: unreadMessageIds, });
       }
     };
 
@@ -197,12 +197,40 @@ const Message = () => {
 
   const formatLastActive = (lastActive) => {
     if (!lastActive) return "Last seen: Unknown";
+
     const now = new Date();
-    const diff = (now - new Date(lastActive)) / 1000 / 60;
-    if (diff < 1) return "Last seen: Just now";
-    if (diff < 60) return `Last seen: ${Math.floor(diff)}m ago`;
-    return `Last seen: ${new Date(lastActive).toLocaleTimeString()}`;
+    const date = new Date(lastActive);
+    const diffMs = now - date;
+    const diffMin = Math.floor(diffMs / 1000 / 60);
+    const diffHr = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHr / 24);
+
+    const sameDay = now.toDateString() === date.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(now.getDate() - 1);
+    const isYesterday = yesterday.toDateString() === date.toDateString();
+
+    const optionsTime = { hour: "numeric", minute: "2-digit" };
+    const optionsDate = { month: "short", day: "numeric" };
+    const optionsMonth = { month: "short", year: "numeric" };
+    const optionsYear = { year: "numeric" };
+    const weekday = date.toLocaleDateString(undefined, { weekday: "long" });
+
+    if (diffMin < 1) return "Last seen: Just now";
+    if (diffMin < 60) return `Last seen: ${diffMin}m ago`;
+    if (sameDay) return `Last seen: Today at ${date.toLocaleTimeString([], optionsTime)}`;
+    if (isYesterday) return `Last seen: Yesterday at ${date.toLocaleTimeString([], optionsTime)}`;
+    if (diffDay < 7) return `Last seen: ${weekday} at ${date.toLocaleTimeString([], optionsTime)}`;
+    if (now.getFullYear() === date.getFullYear()) {
+      return `Last seen: ${date.toLocaleDateString([], optionsDate)} at ${date.toLocaleTimeString([], optionsTime)}`;
+    }
+    if (now.getFullYear() - date.getFullYear() <= 1) {
+      return `Last seen: ${date.toLocaleDateString([], optionsMonth)}`;
+    }
+
+    return `Last seen: ${date.toLocaleDateString([], optionsYear)}`;
   };
+
 
   const handleSendMessage = () => {
     if (!inputText.trim() || !conversationId || !currentUserId) return;
@@ -219,7 +247,7 @@ const Message = () => {
   };
 
   const handleContextMenu = (e, message) => {
-    if (message.isDeleted) return; 
+    if (message.isDeleted) return;
     e.preventDefault();
     const menuWidth = 120;
     const menuHeight = 100;
