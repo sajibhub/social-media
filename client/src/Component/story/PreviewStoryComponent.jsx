@@ -1,359 +1,275 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { IoMdClose } from "react-icons/io";
-import { useEffect, useState } from "react";
-import { FaAngleLeft, FaChevronRight, } from "react-icons/fa";
+import { useEffect, useRef, useState } from "react";
+import { FaAngleLeft, FaChevronRight } from "react-icons/fa";
 import StoryStore from "@/store/StoryStore.js";
 import { CiMenuKebab } from "react-icons/ci";
 import VerifiedBadge from "../utility/VerifyBadge";
-
+import { AiFillDelete } from "react-icons/ai";
 
 const PreviewStoryComponent = () => {
     const navigate = useNavigate();
-
-    const [scrollCount, setScrollCount] = useState(0);
-    const [scrollMaxCount, setScrollMaxCount] = useState(1);
-    const [previewControl, setPreviewControl] = useState(0);
-    const [previewMax, setPreviewMax] = useState(0);
-
-
-    const { StoryData, StoryReq, clearStoreData } = StoryStore()
     const { id } = useParams();
-    const myId = parseInt(id)
+    const initialUserIndex = Math.max(0, parseInt(id) || 0);
+
+    const { StoryData, StoryReq, clearStoreData } = StoryStore();
+    const [currentUserIndex, setCurrentUserIndex] = useState(initialUserIndex);
+    const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
+    const [progress, setProgress] = useState(0);
+    const [popupMenu, setPopupMenu] = useState(false)
+    const popupRef = useRef(null);
 
     useEffect(() => {
-        (
-            async () => {
-                clearStoreData()
-                await StoryReq()
-                setScrollCount(myId)
-                setScrollMaxCount(StoryData.length - 3)
+        const fetchStories = async () => {
+            await clearStoreData();
+            await StoryReq();
+        };
+        fetchStories();
+    }, [StoryReq, clearStoreData]);
+
+    useEffect(() => {
+        if (StoryData?.length > 0) {
+            const boundedUserIndex = Math.min(initialUserIndex, StoryData.length - 1);
+            setCurrentUserIndex(boundedUserIndex);
+            setCurrentStoryIndex(0);
+            setProgress(0);
+        }
+    }, [StoryData, initialUserIndex]);
+
+    useEffect(() => {
+        if (!StoryData?.length || popupMenu) return;
+
+        const timer = setInterval(() => {
+            setProgress((prev) => {
+                if (prev >= 100) {
+                    handleNext();
+                    return 0;
+                }
+                return prev + (100 / 60);
+            });
+        }, 100);
+
+        return () => clearInterval(timer);
+    }, [currentUserIndex, currentStoryIndex, StoryData, popupMenu]);
+
+
+    const handleNext = () => {
+        if (!StoryData?.length) return;
+        setPopupMenu(false); // Close popup when changing story
+        const currentUserStories = StoryData[currentUserIndex].stories;
+        if (currentStoryIndex < currentUserStories.length - 1) {
+            setCurrentStoryIndex(currentStoryIndex + 1);
+        } else if (currentUserIndex < StoryData.length - 1) {
+            setCurrentUserIndex(currentUserIndex + 1);
+            setCurrentStoryIndex(0);
+            navigate(`/story/${currentUserIndex + 1}`);
+        }
+        setProgress(0);
+    };
+
+    const handlePrev = () => {
+        if (!StoryData?.length) return;
+        setPopupMenu(false); // Close popup when changing story
+        if (currentStoryIndex > 0) {
+            setCurrentStoryIndex(currentStoryIndex - 1);
+        } else if (currentUserIndex > 0) {
+            setCurrentUserIndex(currentUserIndex - 1);
+            setCurrentStoryIndex(StoryData[currentUserIndex - 1].stories.length - 1);
+            navigate(`/story/${currentUserIndex - 1}`);
+        }
+        setProgress(0);
+    };
+
+    const handleStoryChange = (index) => {
+        setPopupMenu(false);
+        setCurrentStoryIndex(index);
+        setProgress(0);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (popupRef.current && !popupRef.current.contains(event.target)) {
+                setPopupMenu(false);
             }
-        )()
-    }, [])
+        };
+
+        if (popupMenu) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [popupMenu]);
 
 
 
-    const Header = () => {
+    if (!StoryData || StoryData.length === 0) {
         return (
-            <div className="flex items-center justify-between w-full absolute top-5">
-                <img
-                    src="/image/logo.png"
-                    alt="logo"
-                    className="h-14 w-auto  cursor-pointer"
-                    onClick={() => navigate("/")}
-                />
-
-                <IoMdClose
-                    onClick={
-                        () => navigate(-1)
-                    }
-                    className="text-3xl text-sky-600 cursor-pointer"
-                />
-            </div>
-        )
-    }
-    const EditStoryView = () => {
-        return (
-            <div>
-                <CiMenuKebab className="text-white font-semibold text-xl" />
-
-                <div>
-
+            <div className="h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center">
+                <div className="w-full max-w-md h-[85vh] bg-gray-800/50 rounded-2xl animate-pulse overflow-hidden">
+                    <div className="h-2 bg-gray-700/50 rounded-full m-4"></div>
+                    <div className="flex items-center gap-3 p-4">
+                        <div className="w-12 h-12 bg-gray-700/50 rounded-full"></div>
+                        <div className="flex-1 h-4 bg-gray-700/50 rounded"></div>
+                    </div>
+                    <div className="h-[calc(100%-8rem)] bg-gray-700/50"></div>
                 </div>
             </div>
-        )
-    }
-    const StoryActiveCard = ({ story, id }) => {
-        return (
-            <>
-                {
-                    story.map((story, index) => {
-
-
-                        return (
-                            <>
-                                {
-                                    index === id && (
-                                        <div
-                                            key={index}
-                                            className="relative   rounded-xl overflow-hidden border border-sky-100
-                                              h-full shadow-2xl "
-                                        >
-                                            {/* Background Image */}
-
-                                            <ActiveBG data={story.stories} />
-
-
-                                            <div className="absolute inset-0  bg-opacity-30"></div>
-
-                                            <div
-                                                className="absolute top-0 left-0 p-3 flex items-center justify-between w-full">
-                                                {/* Profile Picture */}
-                                                <div className="flex items-center gap-3">
-                                                    <div
-                                                        className=" w-10 h-10 border-2 border-blue-500 rounded-full overflow-hidden">
-                                                        <img
-                                                            src={story.profile}
-                                                            alt="Profile"
-                                                            className="w-full h-full object-cover"
-                                                        />
-                                                    </div>
-
-                                                    {/* User Name */}
-                                                    <p className="text-white text-base font-medium flex justify-center items-center gap-2">
-                                                        {story.fullName}
-                                                        <VerifiedBadge isVerified={story.verify} />
-                                                    </p>
-                                                </div>
-
-                                                {/* Post Create Time & edit option */}
-                                                <div className="flex justify-end items-center gap-3">
-                                                    <p className="text-white text-sm font-normal">
-                                                        {story.time}
-                                                    </p>
-                                                    <EditStoryView />
-                                                </div>
-                                            </div>
-
-                                            <ActiveIndicator data={story.stories} />
-
-                                            <h1 className=" text-center text-lg absolute bottom-5 text-white font-medium w-full">
-                                                {story.text}
-                                            </h1>
-                                        </div>
-
-                                    )
-                                }
-                            </>
-                        )
-                    })
-                }
-            </>
         );
-    };
-    const ActiveBG = ({ data }) => {
+    }
 
-        useEffect(() => {
-            setPreviewMax(data.length - 1)
-        }, [data]);
+    const currentUser = StoryData[currentUserIndex] || {};
+    const currentStory = currentUser.stories?.[currentStoryIndex] || {};
+    const prevStory = currentUserIndex > 0 || currentStoryIndex > 0
+        ? (currentStoryIndex > 0
+            ? currentUser.stories[currentStoryIndex - 1]
+            : StoryData[currentUserIndex - 1]?.stories[StoryData[currentUserIndex - 1].stories.length - 1])
+        : null;
+    const nextStory = currentUserIndex < StoryData.length - 1 || currentStoryIndex < currentUser.stories?.length - 1
+        ? (currentStoryIndex < currentUser.stories.length - 1
+            ? currentUser.stories[currentStoryIndex + 1]
+            : StoryData[currentUserIndex + 1]?.stories[0])
+        : null;
 
-        return (
-            <>
-                {
-                    data.map((item, index) => {
-                        return (
-                            <div className="absolute top-0 left-0 h-full" key={index}>
-                                {
-                                    index === previewControl && (
-                                        <img
-                                            src={(item.image)}
-                                            alt="Story"
-                                            className="w-full h-full object-cover"
-                                        />
-                                    )
-                                }
+    return (
+        <div className="h-screen bg-gradient-to-b from-gray-900 to-black flex items-center justify-center relative overflow-hidden">
+            {prevStory && (
+                <div className="absolute left-0 top-0 h-full w-1/3 opacity-30 pointer-events-none transform -translate-x-1/4 transition-opacity duration-300">
+                    <img
+                        src={prevStory.image}
+                        alt="Previous"
+                        className="w-full h-full object-cover rounded-l-2xl"
+                    />
+                </div>
+            )}
+            {nextStory && (
+                <div className="absolute right-0 top-0 h-full w-1/3 opacity-30 pointer-events-none transform translate-x-1/4 transition-opacity duration-300">
+                    <img
+                        src={nextStory.image}
+                        alt="Next"
+                        className="w-full h-full object-cover rounded-r-2xl"
+                    />
+                </div>
+            )}
 
+            <div className="w-full max-w-md h-[85vh] relative flex flex-col rounded-2xl overflow-hidden shadow-xl">
+                <div className="absolute top-4 left-0 right-0 flex gap-2 px-6 z-20">
+                    {currentUser.stories?.map((_, index) => (
+                        <div
+                            key={index}
+                            className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden cursor-pointer"
+                            onClick={() => handleStoryChange(index)}
+                        >
+                            <div
+                                className="h-full bg-gradient-to-r from-blue-400 to-blue-600 transition-all duration-100 ease-linear"
+                                style={{
+                                    width: index < currentStoryIndex ? '100%' :
+                                        index === currentStoryIndex ? `${progress}%` : '0%'
+                                }}
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between bg-gradient-to-b from-black/70 to-transparent z-10">
+                    <div className="flex items-center gap-3 mt-2 ml-2">
+                        <img
+                            src={currentUser.profile || ""}
+                            alt="Profile"
+                            className="w-12 h-12 rounded-full border-2 border-blue-500/50 object-cover shadow-md"
+                        />
+                        <div className="flex flex-col">
+                            <div className="flex items-center gap-1">
+                                <span className="text-white font-semibold text-sm">{currentUser.fullName || "Unknown"}</span>
+                                <VerifiedBadge isVerified={currentUser.verify || false} />
                             </div>
-                        )
-                    })
-                }
-            </>
-        )
-    }
-    const ActiveIndicator = ({ data }) => {
-        return (
-            <div className="px-4 absolute top-16 left-0 flex gap-2  w-full">
-                {
-                    data.map((item, index) => {
-                        return (
-                            <>
-                                {
-                                    index === previewControl && <div className="h-[4px] w-[50px] bg-sky-500 rounded-full" key={index}></div>
-                                }
-                                {
-                                    index !== previewControl && <div onClick={() => setPreviewControl(index)} className="h-[4px] w-[30px] bg-gray-200 rounded-full" key={index}></div>
-                                }
-                            </>
-
-                        )
-                    })
-                }
-
-            </div>
-        )
-    }
-    const StoryCard = ({ story, id }) => {
-
-        return (
-            <>
-                {
-                    story.map((story, index) => {
-
-                        return (
-                            <>
-                                {
-                                    index === id && (
-                                        <div
-                                            onClick={() => setScrollCount(index - 2)}
-                                            key={index}
-                                            className="relative  rounded-lg overflow-hidden cursor-pointer border border-sky-50 shadow-xl
-                                            h-full
-                                        "
-                                        >
-                                            {/* Background Image */}
-
-                                            <img
-                                                src={(story.stories[0].image)}
-                                                alt="Story"
-                                                className="w-full h-full object-cover"
-                                            />
-
-
-                                            {/* Overlay */}
-                                            <div className="absolute inset-0 bg-black bg-opacity-30"></div>
-
-                                            {/* Profile Picture */}
-
-                                            <div className="align-center
-                                            flex flex-col items-center justify-end w-[80%]"
-                                            >
-                                                <div
-                                                    className=" w-16 h-16 border-2 border-blue-500 rounded-full overflow-hidden">
-                                                    <img
-                                                        src={story.profile}
-                                                        alt="Profile"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-
-                                                {/* User Name */}
-                                                {/*<p className="mt-2 text-white text-lg font-medium text-center">*/}
-                                                {/*    {story.fullName}*/}
-                                                {/*</p>*/}
-                                            </div>
-
-                                        </div>
-
-                                    )
-                                }
-                            </>
-                        )
-                    })
-                }
-            </>
-        );
-    };
-    const ScrollHandleButton = () => {
-        return (
-            <div className="flex items-center justify-between align-center  w-[125%]  z-50">
-                {
-                    scrollCount > -2 ? (
-                        <div
-                            onClick={() => handleScroll("remove")}
-                            className="h-10 w-10 bg-white rounded-full flex justify-center items-center shadow transform hover:scale-110 transition duration-300"
-                        >
-                            <FaAngleLeft className="text-2xl cursor-pointer text-neutral-800 " />
+                            <span className="text-white/60 text-xs">{currentStory.time || ""}</span>
                         </div>
-                    ) : (
-                        <div></div>
-                    )
-                }
-                {
-                    scrollCount < scrollMaxCount ? (
-                        <div
-                            onClick={() => handleScroll("add")}
-                            className="h-10 w-10 bg-white rounded-full flex justify-center items-center shadow transform hover:scale-110 transition duration-300"
-                        >
-                            <FaChevronRight className="text-2xl cursor-pointer  text-neutral-700 " />
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <CiMenuKebab onClick={() => {
+                            const story = StoryData[id]
+                            if (story?.isMyStory) {
+                                setPopupMenu(true)
+                            }
+                        }
+                        } className="text-white text-xl cursor-pointer hover:text-blue-400 transition-colors" />
+                        <IoMdClose
+                            className="text-white text-2xl cursor-pointer hover:text-blue-400 transition-colors"
+                            onClick={() => navigate('/')}
+                        />
+                    </div>
+                </div>
+
+                <div className="flex-1 relative">
+                    <img
+                        src={currentStory.image || ""}
+                        alt="Story"
+                        className="w-full h-full object-cover transition-opacity duration-300"
+                    />
+                    {currentStory.text && (
+                        <div className="absolute bottom-6 left-0 right-0 text-center px-4">
+                            <span className="text-white text-xl font-medium px-4 py-2 bg-black/70 rounded-xl shadow-lg">
+                                {currentStory.text}
+                            </span>
                         </div>
-                    ) : (
-                        <div></div>
-                    )
-                }
+                    )}
 
-            </div>
-        )
-    }
-
-    const handleScroll = (direction) => {
-        setPreviewControl(0)
-        if (direction === "add") {
-            setScrollMaxCount(StoryData.length - 3)
-            setScrollCount(scrollCount + 1)
-        }
-        if (direction === "remove") {
-            setScrollCount(scrollCount - 1)
-        }
-
-    }
-
-    if (!StoryData) {
-        return (
-            <div className="container h-screen mx-auto flex flex-row items-center relative">
-                <div className="flex items-center justify-between w-full absolute top-5">
-                    <div className="h-14 w-auto bg-gray-300 rounded"></div>
-                    <IoMdClose className="text-3xl text-sky-600" />
+                    <div className="absolute inset-0 flex">
+                        <div
+                            className="w-1/3 h-full cursor-pointer"
+                            onClick={handlePrev}
+                        />
+                        <div className="w-1/3 h-full" />
+                        <div
+                            className="w-1/3 h-full cursor-pointer"
+                            onClick={handleNext}
+                        />
+                    </div>
                 </div>
 
-                <div className="grid grid-cols-6 mx-auto h-full gap-8 py-6 max-w-[1400px] max-h-[750px] w-full">
-                    <div className="col-span-1 py-36 opacity-25 bg-gray-200 rounded"></div>
-                    <div className="col-span-1 py-36 opacity-65 bg-gray-300 rounded"></div>
+                {prevStory && (
+                    <button
+                        onClick={handlePrev}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 p-3 rounded-full hover:bg-black/70 transition-all shadow-md hover:text-blue-400"
+                    >
+                        <FaAngleLeft className="text-white text-2xl" />
+                    </button>
+                )}
+                {nextStory && (
+                    <button
+                        onClick={handleNext}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 p-3 rounded-full hover:bg-black/70 transition-all shadow-md hover:text-blue-400"
+                    >
+                        <FaChevronRight className="text-white text-2xl" />
+                    </button>
+                )}
+                {popupMenu && (
+                    <div
+                        ref={popupRef}
+                        className="absolute z-50 right-0 mt-2 w-56 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none transition-all duration-200 ease-in-out transform scale-95 hover:scale-100 group"
+                        role="menu"
+                        aria-orientation="vertical"
+                        aria-labelledby="menu-button"
+                    >
+                        <div className="py-2">
+                            <>
+                                <button
+                                    onClick={() => {
 
-                    <div className="col-span-2 relative">
-                        <div className="h-full w-full bg-gray-400 rounded"></div>
+                                    }}
+                                    className="flex items-center w-full px-4 py-2 text-sm text-neutral-800 hover:bg-red-50 hover:text-red-500 rounded-md transition duration-200 ease-in-out"
+                                >
+                                    <AiFillDelete className="mr-2 text-lg" /> Delete Post
+                                </button>
+                            </>
+                        </div>
                     </div>
-
-                    <div className="col-span-1 py-36 opacity-65 bg-gray-300 rounded"></div>
-                    <div className="col-span-1 py-36 opacity-25 bg-gray-200 rounded"></div>
-                </div>
+                )}
             </div>
-        )
-    }
-    else {
-        return (
-            <div
-                className="container h-screen mx-auto flex flex-row items-center relative "
-            >
-                <Header />
-                <div className="grid grid-cols-6 mx-auto h-full gap-8 py-6  max-w-[1400px] max-h-[750px] ">
-                    <div className="col-span-1 py-36 opacity-25 cursor-pointer">
-                        <StoryCard
-                            story={StoryData}
-                            id={scrollCount}
-                        />
-                    </div>
-                    <div className="col-span-1 py-36 opacity-65 cursor-pointer">
-                        <StoryCard
-                            story={StoryData}
-                            id={1 + scrollCount}
-                        />
-                    </div>
-                    <div className="col-span-2 relative cursor-pointer ">
-                        <ScrollHandleButton />
-                        <StoryActiveCard
-                            story={StoryData}
-                            id={2 + scrollCount}
-                        />
-                    </div>
-                    <div className="col-span-1 py-36 opacity-65 cursor-pointer">
-                        <StoryCard
-                            story={StoryData}
-                            id={3 + scrollCount}
-                        />
-                    </div>
-                    <div className="col-span-1 py-36 opacity-25 cursor-pointer">
-                        <StoryCard
-                            story={StoryData}
-                            id={4 + scrollCount}
-                        />
-                    </div>
-
-                </div>
-
-            </div>
-        );
-    }
-
+        </div>
+    );
 };
 
 export default PreviewStoryComponent;

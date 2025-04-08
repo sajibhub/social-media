@@ -9,23 +9,24 @@ const SignUp = () => {
     const [showPassword, setShowPassword] = useState(false);
     // Provide default empty object if authorStore values are undefined
     const { 
-        signUpFrom = {
+        signUpForm = {
             username: '',
             fullName: '',
             email: '',
             phone: '',
             password: ''
         }, 
-        setSignUpFrom, 
+        setSignUpForm, 
         signUpReq 
     } = authorStore();
+    
     const { setAuthor } = uiManage();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await signUpReq(signUpFrom);
+            const res = await signUpReq(signUpForm);
             setLoading(false);
 
             if (res === 201) {
@@ -48,7 +49,7 @@ const SignUp = () => {
                 <h2 className="text-3xl lg:text-4xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 mb-6 animate-pulse">
                     Sign Up
                 </h2>
-                
+
                 {/* Form */}
                 <form onSubmit={handleSubmit}>
                     {/* Username Input */}
@@ -63,8 +64,8 @@ const SignUp = () => {
                             type="text"
                             id="username"
                             name="username"
-                            value={signUpFrom.username || ''}
-                            onChange={(e) => setSignUpFrom("username", e.target.value)}
+                            value={signUpForm.username || ''}
+                            onChange={(e) => setSignUpForm("username", e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your username"
                             required
@@ -83,8 +84,8 @@ const SignUp = () => {
                             type="text"
                             id="fullName"
                             name="fullName"
-                            value={signUpFrom.fullName || ''}
-                            onChange={(e) => setSignUpFrom("fullName", e.target.value)}
+                            value={signUpForm.fullName || ''}
+                            onChange={(e) => setSignUpForm("fullName", e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your full name"
                             required
@@ -103,8 +104,8 @@ const SignUp = () => {
                             type="email"
                             id="email"
                             name="email"
-                            value={signUpFrom.email || ''}
-                            onChange={(e) => setSignUpFrom("email", e.target.value)}
+                            value={signUpForm.email || ''}
+                            onChange={(e) => setSignUpForm("email", e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your email"
                             required
@@ -123,8 +124,8 @@ const SignUp = () => {
                             type="text"
                             id="phone"
                             name="phone"
-                            value={signUpFrom.phone || ''}
-                            onChange={(e) => setSignUpFrom("phone", e.target.value)}
+                            value={signUpForm.phone || ''}
+                            onChange={(e) => setSignUpForm("phone", e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                             placeholder="Enter your phone number"
                             required
@@ -144,8 +145,8 @@ const SignUp = () => {
                                 type={showPassword ? "text" : "password"}
                                 id="password"
                                 name="password"
-                                value={signUpFrom.password || ''}
-                                onChange={(e) => setSignUpFrom("password", e.target.value)}
+                                value={signUpForm.password || ''}
+                                onChange={(e) => setSignUpForm("password", e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                                 placeholder="Enter your password"
                                 required

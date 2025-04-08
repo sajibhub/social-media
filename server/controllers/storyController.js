@@ -55,8 +55,7 @@ export const storyRead = async (req, res) => {
         const stories = await Story.aggregate([
             {
                 $match: {
-                    createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-
+                    createdAt: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
                 }
             },
             {
@@ -64,87 +63,55 @@ export const storyRead = async (req, res) => {
                     from: "users",
                     localField: "userId",
                     foreignField: "_id",
-                    as: "user",
+                    as: "user"
                 }
             },
             { $unwind: "$user" },
-
             {
                 $addFields: {
                     time: {
                         $cond: {
                             if: {
                                 $lt: [
-                                    {
-                                        $divide: [
-                                            { $subtract: [new Date(), "$createdAt"] },
-                                            1000 * 60,
-                                        ],
-                                    },
-                                    1440,
-                                ],
+                                    { $divide: [{ $subtract: [new Date(), "$createdAt"] }, 1000 * 60] },
+                                    1440
+                                ]
                             },
                             then: {
                                 $cond: {
                                     if: {
                                         $lt: [
-                                            {
-                                                $divide: [
-                                                    { $subtract: [new Date(), "$createdAt"] },
-                                                    1000 * 60,
-                                                ],
-                                            },
-                                            60,
-                                        ],
+                                            { $divide: [{ $subtract: [new Date(), "$createdAt"] }, 1000 * 60] },
+                                            60
+                                        ]
                                     },
                                     then: {
                                         $concat: [
-                                            {
-                                                $toString: {
-                                                    $floor: {
-                                                        $divide: [
-                                                            { $subtract: [new Date(), "$createdAt"] },
-                                                            1000 * 60,
-                                                        ],
-                                                    },
-                                                },
-                                            },
-                                            " minutes ago",
-                                        ],
+                                            { $toString: { $floor: { $divide: [{ $subtract: [new Date(), "$createdAt"] }, 1000 * 60] } } },
+                                            " minutes ago"
+                                        ]
                                     },
                                     else: {
                                         $concat: [
-                                            {
-                                                $toString: {
-                                                    $floor: {
-                                                        $divide: [
-                                                            { $subtract: [new Date(), "$createdAt"] },
-                                                            1000 * 60 * 60,
-                                                        ],
-                                                    },
-                                                },
-                                            },
-                                            " hours ago",
-                                        ],
-                                    },
-                                },
+                                            { $toString: { $floor: { $divide: [{ $subtract: [new Date(), "$createdAt"] }, 1000 * 60 * 60] } } },
+                                            " hours ago"
+                                        ]
+                                    }
+                                }
                             },
                             else: {
                                 $dateToString: {
                                     format: "%d-%b-%Y",
                                     date: "$createdAt",
-                                    timezone: "Asia/Dhaka",
-                                },
-                            },
-                        },
+                                    timezone: "Asia/Dhaka"
+                                }
+                            }
+                        }
                     },
-                    isMyStory: { $eq: ["$userId", id] },
                     isLike: { $in: [id, "$likes"] },
-                    isFollowing: { $in: [id, "$user.followers"] },
-                    isSeen: { $in: [id, "$views"] },
+                    isSeen: { $in: [id, "$views"] }
                 }
             },
-
             {
                 $group: {
                     _id: "$userId",
@@ -166,32 +133,23 @@ export const storyRead = async (req, res) => {
                 $addFields: {
                     rank: {
                         $add: [
-                            {
-                                $cond: {
-                                    if: { $eq: [id, "$user._id"] },
-                                    then: 1000,
-                                    else: 0
-                                }
-                            },
-                            {
-                                $cond: {
-                                    if: { $in: [id, "$user.followers"] },
-                                    then: 50,
-                                    else: 0
-                                }
-                            },
-                            {
-                                $cond: {
-                                    if: { $eq: [id, "$views"] },
-                                    then: -50,
-                                    else: 50
-                                }
-                            }
+                            { $cond: { if: { $eq: [id, "$user._id"] }, then: 1000, else: 0 } },
+                            { $cond: { if: { $in: [id, "$user.followers"] }, then: 50, else: 0 } },
+                            { $cond: { if: { $in: [id, "$stories.isSeen"] }, then: -50, else: 50 } }
                         ]
+                    },
+                    isMyStory: { $eq: ["$_id", id] },
+                    isFollowing: {
+                        $cond: {
+                            if: { $ne: ["$user._id", id] },
+                            then: { $in: [id, "$user.followers"] },
+                            else: "$$REMOVE"
+                        }
                     }
                 }
             },
             { $sort: { rank: -1 } },
+            { $limit: 50 },
             {
                 $project: {
                     _id: "$user._id",
@@ -199,19 +157,19 @@ export const storyRead = async (req, res) => {
                     fullName: "$user.fullName",
                     profile: "$user.profile",
                     verify: "$user.verify",
-                    isFollowing: "$isFollowing",
-                    isMyStory: "$isMyStory",
+                    isFollowing: 1,
+                    isMyStory: 1,
                     stories: 1
                 }
             }
         ]);
 
         return res.status(200).json({
-            stories
+            stories,
         });
     } catch (error) {
-        res.status(500).json({
-            message: "An error occurred while processing your request."
+        return res.status(500).json({
+            message: "An error occurred while processing your request",
         });
     }
 };

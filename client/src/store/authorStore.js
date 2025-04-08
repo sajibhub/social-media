@@ -32,7 +32,7 @@ const authorStore = create((set, get) => ({
       return res.status;
     } catch (error) {
       console.error('Error in signUp:', error);
-      return false;
+      return error;
     }
   },
 
@@ -230,23 +230,17 @@ const authorStore = create((set, get) => ({
     }
   },
 
-  searchKeywords: null,
-  setSearchKeywords: (e) => {
-    set({ searchKeywords: e });
-  },
 
   searchUserData: null,
   searchUserReq: async (data) => {
     const { searchUserData, searchKeywords } = get();
     if (searchUserData && searchKeywords === data) return true;
 
-    const body = { search: data };
     try {
-      const res = await axios.post(Search_user_api, body, { withCredentials: true });
+      const res = await axios.post(Search_user_api, { search: data }, { withCredentials: true });
       set({ searchUserData: res.data.searchUser, searchKeywords: data });
       return true;
     } catch (error) {
-      console.error('Error searching users:', error);
       return false;
     }
   },
