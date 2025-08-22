@@ -1,18 +1,25 @@
-
-import { useState } from 'react';
-import authorStore from "@/store/authorStore.js";
+import { useState, useEffect } from 'react';
+import { motion } from "framer-motion";
+import authorStore from "../store/authorStore.js";
 import toast from "react-hot-toast";
-import uiManage from "@/store/uiManage.js";
-
+import uiManage from "../store/uiManage.js";
 
 const PasswordPopup = () => {
-    const {setPassword} = uiManage()
+    const { setPassword } = uiManage();
     const { passwordReq, otpSentData } = authorStore();
-
     const [otp, setOtp] = useState('');
     const [password, setPasswordR] = useState('');
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);  // State to toggle password visibility
+    const [showPassword, setShowPassword] = useState(false);
+    const [darkMode, setDarkMode] = useState(false);
+
+    // Initialize dark mode from localStorage
+    useEffect(() => {
+        const savedTheme = localStorage.getItem("theme");
+        if (savedTheme === "dark") {
+            setDarkMode(true);
+        }
+    }, []);
 
     const handleSubmit = async () => {
         const data = {
@@ -33,16 +40,76 @@ const PasswordPopup = () => {
 
     // Close the popup
     const closePopup = () => {
-        setPassword(null); // Close the popup
+        setPassword(null);
     };
 
+    // Form field component to reduce code duplication
+    const FormField = ({ 
+        label, 
+        type, 
+        value, 
+        onChange, 
+        placeholder, 
+        showToggle = false,
+        onToggle,
+        toggleState
+    }) => (
+        <div className="mb-4">
+            <label className={`block text-sm font-medium mb-1 ${
+                darkMode ? "text-gray-300" : "text-gray-700"
+            }`}>
+                {label}:
+            </label>
+            <div className="relative">
+                <input
+                    type={type}
+                    value={value}
+                    onChange={onChange}
+                    className={`w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 transition-all ${
+                        darkMode 
+                            ? "bg-gray-700 border-gray-600 text-gray-200 focus:ring-cyan-500" 
+                            : "bg-white border-gray-300 text-gray-800 focus:ring-sky-500"
+                    } border`}
+                    placeholder={placeholder}
+                    required
+                />
+                {showToggle && (
+                    <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        type="button"
+                        onClick={onToggle}
+                        className={`absolute top-3 right-3 ${
+                            darkMode ? "text-gray-400 hover:text-cyan-300" : "text-gray-500 hover:text-sky-500"
+                        }`}
+                    >
+                        {toggleState ? "Hide" : "Show"}
+                    </motion.button>
+                )}
+            </div>
+        </div>
+    );
+
     return (
-        <div className="fixed top-0 left-0 h-screen w-screen z-50 flex items-center justify-center bg-sky-50 bg-opacity-90 px-5">
-            <div className="relative bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
+        <div className={`fixed top-0 left-0 h-screen w-screen z-50 flex items-center justify-center px-5 ${
+            darkMode ? 'bg-black/70 backdrop-blur-sm' : 'bg-sky-50 bg-opacity-90'
+        }`}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className={`relative p-6 rounded-lg shadow-xl max-w-lg w-full ${
+                    darkMode ? 'bg-gradient-to-b from-gray-800 to-gray-900' : 'bg-white'
+                }`}
+            >
                 {/* Close Button */}
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
                     onClick={closePopup}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 focus:outline-none"
+                    className={`absolute top-4 right-4 focus:outline-none ${
+                        darkMode ? 'text-gray-400 hover:text-cyan-300' : 'text-gray-500 hover:text-gray-800'
+                    }`}
                     aria-label="Close"
                 >
                     <svg
@@ -59,59 +126,60 @@ const PasswordPopup = () => {
                             d="M6 18L18 6M6 6l12 12"
                         />
                     </svg>
-                </button>
-
+                </motion.button>
+                
                 {/* Title */}
-                <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Set Password</h2>
-
+                <h2 className={`text-2xl font-semibold mb-4 text-center ${
+                    darkMode ? 'text-gray-100' : 'text-gray-800'
+                }`}>
+                    Set Password
+                </h2>
+                
                 {/* OTP Input */}
-                <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">OTP:</label>
-                    <input
-                        type="text"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                        placeholder="Enter OTP"
-                        required
-                    />
-                </div>
-
+                <FormField
+                    label="OTP"
+                    type="text"
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
+                    placeholder="Enter OTP"
+                />
+                
                 {/* Password Input */}
-                <div className="mb-4 relative">
-                    <label className="block text-sm font-medium text-gray-700">Password:</label>
-                    <input
-                        type={showPassword ? "text" : "password"}  // Toggle password visibility
-                        value={password}
-                        onChange={(e) => setPasswordR(e.target.value)}
-                        className="w-full px-4 py-2 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
-                        placeholder="Enter New Password"
-                        required
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}  // Toggle the password visibility
-                        className="absolute top-[28px] right-3 text-gray-500 hover:text-sky-500"
-                    >
-                        {showPassword ? "Hide" : "Show"}
-                    </button>
-                </div>
-
+                <FormField
+                    label="Password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPasswordR(e.target.value)}
+                    placeholder="Enter New Password"
+                    showToggle={true}
+                    onToggle={() => setShowPassword(!showPassword)}
+                    toggleState={showPassword}
+                />
+                
                 {/* Submit Button */}
-                <button
+                <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={handleSubmit}
-                    className={`w-full py-2 rounded-lg text-white ${loading ? "bg-sky-300" : "bg-sky-500 hover:bg-sky-600"} focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2`}
+                    className={`w-full py-3 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all ${
+                        loading 
+                            ? (darkMode ? 'bg-cyan-700' : 'bg-sky-300') 
+                            : (darkMode ? 'bg-cyan-600 hover:bg-cyan-500 focus:ring-cyan-500' : 'bg-sky-500 hover:bg-sky-600 focus:ring-sky-500')
+                    }`}
                     disabled={loading}
                 >
                     {loading ? <div className="loader mx-auto"></div> : "Submit"}
-                </button>
-            </div>
+                </motion.button>
+                
+                {/* Additional Info */}
+                <div className={`mt-4 text-xs text-center ${
+                    darkMode ? 'text-gray-500' : 'text-gray-500'
+                }`}>
+                    <p>Enter the OTP sent to your email and set a new password.</p>
+                </div>
+            </motion.div>
         </div>
     );
 };
 
 export default PasswordPopup;
-
-
-
-

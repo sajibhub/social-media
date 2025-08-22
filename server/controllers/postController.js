@@ -51,24 +51,21 @@ export const PostCreate = (req, res) => {
 };
 
 export const PostRead = async (req, res) => {
-  const { id } = req.headers;
-  const { username } = req.params;
-
   try {
+    const { id } = req.headers;
+    const { username } = req.params;
+    const objectId = new mongoose.Types.ObjectId(id);
+
     const userFind = await User.findOne({ username });
     if (!userFind) {
       return res.status(404).json({ message: "User not found" });
     }
 
     const post = await Post.aggregate([
-      {
-        $match: {
-          userId: userFind._id,
-        },
-      },
-      {
-        $sort: { createdAt: -1 },
-      },
+      { $match: { userId: userFind._id } },
+      { $sort: { createdAt: -1 } },
+
+      // Join user info
       {
         $lookup: {
           from: "users",
@@ -77,92 +74,49 @@ export const PostRead = async (req, res) => {
           as: "user",
         },
       },
-      {
-        $unwind: "$user",
-      },
+      { $unwind: "$user" },
+
+      // Add computed fields
       {
         $addFields: {
           time: {
-            $cond: {
-              if: {
-                $lt: [
+            $let: {
+              vars: { diffMinutes: { $divide: [{ $subtract: [new Date(), "$createdAt"] }, 1000 * 60] } },
+              in: {
+                $cond: [
+                  { $lt: ["$$diffMinutes", 1440] },
                   {
-                    $divide: [
-                      { $subtract: [new Date(), "$createdAt"] },
-                      1000 * 60,
-                    ],
-                  },
-                  1440,
-                ],
-              },
-              then: {
-                $cond: {
-                  if: {
-                    $lt: [
+                    $cond: [
+                      { $lt: ["$$diffMinutes", 60] },
+                      { $concat: [{ $toString: { $floor: "$$diffMinutes" } }, " minutes ago"] },
                       {
-                        $divide: [
-                          { $subtract: [new Date(), "$createdAt"] },
-                          1000 * 60,
-                        ],
-                      },
-                      60,
-                    ],
+                        $concat: [
+                          { $toString: { $floor: { $divide: ["$$diffMinutes", 60] } } },
+                          " hours ago"
+                        ]
+                      }
+                    ]
                   },
-                  then: {
-                    $concat: [
-                      {
-                        $toString: {
-                          $floor: {
-                            $divide: [
-                              { $subtract: [new Date(), "$createdAt"] },
-                              1000 * 60,
-                            ],
-                          },
-                        },
-                      },
-                      " minutes ago",
-                    ],
-                  },
-                  else: {
-                    $concat: [
-                      {
-                        $toString: {
-                          $floor: {
-                            $divide: [
-                              { $subtract: [new Date(), "$createdAt"] },
-                              1000 * 60 * 60,
-                            ],
-                          },
-                        },
-                      },
-                      " hours ago",
-                    ],
-                  },
-                },
-              },
-              else: {
-                $dateToString: {
-                  format: "%d-%b-%Y",
-                  date: "$createdAt",
-                  timezone: "Asia/Dhaka",
-                },
-              },
-            },
+                  { $dateToString: { format: "%d-%b-%Y", date: "$createdAt", timezone: "Asia/Dhaka" } }
+                ]
+              }
+            }
           },
-          isLike: { $in: [id, "$likes"] },
-          myPost: { $eq: [id, "$userId"] },
-          isFollowing: {
-            $cond: {
-              if: { $ne: [id, "$userId"] },
-              then: { $in: [id, "$user.followers"] },
-              else: "$$REMOVE",
-            },
-          },
-          isSave: { $in: [id, "$postSave"] },
-        },
 
+          isLike: { $in: [objectId, { $ifNull: ["$likes", []] }] },
+          myPost: { $eq: [objectId, "$userId"] },
+          isFollowing: {
+            $cond: [
+              { $ne: [objectId, "$userId"] },
+              { $in: [objectId, { $ifNull: ["$user.followers", []] }] },
+              "$$REMOVE"
+            ]
+          },
+          isSave: { $in: [objectId, { $ifNull: ["$postSave", []] }] },
+        },
       },
 
+      // Project fields
       {
         $project: {
           _id: 1,
@@ -176,21 +130,19 @@ export const PostRead = async (req, res) => {
           caption: 1,
           images: 1,
           time: 1,
-          likes: { $size: "$likes" },
-          comment: { $size: "$comments" },
-          view: { $size: "$view" },
-          postSave: { $size: "$postSave" },
+          likes: { $size: { $ifNull: ["$likes", []] } },
+          comment: { $size: { $ifNull: ["$comments", []] } },
+          view: { $size: { $ifNull: ["$view", []] } },
+          postSave: { $size: { $ifNull: ["$postSave", []] } },
           isLike: 1,
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
-
         },
       },
     ]);
 
     return res.status(200).json({ post });
-
   } catch (error) {
     console.error(error);
     return res.status(500).json({

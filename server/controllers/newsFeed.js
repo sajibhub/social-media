@@ -31,7 +31,7 @@ export const NewsFeed = async (req, res) => {
                 $lt: [
                   {
                     $divide: [
-                      { $subtract: [new Date(), "$createdAt"] },
+                      { $subtract: ["$$NOW", "$createdAt"] },
                       1000 * 60,
                     ],
                   },
@@ -44,7 +44,7 @@ export const NewsFeed = async (req, res) => {
                     $lt: [
                       {
                         $divide: [
-                          { $subtract: [new Date(), "$createdAt"] },
+                          { $subtract: ["$$NOW", "$createdAt"] },
                           1000 * 60,
                         ],
                       },
@@ -57,7 +57,7 @@ export const NewsFeed = async (req, res) => {
                         $toString: {
                           $floor: {
                             $divide: [
-                              { $subtract: [new Date(), "$createdAt"] },
+                              { $subtract: ["$$NOW", "$createdAt"] },
                               1000 * 60,
                             ],
                           },
@@ -72,7 +72,7 @@ export const NewsFeed = async (req, res) => {
                         $toString: {
                           $floor: {
                             $divide: [
-                              { $subtract: [new Date(), "$createdAt"] },
+                              { $subtract: ["$$NOW", "$createdAt"] },
                               1000 * 60 * 60,
                             ],
                           },
@@ -101,65 +101,74 @@ export const NewsFeed = async (req, res) => {
               else: "$$REMOVE",
             },
           },
-          isSave: { $in: [id, "$postSave",] },
+          isSave: { $in: [id, "$postSave"] },
           rank: {
             $add: [
-              { $multiply: [{ $size: "$likes" }, 1] },
-              { $multiply: [{ $size: "$comments" }, 2] },
-              { $multiply: [{ $size: "$view" }, 1] },
+              { $multiply: [{ $size: { $ifNull: ["$likes", []] } }, 1] },
+              { $multiply: [{ $size: { $ifNull: ["$comments", []] } }, 2] },
+              { $multiply: [{ $size: { $ifNull: ["$view", []] } }, 1] },
               { $floor: { $multiply: [{ $rand: {} }, 150] } },
               {
                 $cond: {
                   if: { $in: [id, "$user.followers"] },
                   then: 15,
-                  else: 5
-                }
+                  else: 5,
+                },
               },
               {
                 $cond: {
                   if: { $in: [id, "$user.following"] },
                   then: 30,
-                  else: 5
-                }
+                  else: 5,
+                },
               },
               {
                 $cond: {
-                  if: { $in: [id, '$likes'] },
+                  if: { $in: [id, "$likes"] },
                   then: -80,
-                  else: 5
-                }
+                  else: 5,
+                },
               },
             ],
           },
+
         },
       },
       {
         $sort: { rank: -1 },
       },
+
       {
         $project: {
           _id: 1,
-          user: { _id: 1, fullName: 1, username: 1, profile: 1, verify: 1 },
+          user: {
+            _id: "$user._id",
+            fullName: "$user.fullName",
+            username: "$user.username",
+            profile: "$user.profile",
+            verify: "$user.verify"
+          },
           caption: 1,
           images: 1,
           time: 1,
-          postSave: { $size: "$postSave" },
-          likes: { $size: "$likes" },
-          comment: { $size: "$comments" },
-          view: { $size: "$view" },
+          postSave: { $size: { $ifNull: ["$postSave", []] } },
+          likes: { $size: { $ifNull: ["$likes", []] } },
+          comment: { $size: { $ifNull: ["$comments", []] } },
+          view: { $size: { $ifNull: ["$view", []] } },
           isLike: 1,
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
-        },
-      },
+        }
+      }
+
     ]);
 
     return res.status(200).json({
       post,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       message: "An error occurred while processing your request.",
     });

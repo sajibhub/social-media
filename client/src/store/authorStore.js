@@ -6,8 +6,8 @@ const Base_url = `${import.meta.env.VITE_API_URL}/api/v1/`;
 const Sign_up_api = `${Base_url}user/auth/signup`;
 const Login_api = `${Base_url}user/auth/login`;
 const SignOut_api = `${Base_url}user/auth/logout`;
-const Otp_Request_api = `${Base_url}user/auth/forger/password/`;
-const password_Request_api = `${Base_url}user/auth/forger/password`;
+const Otp_Request_api = `${Base_url}user/auth/forgot/password/`;
+const password_Request_api = `${Base_url}user/auth/forgot/password`;
 const Read_Profile_api = `${Base_url}user/profile/`;
 const Profile_Update_api = `${Base_url}user/profile/pic/update`;
 const Profile_info_update_api = `${Base_url}user/profile/info/update`;
@@ -75,7 +75,7 @@ const authorStore = create((set, get) => ({
     }
   },
 
-  otpSentData: null,
+  otpSentData: {},
   setOtpSentData: (name, value) => {
     set((state) => ({
       otpSentData: { ...state.otpSentData, [name]: value },
@@ -166,7 +166,7 @@ const authorStore = create((set, get) => ({
     }
   },
 
-  profileUpdateData: null,
+  profileUpdateData: {},
   setProfileUpdateData: (name, value) => {
     set((state) => ({
       profileUpdateData: { ...state.profileUpdateData, [name]: value },
@@ -192,7 +192,7 @@ const authorStore = create((set, get) => ({
     }
   },
 
-  flowReq: async (id) => {
+  followReq: async (id) => {
     try {
       await axios.put(`${Follow_api}${id}`, '', { withCredentials: true });
       // Optionally update local state if API returns updated follow status
@@ -210,9 +210,11 @@ const authorStore = create((set, get) => ({
 
   update_suggestUser: (id, updatedFields) => {
     set((state) => ({
-      suggestUser: state.suggestUser.map((item) =>
-        item._id === id ? { ...item, ...updatedFields } : item
-      ),
+      suggestUser: Array.isArray(state.suggestUser)
+        ? state.suggestUser.map((item) =>
+            item._id === id ? { ...item, ...updatedFields } : item
+          )
+        : [],
     }));
   },
 
@@ -229,7 +231,6 @@ const authorStore = create((set, get) => ({
       return false;
     }
   },
-
 
   searchUserData: null,
   searchUserReq: async (data) => {
@@ -252,9 +253,11 @@ const authorStore = create((set, get) => ({
 
   update_followersList: (id, updatedFields) => {
     set((state) => ({
-      followersList: state.followersList.map((item) =>
-        item._id === id ? { ...item, ...updatedFields } : item
-      ),
+      followersList: Array.isArray(state.followersList)
+        ? state.followersList.map((item) =>
+            item._id === id ? { ...item, ...updatedFields } : item
+          )
+        : [],
     }));
   },
 

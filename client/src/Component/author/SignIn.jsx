@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import uiManage from "../../store/uiManage.js";
-import authorStore from "@/store/authorStore.js";
+import authorStore from "../../store/authorStore.js";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import SocialLogin from "../utility/socialLogin.jsx";

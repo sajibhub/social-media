@@ -242,29 +242,22 @@ export const Logout = async (req, res) => {
   }
 };
 
+
+
 export const Profile = async (req, res) => {
   try {
     const { id } = req.headers;
     const { username } = req.params;
-    if (username != "me") {
-      if (!(await User.findOne({ username }))) {
-        return res.status(404).json({
-          message: "This username has no profile",
-        });
-      }
-    }
+    const objectId = new mongoose.Types.ObjectId(id);
+
+    // Determine which user to fetch
+    const matchCondition =
+      username === "me" ? { _id: objectId } : { username };
+
     const profile = await User.aggregate([
-      {
-        $match: {
-          $expr: {
-            $cond: {
-              if: { $eq: [username, "me"] },
-              then: { $eq: ["$_id", id] },
-              else: { $eq: ["$username", username] },
-            },
-          },
-        },
-      },
+      { $match: matchCondition },
+
+      // Lookup liked posts
       {
         $lookup: {
           from: "posts",
@@ -273,6 +266,8 @@ export const Profile = async (req, res) => {
           as: "likedPosts",
         },
       },
+
+      // Lookup notifications
       {
         $lookup: {
           from: "notifications",
@@ -281,44 +276,26 @@ export const Profile = async (req, res) => {
           as: "notifications",
         },
       },
+
+      // Compute sizes and flags
       {
         $addFields: {
-          followers: {
-            $size: "$followers"
-          },
-          following: {
-            $size: "$following"
-          },
-          postLike: {
-            $size: "$likedPosts"
-          },
-          postSave: {
-            $size: "$postSave"
-          },
-          myProfile: {
-            $cond: {
-              if: { $eq: [id, "$_id"] },
-              then: true,
-              else: false,
-            },
-          },
+          followers: { $size: { $ifNull: ["$followers", []] } },
+          following: { $size: { $ifNull: ["$following", []] } },
+          postLike: { $size: { $ifNull: ["$likedPosts", []] } },
+          postSave: { $size: { $ifNull: ["$postSave", []] } },
+          myProfile: { $eq: ["$_id", objectId] },
           isFollowing: {
-            $cond: {
-              if: { $ne: [id, "$_id"] },
-              then: {
-                $cond: {
-                  if: { $in: [id, "$followers"] },
-                  then: true,
-                  else: false,
-                },
-              },
-              else: "$$REMOVE",
-            },
+            $cond: [
+              { $ne: ["$_id", objectId] },
+              { $in: [objectId, { $ifNull: ["$followers", []] }] },
+              "$$REMOVE",
+            ],
           },
           notification: {
             $size: {
               $filter: {
-                input: "$notifications",
+                input: { $ifNull: ["$notifications", []] },
                 as: "notification",
                 cond: { $eq: ["$$notification.isRead", false] },
               },
@@ -326,54 +303,20 @@ export const Profile = async (req, res) => {
           },
         },
       },
+
+      // Project only the fields we want
       {
         $project: {
           username: 1,
           fullName: 1,
-          email: {
-            $cond: {
-              if: { $eq: [id, "$_id"] },
-              then: "$email",
-              else: "$$REMOVE",
-            },
-          },
-          phone: {
-            $cond: {
-              if: { $eq: [id, "$_id"] },
-              then: "$phone",
-              else: "$$REMOVE",
-            },
-          },
+          email: { $cond: [{ $eq: ["$_id", objectId] }, "$email", "$$REMOVE"] },
+          phone: { $cond: [{ $eq: ["$_id", objectId] }, "$phone", "$$REMOVE"] },
           profile: 1,
           cover: 1,
-          provider: {
-            $cond: {
-              if: { $eq: [id, "$_id"] },
-              then: "$provider",
-              else: "$$REMOVE",
-            },
-          },
-          facebookId: {
-            $cond: {
-              if: { $eq: [id, "$_id"] },
-              then: "$facebookId",
-              else: "$$REMOVE",
-            },
-          },
-          googleId: {
-            $cond: {
-              if: { $eq: [id, "$_id"] },
-              then: "$googleId",
-              else: "$$REMOVE",
-            },
-          },
-          githubId: {
-            $cond: {
-              if: { $eq: [id, "$_id"] },
-              then: "$githubId",
-              else: "$$REMOVE",
-            },
-          },
+          provider: { $cond: [{ $eq: ["$_id", objectId] }, "$provider", "$$REMOVE"] },
+          facebookId: { $cond: [{ $eq: ["$_id", objectId] }, "$facebookId", "$$REMOVE"] },
+          googleId: { $cond: [{ $eq: ["$_id", objectId] }, "$googleId", "$$REMOVE"] },
+          githubId: { $cond: [{ $eq: ["$_id", objectId] }, "$githubId", "$$REMOVE"] },
           bio: 1,
           verify: 1,
           location: 1,
@@ -386,14 +329,15 @@ export const Profile = async (req, res) => {
           myProfile: 1,
           isFollowing: 1,
           notification: 1,
-          lastActive: 1
+          lastActive: 1,
         },
       },
     ]);
 
-    return res.status(200).json({
-      profile: profile[0],
-    });
+    if (!profile.length)
+      return res.status(404).json({ message: "Profile not found" });
+
+    return res.status(200).json({ profile: profile[0] });
   } catch (error) {
     console.log(error);
     res.status(500).json({

@@ -1,20 +1,20 @@
 import {create} from "zustand";
 import axios from "axios";
 
-const Base_url = `${import.meta.env.VITE_API_URL}/api/v1/`;
+const Base_url = `${import.meta.env.VITE_API_URL}/api/v1`;
 const Create_Post_Api= Base_url + "user/post/create";
 const My_Post_Api= Base_url + "/user/post/read/";
 const newsFeed_Post_Api= Base_url + "/user/post/feed";
-const Update_Post_Api= Base_url + "user/post/update/";
-const Delete_Post_Api= Base_url + "user/post/delete/";
-const Like_Post_Api= Base_url + "user/post/like/";
-const CommentList_Post_Api= Base_url + "user/post/comment/view/";
-const Post_Comment_delete_api= Base_url + "user/post/comment/delete/"
-const Post_Comment_Update_api= Base_url + "user/post/comment/update/"
-const Comment_Post_Api= Base_url + "user/post/comment/";
-const Save_Post_Api= Base_url + "user/post/save/";
-const Save_Post_list_Api= Base_url + "user/save/post";
-const Single_Post_Api= Base_url + "user/single/post/";
+const Update_Post_Api= Base_url + "/user/post/update/";
+const Delete_Post_Api= Base_url + "/user/post/delete/";
+const Like_Post_Api= Base_url + "/user/post/like/";
+const CommentList_Post_Api= Base_url + "/user/post/comment/view/";
+const Post_Comment_delete_api= Base_url + "/user/post/comment/delete/"
+const Post_Comment_Update_api= Base_url + "/user/post/comment/update/"
+const Comment_Post_Api= Base_url + "/user/post/comment/";
+const Save_Post_Api= Base_url + "/user/post/save/";
+const Save_Post_list_Api= Base_url + "/user/save/post";
+const Single_Post_Api= Base_url + "/user/single/post/";
 
 
 const postStore  = create((set) => ({

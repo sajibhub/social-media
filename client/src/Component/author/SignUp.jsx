@@ -1,7 +1,7 @@
 import uiManage from "../../store/uiManage.js";
 import toast from "react-hot-toast";
 import { useState } from "react";
-import authorStore from "@/store/authorStore.js";
+import authorStore from "../../store/authorStore.js";
 import SocialLogin from "../utility/socialLogin.jsx";
 
 const SignUp = () => {
