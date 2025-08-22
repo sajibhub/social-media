@@ -63,10 +63,10 @@ const SinglePostPreview = () => {
 
   // Theme state
   const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("theme") !== "light"; // Simplified theme initialization
+    return localStorage.getItem("theme") !== "light";
   });
 
-  const [hoveredComment, setHoveredComment] = useState(null); // Simplified to store only comment ID
+  const [hoveredComment, setHoveredComment] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [commentData, setCommentData] = useState("");
@@ -74,7 +74,7 @@ const SinglePostPreview = () => {
   const [showPicker, setShowPicker] = useState(false);
   const [actionLoading, setActionLoading] = useState({ like: false, save: false, comment: false });
   const emojiPickerRef = useRef(null);
-  const abortControllerRef = useRef(null); // For canceling fetch requests
+  const abortControllerRef = useRef(null);
 
   // Theme styles
   const styles = getThemeStyles(darkMode);
@@ -109,7 +109,7 @@ const SinglePostPreview = () => {
 
     return () => {
       if (abortControllerRef.current) {
-        abortControllerRef.current.abort(); // Cancel ongoing requests on unmount
+        abortControllerRef.current.abort();
       }
     };
   }, [postId, Single_Post_Req, commentListReq]);
@@ -171,7 +171,7 @@ const SinglePostPreview = () => {
 
     setActionLoading((prev) => ({ ...prev, comment: true }));
     try {
-      const data = { id: Single_Post_Data[0]?._id, comment: commentData };
+      const data = { id: Single_Post_Data?.[0]?._id, comment: commentData };
       const res = commentId
         ? await updateComment({ ...data, commentId })
         : await commentPostReq(data);
@@ -198,7 +198,7 @@ const SinglePostPreview = () => {
   const deleteCommentHandler = async (id) => {
     setHoveredComment(null);
     try {
-      const res = await deletePostCommentReq(Single_Post_Data[0]?._id, id);
+      const res = await deletePostCommentReq(Single_Post_Data?.[0]?._id, id);
       if (res) {
         await commentListReq(postId);
         toast.success("Comment deleted successfully");
@@ -230,7 +230,7 @@ const SinglePostPreview = () => {
   };
 
   // Early return for loading or error states
-  if (isLoading || error || !Single_Post_Data[0]) {
+  if (isLoading) {
     return (
       <motion.div
         className={`min-h-screen ${styles.container} font-sans`}
@@ -252,40 +252,61 @@ const SinglePostPreview = () => {
           <h1 className="text-center text-xl font-medium py-4">Preview Post</h1>
         </div>
 
-        {isLoading && (
-          <div className="flex justify-center items-center h-64">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-              <p className={darkMode ? "mt-4 text-gray-400" : "mt-4 text-gray-600"}>Loading post...</p>
-            </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+            <p className={darkMode ? "mt-4 text-gray-400" : "mt-4 text-gray-600"}>Loading post...</p>
           </div>
-        )}
-
-        {error && (
-          <div className="max-w-md mx-auto mt-8 p-4 rounded-lg bg-red-100 border border-red-300 text-red-800">
-            <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span>{error}</span>
-            </div>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Retry
-            </button>
-          </div>
-        )}
+        </div>
       </motion.div>
     );
   }
 
-  const post = Single_Post_Data[0]; // Destructure for easier access
+  if (error || !Single_Post_Data || Single_Post_Data.length === 0) {
+    return (
+      <motion.div
+        className={`min-h-screen ${styles.container} font-sans`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3 }}
+      >
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={toggleDarkMode}
+          className="fixed top-4 right-4 z-50 p-3 rounded-full bg-gray-800/50 backdrop-blur-sm border border-gray-700 shadow-lg"
+          aria-label={`Switch to ${darkMode ? "light" : "dark"} mode`}
+        >
+          {darkMode ? <FaSun className="text-yellow-400 text-xl" /> : <FaMoon className="text-gray-700 text-xl" />}
+        </motion.button>
+
+        <div className={`w-full border-b-2 sticky top-0 z-[999999] ${styles.header}`}>
+          <h1 className="text-center text-xl font-medium py-4">Preview Post</h1>
+        </div>
+
+        <div className="max-w-md mx-auto mt-8 p-4 rounded-lg bg-red-100 border border-red-300 text-red-800">
+          <div className="flex items-center">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <span>{error || "Post not found"}</span>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Retry
+          </button>
+        </div>
+      </motion.div>
+    );
+  }
+
+  const post = Single_Post_Data[0];
 
   return (
     <motion.div
@@ -340,9 +361,8 @@ const SinglePostPreview = () => {
                 alt={`${post.user.fullName}'s profile`}
               />
               <div
-                className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${
-                  isUserOnline(post.user._id) ? "bg-green-500 border-white" : "bg-red-500 border-white"
-                } z-10`}
+                className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${isUserOnline(post.user._id) ? "bg-green-500 border-white" : "bg-red-500 border-white"
+                  } z-10`}
               ></div>
             </div>
           </div>
@@ -465,9 +485,8 @@ const SinglePostPreview = () => {
                         className="min-w-full min-h-full"
                       />
                       <div
-                        className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${
-                          isUserOnline(item.user._id) ? "bg-green-500 border-white" : "bg-red-500 border-white"
-                        } z-10`}
+                        className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 ${isUserOnline(item.user._id) ? "bg-green-500 border-white" : "bg-red-500 border-white"
+                          } z-10`}
                       ></div>
                     </div>
                   </div>

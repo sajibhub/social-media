@@ -1,8 +1,10 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import toast, { Toaster } from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
 import 'animate.css';
+import { create } from "zustand";
+
 import HomePage from "./pages/HomePage.jsx";
 import AuthorPage from "./pages/authorPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
@@ -15,21 +17,23 @@ import SinglePostPreview from "./pages/SinglePostPreview";
 import AddPostPopup from "./pages/AddPostPage.jsx";
 import SettingPage from "./pages/SettingPage.jsx";
 import StoryPage from "./pages/StoryPage.jsx";
+import Message from "./pages/message.jsx";
+
 import { socket } from './utils/socket.js';
 import authorStore from "./store/authorStore.js";
-import NotificationSound from '../public/audio/notification.wav';
 import notificationStore from "./store/notificationStore.js";
-import Message from "./pages/message.jsx";
-import useActiveStore from './store/useActiveStore.js';
-import { create } from "zustand";   
+import NotificationSound from '../public/audio/notification.wav';
 
-// ✅ Proper zustand store
+import { setActiveUsers, addActiveUser, removeActiveUser } from "./redux/features/users/activeUser.js";
+
+// ✅ Theme Zustand store
 const useThemeStore = create((set) => ({
   darkMode: true,
   toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
   setDarkMode: (darkMode) => set({ darkMode }),
 }));
 
+// ✅ Routes
 const router = createBrowserRouter([
   { path: "/", element: <HomePage /> },
   { path: "/author", element: <AuthorPage /> },
@@ -67,15 +71,16 @@ const router = createBrowserRouter([
   { path: "*", element: <NotFound /> },
 ]);
 
-
-
 const App = () => {
   const { profileData, updateProfileDataField } = authorStore();
   const { addNotification } = notificationStore();
-  const { setActiveUsers } = useActiveStore();
   const [notification, setNotification] = useState(profileData?.notification || 0);
   const audio = new Audio(NotificationSound);
   const darkMode = useThemeStore((state) => state.darkMode);
+  const { activeUsers } = useSelector((state) => state);
+  console.log(activeUsers)
+
+  const dispatch = useDispatch();
 
   // ✅ Initialize theme
   useEffect(() => {
@@ -91,17 +96,14 @@ const App = () => {
   // ✅ Apply theme class
   useEffect(() => {
     localStorage.setItem("theme", darkMode ? "dark" : "light");
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
+    document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  // ✅ Socket
+  // ✅ Socket.IO integration
   useEffect(() => {
     if (socket.disconnected) socket.connect();
 
+    // --- Notification handler ---
     const handleNotification = (data) => {
       toast.success(`New ${data?.type} Notification`);
       audio.play().catch((err) => console.error("Audio play failed:", err));
@@ -113,14 +115,25 @@ const App = () => {
       });
     };
 
-    socket.on("notification", handleNotification);
-    socket.on("active", (users) => setActiveUsers(users));
+    // --- Online/offline users handlers ---
+    const handleOnlineUsers = (users) => dispatch(setActiveUsers(users));
+    const handleOnline = ({ id }) => dispatch(addActiveUser(id));
+    const handleOffline = ({ id }) => dispatch(removeActiveUser(id));
 
+    // --- Socket event listeners ---
+    socket.on("notification", handleNotification);
+    socket.on("onlineUsers", handleOnlineUsers);
+    socket.on("online", handleOnline);
+    socket.on("offline", handleOffline);
+
+    // --- Cleanup listeners ---
     return () => {
       socket.off("notification", handleNotification);
-      socket.off("active");
+      socket.off("onlineUsers", handleOnlineUsers);
+      socket.off("online", handleOnline);
+      socket.off("offline", handleOffline);
     };
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className={`min-h-screen ${darkMode ? "dark" : ""}`}>
@@ -132,9 +145,7 @@ const App = () => {
           style: {
             background: darkMode ? "#374151" : "#ffffff",
             color: darkMode ? "#ffffff" : "#1f2937",
-            border: darkMode
-              ? "1px solid #4b5563"
-              : "1px solid #e5e7eb",
+            border: darkMode ? "1px solid #4b5563" : "1px solid #e5e7eb",
           },
         }}
       />

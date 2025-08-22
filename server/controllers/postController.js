@@ -9,38 +9,41 @@ import Notification from "../models/notificationModel.js";
 import { io } from "../app.js";
 import postTime from "../utils/postTime.js";
 
-export const PostCreate = (req, res) => {
+export const PostCreate = async (req, res) => {
   try {
     const { id } = req.headers;
     const upload = multer({ storage });
-    upload.single("image")(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({
-          message: err.message,
-        });
-      }
-      const { caption } = req.body;
-      const file = req.file;
-
-      if (!caption && !file) {
-        return res.status(400).json({
-          message: "Please provide a caption or an image.",
-        });
-      }
-
-      let images = null;
-      if (file) {
-        images = [file.path];
-      }
-
-      const post = await Post.create({
-        userId: id,
-        caption,
-        images,
+    
+    // Wrap multer middleware in a promise to handle it properly
+    await new Promise((resolve, reject) => {
+      upload.single("image")(req, res, (err) => {
+        if (err) reject(err);
+        else resolve();
       });
-      res.status(201).json({
-        message: "Post created successfully.",
+    });
+
+    const { caption } = req.body;
+    const file = req.file;
+
+    if (!caption && !file) {
+      return res.status(400).json({
+        message: "Please provide a caption or an image.",
       });
+    }
+
+    let images = null;
+    if (file) {
+      images = [file.path];
+    }
+
+    await Post.create({
+      userId: id,
+      caption,
+      images,
+    });
+    
+    return res.status(201).json({
+      message: "Post created successfully.",
     });
   } catch (error) {
     console.log(error);
@@ -164,31 +167,38 @@ export const PostUpdate = async (req, res) => {
     if (!postId) {
       return res.status(400).json({
         message: "Post ID is required"
-      })
+      });
     }
 
     const findPost = await Post.findById(postId).select({ userId: 1 });
-    if (findPost?.userId.toString() != id.toString()) {
+    if (!findPost) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+    
+    if (findPost.userId.toString() !== id.toString()) {
       return res.status(403).json({
         message: "Post update access denied",
       });
     }
+    
     const updatedPost = await Post.findByIdAndUpdate(
       postId,
       { $set: { caption } },
       { new: true }
     );
+    
     if (!updatedPost) {
       return res.status(404).json({
         message: "Post not found.",
       });
     }
-    res.status(200).json({
+    
+    return res.status(200).json({
       message: "Post updated successfully.",
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
   }
@@ -206,7 +216,7 @@ export const PostDelete = async (req, res) => {
     if (!postId) {
       return res.status(400).json({
         message: "Post ID is required"
-      })
+      });
     }
 
     const findPost = await Post.findById(postId).select({ userId: 1, likes: 1, postSave: 1 });
@@ -224,7 +234,6 @@ export const PostDelete = async (req, res) => {
       { new: true }
     );
 
-
     const deletedPost = await Post.findByIdAndDelete(postId);
 
     if (!deletedPost) {
@@ -235,7 +244,10 @@ export const PostDelete = async (req, res) => {
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "An error occurred while processing your request.", error: error.message });
+    return res.status(500).json({ 
+      message: "An error occurred while processing your request.", 
+      error: error.message 
+    });
   }
 };
 
@@ -251,7 +263,7 @@ export const PostLike = async (req, res) => {
     if (!postId) {
       return res.status(400).json({
         message: "Post ID is required"
-      })
+      });
     }
 
     const findPost = await Post.findById(postId);
@@ -261,8 +273,9 @@ export const PostLike = async (req, res) => {
         message: "Post not found.",
       });
     }
+    
     if (findPost.likes.includes(id)) {
-      const updatedPost = await Post.findByIdAndUpdate(
+      await Post.findByIdAndUpdate(
         postId,
         { $pull: { likes: id } },
         { new: true }
@@ -272,21 +285,23 @@ export const PostLike = async (req, res) => {
       });
     }
 
-    const updatedPost = await Post.findByIdAndUpdate(
+    await Post.findByIdAndUpdate(
       postId,
       { $push: { likes: id } },
       { new: true }
     );
 
-    const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 })
-    if (id.toString() != findPost.userId.toString()) {
+    const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 });
+    
+    if (id.toString() !== findPost.userId.toString()) {
       const create = await Notification.create({
         userId: userId._id,
         type: "like",
         sourceId: id,
         postId,
-      })
-      const user = await User.findOne({ _id: id }).select({ fullName: 1, username: 1, profile: 1, verify: 1 })
+      });
+      
+      const user = await User.findOne({ _id: id }).select({ fullName: 1, username: 1, profile: 1, verify: 1 });
 
       const data = {
         _id: create._id,
@@ -297,13 +312,16 @@ export const PostLike = async (req, res) => {
         type: "like",
         isRead: false,
         user
-      }
-      io.to(userId._id.toString()).emit('notification', data)
+      };
+      
+      io.to(userId._id.toString()).emit('notification', data);
     }
+    
     return res.status(200).json({
       message: "Post liked successfully.",
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
@@ -321,7 +339,7 @@ export const PostLikeRead = async (req, res) => {
     if (!postId) {
       return res.status(400).json({
         message: "Post ID is required"
-      })
+      });
     }
 
     const findPost = await Post.findById(postId);
@@ -357,12 +375,14 @@ export const PostLikeRead = async (req, res) => {
       },
     ]);
 
-
     return res.status(200).json({
       user: likeUserFind,
     });
   } catch (error) {
-    message: "An error occurred while processing your request";
+    console.error(error);
+    return res.status(500).json({
+      message: "An error occurred while processing your request",
+    });
   }
 };
 
@@ -379,7 +399,7 @@ export const PostComment = async (req, res) => {
     if (!postId) {
       return res.status(400).json({
         message: "Post ID is required"
-      })
+      });
     }
 
     if (!comment) {
@@ -387,27 +407,31 @@ export const PostComment = async (req, res) => {
         message: "Please provide a comment.",
       });
     }
+    
     const findPost = await Post.findById(postId);
     if (!findPost) {
       return res.status(404).json({
         message: "Post not found.",
       });
     }
-    const updatedPost = await Post.findByIdAndUpdate(
+    
+    await Post.findByIdAndUpdate(
       postId,
       { $push: { comments: { comment, userId: id } } },
       { new: true }
     );
 
-    const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 })
-    const user = await User.findOne({ _id: id }).select({ fullName: 1, username: 1, profile: 1, verify: 1 })
-    if (id.toString() != findPost.userId) {
+    const userId = await User.findOne({ _id: findPost.userId }).select({ _id: 1 });
+    const user = await User.findOne({ _id: id }).select({ fullName: 1, username: 1, profile: 1, verify: 1 });
+    
+    if (id.toString() !== findPost.userId.toString()) {
       const comment = await Notification.create({
         userId: userId._id,
         type: "comment",
         sourceId: id,
         postId,
-      })
+      });
+      
       const data = {
         _id: comment._id,
         userId: userId._id,
@@ -417,16 +441,17 @@ export const PostComment = async (req, res) => {
         type: "comment",
         isRead: false,
         user
-      }
-      io.to(userId._id.toString()).emit('notification', data)
+      };
+      
+      io.to(userId._id.toString()).emit('notification', data);
     }
-
 
     return res.status(200).json({
       message: "Comment added successfully.",
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
   }
@@ -444,7 +469,7 @@ export const PostCommentView = async (req, res) => {
     if (!postId) {
       return res.status(400).json({
         message: "Post ID is required"
-      })
+      });
     }
 
     const findPost = await Post.findById(postId);
@@ -578,7 +603,7 @@ export const PostCommentView = async (req, res) => {
           _id: "$comments._id",
           isComment: {
             $cond: {
-              if: { $eq: ["$comments.userId", id] },
+              if: { $eq: [{ $toString: "$comments.userId" }, id] },
               then: true,
               else: false,
             },
@@ -594,12 +619,12 @@ export const PostCommentView = async (req, res) => {
       },
     ]);
 
-    res.status(200).json({
+    return res.status(200).json({
       comments,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
   }
@@ -621,7 +646,7 @@ export const PostCommentUpdate = async (req, res) => {
 
     if (!commentId || !postId) {
       return res.status(400).json({
-        message: "Please provide a comment and post ID .",
+        message: "Please provide a comment and post ID.",
       });
     }
     if (!comment) {
@@ -629,22 +654,27 @@ export const PostCommentUpdate = async (req, res) => {
         message: "Please provide a comment.",
       });
     }
+    
     const findPost = await Post.findById(postId);
     if (!findPost) {
       return res.status(404).json({
         message: "Post not found.",
       });
     }
+    
     const commentExists = findPost.comments.find((comment) => {
       return comment._id.toString() === commentId.toString();
     });
+    
     if (!commentExists) {
       return res.status(404).json({ message: "Comment not found." });
     }
-    if (!commentExists.userId.toString() == id.toString()) {
-      return res.status(401).json({ message: "You are not authorized to delete this comment." });
+    
+    if (commentExists.userId.toString() !== id.toString()) {
+      return res.status(401).json({ message: "You are not authorized to update this comment." });
     }
-    const updatedPost = await Post.findByIdAndUpdate(
+    
+    await Post.findByIdAndUpdate(
       postId,
       {
         $set: {
@@ -656,11 +686,13 @@ export const PostCommentUpdate = async (req, res) => {
         arrayFilters: [{ "comment._id": commentId }],
       }
     );
+    
     return res.status(200).json({
       message: "Comment updated successfully",
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       message: "An error occurred while processing your request",
     });
   }
@@ -684,19 +716,23 @@ export const PostCommentDelete = async (req, res) => {
         message: "Please provide a comment ID.",
       });
     }
+    
     const findPost = await Post.findById(postId);
     if (!findPost) {
       return res.status(404).json({
         message: "Post not found.",
       });
     }
+    
     const commentExists = findPost.comments.find((comment) => {
       return comment._id.toString() === commentId.toString();
     });
+    
     if (!commentExists) {
       return res.status(404).json({ message: "Comment not found." });
     }
-    if (!commentExists.userId.toString() == id.toString()) {
+    
+    if (commentExists.userId.toString() !== id.toString()) {
       return res.status(401).json({ message: "You are not authorized to delete this comment." });
     }
 
@@ -705,16 +741,19 @@ export const PostCommentDelete = async (req, res) => {
       { $pull: { comments: { _id: commentId, userId: id } } },
       { new: true }
     );
+    
     if (!updatedPost) {
       return res.status(404).json({
         message: "Comment not found or not authorized to delete it.",
       });
     }
-    res.status(200).json({
+    
+    return res.status(200).json({
       message: "Comment deleted successfully.",
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
   }
@@ -741,8 +780,9 @@ export const PostSave = async (req, res) => {
         message: "Post not found.",
       });
     }
+    
     const UserFind = await User.findById(id);
-    if (UserFind.postSave.toString().includes(postId.toString())) {
+    if (UserFind.postSave.includes(postId)) {
       await Post.findByIdAndUpdate(
         postId,
         {
@@ -771,6 +811,7 @@ export const PostSave = async (req, res) => {
       },
       { new: true }
     );
+    
     await User.findByIdAndUpdate(
       id,
       {
@@ -778,12 +819,13 @@ export const PostSave = async (req, res) => {
       },
       { new: true }
     );
+    
     return res.status(200).json({
       message: "Post save successfully",
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
+    return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
   }
@@ -800,6 +842,7 @@ export const SinglePost = async (req, res) => {
     if (!postId) {
       return res.status(400).json({ message: "Please provide a post ID." });
     }
+    
     const post = await Post.findById(postId);
     if (!post) {
       return res.status(404).json({ message: "Post not found." });
@@ -894,17 +937,16 @@ export const SinglePost = async (req, res) => {
               },
             },
           },
-          isLike: { $in: [id, "$likes"] },
-          myPost: { $eq: [id, "$userId"] },
+          isLike: { $in: [new mongoose.Types.ObjectId(id), "$likes"] },
+          myPost: { $eq: [new mongoose.Types.ObjectId(id), "$userId"] },
           isFollowing: {
             $cond: {
-              if: { $ne: [id, "$userId"] },
-              then: { $in: [id, "$user.followers"] },
+              if: { $ne: [new mongoose.Types.ObjectId(id), "$userId"] },
+              then: { $in: [new mongoose.Types.ObjectId(id), "$user.followers"] },
               else: "$$REMOVE",
             },
           },
-          isSave: { $in: [id, "$postSave"] },
-
+          isSave: { $in: [new mongoose.Types.ObjectId(id), "$postSave"] },
         },
       },
 
@@ -928,14 +970,14 @@ export const SinglePost = async (req, res) => {
           myPost: 1,
           isFollowing: 1,
           isSave: 1,
-
         },
       },
     ]);
 
     return res.status(200).json(findPost);
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       message: "An error occurred while processing your request.",
     });
   }

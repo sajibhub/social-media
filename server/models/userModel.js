@@ -20,7 +20,7 @@ const UserSchema = mongoose.Schema(
       type: String,
       unique: true,
       trim: true,
-      
+
     },
     password: {
       type: String,
@@ -121,13 +121,25 @@ const UserSchema = mongoose.Schema(
       type: Number,
       default: new Date(),
     },
-    lastActive: { type: Date, default: null },
-  },
-  {
-    timestamps: true,
-    versionKey: false,
-  }
-);
+    isOnline: {
+      type: Boolean,
+      default: false
+    },
+    lastActive: {
+      type: Date,
+      default: Date.now
+    },
+    settings: {
+      notifications: {
+        message: { type: Boolean, default: true },
+        reaction: { type: Boolean, default: true },
+        typing: { type: Boolean, default: true }
+      }
+    }
+  }, {
+  timestamps: true,
+  versionKey: false
+});
 
 const User = mongoose.model("User", UserSchema);
 export default User;
