@@ -45,30 +45,35 @@ const upload = multer({
 
 const Chat = () => {
   io.on("connection", async (socket) => {
-    const id = socket.handshake.headers.id;
+    const id = socket.handshake.headers.id; // client should send user ID in headers
     // Validate user ID
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       socket.emit("error", { message: "Invalid user ID" });
       socket.disconnect();
       return;
     }
+
     const userObjectId = new mongoose.Types.ObjectId(id);
-    let user = null;
 
     try {
-      user = await User.findById(userObjectId);
+      const user = await User.findById(userObjectId);
       if (!user) {
         socket.emit("error", { message: "User not found" });
         socket.disconnect();
         return;
       }
+
       activeUsers[id] = socket.id;
-      socket.join(id.toString());
+
       await User.findByIdAndUpdate(userObjectId, {
         lastActive: new Date(),
         isOnline: true
       });
+
+      socket.join(id.toString());
+
       io.emit("online", { id });
+      socket.emit("onlineUsers", Object.keys(activeUsers));
     } catch (error) {
       console.error("Connection error:", error);
       socket.emit("error", { message: "Connection error" });
@@ -76,10 +81,8 @@ const Chat = () => {
       return;
     }
 
-    socket.on("onlineUsers", () => {
-      const onlineUsers = Object.keys(activeUsers)
-      socket.emit("onlineUsers", onlineUsers);
-    })
+
+
 
     // Get all users for chat (optimized with pagination)
     socket.on("getChatUsers", async (data = { page: 1, limit: 20, search: "" }) => {

@@ -20,11 +20,10 @@ import StoryPage from "./pages/StoryPage.jsx";
 import Message from "./pages/message.jsx";
 
 import { socket } from './utils/socket.js';
-import authorStore from "./store/authorStore.js";
-import notificationStore from "./store/notificationStore.js";
 import NotificationSound from '../public/audio/notification.wav';
 
 import { setActiveUsers, addActiveUser, removeActiveUser } from "./redux/features/users/activeUser.js";
+import { addNotification } from "./redux/features/notification/notifications.js"; 
 
 // ✅ Theme Zustand store
 const useThemeStore = create((set) => ({
@@ -72,15 +71,9 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  const { profileData, updateProfileDataField } = authorStore();
-  const { addNotification } = notificationStore();
-  const [notification, setNotification] = useState(profileData?.notification || 0);
-  const audio = new Audio(NotificationSound);
-  const darkMode = useThemeStore((state) => state.darkMode);
-  const { activeUsers } = useSelector((state) => state);
-  console.log(activeUsers)
-
   const dispatch = useDispatch();
+  const darkMode = useThemeStore((state) => state.darkMode);
+  const { activeUsers } = useSelector((state) => state.activeUsers);
 
   // ✅ Initialize theme
   useEffect(() => {
@@ -103,30 +96,30 @@ const App = () => {
   useEffect(() => {
     if (socket.disconnected) socket.connect();
 
-    // --- Notification handler ---
     const handleNotification = (data) => {
-      toast.success(`New ${data?.type} Notification`);
+      if (!data) return;
+      toast.success(`New ${data.type} Notification`);
+
+      const audio = new Audio(NotificationSound);
       audio.play().catch((err) => console.error("Audio play failed:", err));
-      addNotification(data);
-      setNotification((prev) => {
-        const newCount = prev + 1;
-        updateProfileDataField("notification", newCount);
-        return newCount;
-      });
+
+      // ✅ Dispatch to Redux notifications
+      dispatch(addNotification(data));
     };
 
-    // --- Online/offline users handlers ---
     const handleOnlineUsers = (users) => dispatch(setActiveUsers(users));
     const handleOnline = ({ id }) => dispatch(addActiveUser(id));
     const handleOffline = ({ id }) => dispatch(removeActiveUser(id));
 
-    // --- Socket event listeners ---
+    // Ask server for the online user list
+    socket.emit("onlineUsers");
+
+    // Listen for socket events
     socket.on("notification", handleNotification);
     socket.on("onlineUsers", handleOnlineUsers);
     socket.on("online", handleOnline);
     socket.on("offline", handleOffline);
 
-    // --- Cleanup listeners ---
     return () => {
       socket.off("notification", handleNotification);
       socket.off("onlineUsers", handleOnlineUsers);

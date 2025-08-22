@@ -144,7 +144,7 @@ const authorStore = create((set, get) => ({
 
       if (isMe) {
         set({ myProfileData: newProfileData });
-        localStorage.setItem('userName', newProfileData.username);
+        localStorage.setItem('username', newProfileData.username);
         localStorage.setItem('id', newProfileData._id);
       } else {
         set({ profileData: newProfileData });

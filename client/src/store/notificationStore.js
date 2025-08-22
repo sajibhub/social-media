@@ -10,7 +10,6 @@ const notificationStore = create((set, get) => ({
   loading: false,
   showConfirmDelete: false,
 
-
   // Fetch notifications
   fetchNotifications: async () => {
     set({ loading: true });

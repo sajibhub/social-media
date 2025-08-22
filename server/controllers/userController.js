@@ -243,7 +243,6 @@ export const Logout = async (req, res) => {
 };
 
 
-
 export const Profile = async (req, res) => {
   try {
     const { id } = req.headers;

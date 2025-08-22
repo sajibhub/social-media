@@ -3,16 +3,26 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const activeUsersSlice = createSlice({
   name: "activeUsers",
-  initialState: [],
+  initialState: {
+    activeUsers: [],
+  },
   reducers: {
-    setActiveUsers: (state, action) => action.payload,
-    addActiveUser: (state, action) => {
-      if (!state.includes(action.payload)) state.push(action.payload);
+    setActiveUsers: (state, action) => {
+      state.activeUsers = action.payload;
     },
-    removeActiveUser: (state, action) =>
-      state.filter((id) => id !== action.payload),
+    addActiveUser: (state, action) => {
+      if (!state.activeUsers.includes(action.payload)) {
+        state.activeUsers.push(action.payload);
+      }
+    },
+    removeActiveUser: (state, action) => {
+      state.activeUsers = state.activeUsers.filter(
+        (id) => id !== action.payload
+      );
+    },
   },
 });
 
-export const { setActiveUsers, addActiveUser, removeActiveUser } = activeUsersSlice.actions;
+export const { setActiveUsers, addActiveUser, removeActiveUser } =
+  activeUsersSlice.actions;
 export default activeUsersSlice.reducer;
